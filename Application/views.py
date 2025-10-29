@@ -148,7 +148,6 @@ def saved_job_remove(request,sj_id):
         return Response({"Message":"Something Wrong Please try again"})
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def applied_jobs(request):
     applications = Application.objects.filter(job_seeker_profile__user=request.user)
     app_job=ApplicationListSerializer(applications,many=True).data
@@ -168,3 +167,90 @@ def applied_job_remove(request,app_id):
         return Response({"Message":f"Job {application.job.title} Succssfully Remove"},status=status.HTTP_200_OK)
     else:
         return Response({"Message":"Something Wrong Please try again"})
+    
+
+#applications for employer dashboard
+@api_view(['GET'])
+def applications(request):
+    employer=get_object_or_404(EmployerProfile,user=request.user)
+    query=Application.objects.applications_for_employer(employer)
+    applications=ApplicationListSerializer(query,many=True).data
+    return Response({"applications":applications})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def application_detail(request, app_id):
+    app = get_object_or_404(Application, id=app_id, job__employer__user=request.user)
+    s_app = ApplicationDetailSerializer(app).data
+    return Response({"s_app": s_app}, status=status.HTTP_200_OK)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def application_delete(request,app_id):
+    if request.method == "DELETE":
+        app = get_object_or_404(Application, id=app_id, job__employer__user=request.user)
+        app.delete()
+        return Response({"Message":f"{app} Delete Successfully"})
+    else:
+        return Response({"Message":"Something Wrong Please try again"})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def pending_applications(request):
+    apps = Application.objects.submitted_applications(request.user)
+    s_apps=ApplicationListSerializer(apps,many=True).data
+    return Response({
+        "pending_apps":s_apps,
+        "count": len(s_apps)
+        })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def reviewed_applications(request):
+    apps = Application.objects.reviewed_applications(request.user)
+    s_apps=ApplicationListSerializer(apps,many=True).data
+    return Response({
+        "reviewed_apps":s_apps,
+        "count": len(s_apps)
+        })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def rejected_applications(request):
+    apps = Application.objects.rejected_applications(request.user)
+    s_apps=ApplicationListSerializer(apps,many=True).data
+    return Response({
+        "rejected_apps":s_apps,
+        "count": len(s_apps)
+        })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def shortlist_applications(request):
+    apps = Application.objects.shortlist_applications(request.user)
+    s_apps=ApplicationListSerializer(apps,many=True).data
+    return Response({
+        "shorlist_apps":s_apps,
+        "count": len(s_apps)
+        })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def hired_applications(request):
+    apps = Application.objects.hired_applications(request.user)
+    s_apps=ApplicationListSerializer(apps,many=True).data
+    return Response({
+        "hired_apps":s_apps,
+        "count": len(s_apps)
+        })
+
+
+
+
+
+
+
+    

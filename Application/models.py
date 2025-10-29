@@ -25,11 +25,33 @@ class SaveJob(models.Model):
         return f"{self.profile} saved {self.job}"
 
 
+class ApplicationManager(models.Manager):
+    def applications_for_employer(self, employer):
+        return self.filter(job__employer=employer)
+
+    def submitted_applications(self,user):
+        return self.filter(status="P",job__employer__user=user)
+    
+    def reviewed_applications(self,user):
+        return self.filter(status="R",job__employer__user=user)
+    
+    def rejected_applications(self,user):
+        return self.filter(status="RJ",job__employer__user=user)
+    
+    def shortlist_applications(self,user):
+        return self.filter(status="SL",job__employer__user=user)
+    
+    def hired_applications(self,user):
+        return self.filter(status="H",job__employer__user=user)
+    
 class Application(models.Model):
     STATUS_CHOICES = [
         ('P', 'Pending'),
-        ('AC', 'Accept'),
-        ('RJ', 'Reject'),
+        ('H', 'Hired'),
+        ('RJ', 'Rejected'),
+        ('R', 'Review'),
+        ('SL', 'ShortList'),
+        
     ]
     id = models.UUIDField(
         primary_key=True,      # ဒီ field ကို primary key လုပ်မယ်
@@ -43,16 +65,10 @@ class Application(models.Model):
     applied_at = models.DateTimeField(auto_now_add=True,null=True, blank=True)
     updated_at=models.DateTimeField(auto_now=True,null=True, blank=True)
 
+    objects = ApplicationManager()
+
     def __str__(self):
         return f"{self.job_seeker_profile} applied for {self.job}"
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["job_seeker_profile", "job"],
-                name="unique_application_per_jobseeker_job"
-        ),
-    ]
         
 
 
