@@ -1,0 +1,16 @@
+#saved-jobs-jobseekerprofile
+http://127.0.0.1:8000/application/save/job/job_id/
+http://127.0.0.1:8000/application/saved/jobs/
+http://127.0.0.1:8000/application/saved/job/detail/save_job.id/
+http://127.0.0.1:8000/application/saved/job/remove/save_job.id/
+
+#applied-jobs-jobseekerprofile
+http://127.0.0.1:8000/application/application/<uuid:job_id>/apply/
+http://127.0.0.1:8000/application/application/apply/jobs/list/
+http://127.0.0.1:8000/application/application/apply/job/detail/app_id/ #detail
+http://127.0.0.1:8000/application/application/apply/job/remove/app_id/ #remove
+
+
+
+
+
