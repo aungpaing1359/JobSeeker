@@ -8,6 +8,16 @@ urlpatterns = [
     path("application/apply/job/remove/<uuid:app_id>/",applied_job_remove,name="apply-job-remove"),
     path("application/<uuid:job_id>/apply/",apply_job, name="apply-job"),
 
+    #applications for employer dashboard
+    path("employer/applications/",applications,name="employer-applications"),
+    path("employer/application/detail/<uuid:app_id>/",application_detail,name="employer-application-detail"),
+    path("employer/application/delete/<uuid:app_id>/",application_delete,name="employer-application-delete"),
+    path("employer/application/pending/",pending_applications,name="employer-pending-applicatons"),
+    path("employer/application/reviewed/",reviewed_applications,name="employer-reviewed-applicatons"),
+    path("employer/application/rejected/",rejected_applications,name="employer-rejected-applicatons"),
+    path("employer/application/shortlist/",shortlist_applications,name="employer-shortlist-applicatons"),
+    path("employer/application/hired/",hired_applications,name="employer-hired-applicatons"),
+    
     #save jobs
     path("save/job/<uuid:job_id>/", save_job, name="save-job"), 
     path("saved/jobs/", saved_jobs, name="saved-job-list"),   
