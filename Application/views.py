@@ -247,7 +247,53 @@ def hired_applications(request):
         "count": len(s_apps)
         })
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_application_status(request, app_id):
+    """
+    Update a single application status by its ID.
+    Example:  POST /api/v1/applications/5/update-status/
+              Body: { "new_status": "shortlist" }
+    """
+    employer = getattr(request.user, "employerprofile", None)
+    if not employer:
+        return Response(
+            {"error": "Only employers can perform this action."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
+    app = get_object_or_404(Application, id=app_id, job__employer=employer)
+    new_status = request.data.get("new_status")
+
+    # Map readable names → codes (optional, if you use short codes)
+    STATUS_MAP = {
+        "pending": "P",
+        "review": "R",
+        "shortlist": "SL",
+        "rejected": "RJ",
+        "hired": "H",
+    }
+    new_status = STATUS_MAP.get(str(new_status).lower(), new_status)
+
+    valid_statuses = [choice[0] for choice in Application.STATUS_CHOICES]
+    if new_status not in valid_statuses:
+        return Response(
+            {"error": "Invalid status value.", "valid_statuses": valid_statuses},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    app.status = new_status
+    app.save()
+
+    return Response(
+        {
+            "success": True,
+            "id": app.id,
+            "new_status": app.status,
+            "message": f"Application {app.id} updated to '{new_status}'."
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 
