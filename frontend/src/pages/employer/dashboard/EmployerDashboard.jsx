@@ -30,21 +30,21 @@ export default function EmployerDashboardLayout() {
     employer ? !employer.is_verified : false
   );
 
-  // ✅ Update local state whenever employer object changes (Sign In)
+  // Update local state whenever employer object changes (Sign In)
   useEffect(() => {
     if (employer?.is_verified) {
-      setShowVerificationMessage(false); // verified => hide message
+      setShowVerificationMessage(false);
     } else {
-      setShowVerificationMessage(true); // not verified => show message
+      setShowVerificationMessage(true);
     }
   }, [employer]);
 
   const handleResendEmail = async () => {
     setResendLoading(true);
     try {
-      await resendEmail(); // send verification email
-      setShowVerificationMessage(true); // keep message showing while waiting
-      // auto-hide message after 3 seconds
+      await resendEmail();
+      setShowVerificationMessage(true);
+      
       setTimeout(() => setShowVerificationMessage(false), 3000);
     } catch (err) {
       console.error(err);

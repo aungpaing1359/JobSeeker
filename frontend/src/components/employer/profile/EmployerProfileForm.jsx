@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 // CSRF token function
 function getCookie(name) {
@@ -48,13 +49,13 @@ export default function EmployerProfileForm() {
         const profile = response.data.employer_profile[0];
         console.log("Profile Data:", profile);
 
-        // ✅ ဒီမှာ check condition ထည့်
+        // check condition
         if (!profile || !profile.id) {
           console.error("No employer profile found!", response.data);
-          return; // ရှာမတွေ့ရင် အနားတစ်ခါတည်းပြန်ထွက်
+          return;
         }
 
-        setEmployerId(profile.id); // Save ID for update
+        setEmployerId(profile.id);
         const storedUser = JSON.parse(localStorage.getItem("employerUser"));
 
         setFormData({
@@ -91,7 +92,7 @@ export default function EmployerProfileForm() {
     e.preventDefault();
 
     if (!employerId) {
-      alert("Employer ID not loaded yet. Please wait.");
+      toast.error("Employer ID not loaded yet. Please wait.");
       return;
     }
 
@@ -122,10 +123,10 @@ export default function EmployerProfileForm() {
       );
 
       console.log("Success:", response.data);
-      alert("Employer Profile Updated ✅");
+      toast.success("Employer Profile Updated");
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      alert("Something went wrong ❌");
+      toast.error("Something went wrong");
     }
   };
 

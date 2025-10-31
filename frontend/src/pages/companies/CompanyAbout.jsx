@@ -77,15 +77,16 @@ export default function CompanyAbout() {
         <h2 className="text-2xl font-bold mb-5">About Company</h2>
 
         <div className="relative">
-          {/* ✅ Right — Info Card (Float right like image) */}
+          {/* Right Info Card */}
           <aside className="float-right w-full md:w-1/3 bg-gray-50 rounded-xl shadow-sm p-6 space-y-4 border border-gray-200 ml-6 mb-4">
-            
             <div>
               <User className="inline-block w-5 h-5 text-blue-600 mr-2" />
               <span className="font-semibold">Full Name</span>
-              <p>{company.first_name} {company.last_name}</p>
+              <p>
+                {company.first_name} {company.last_name}
+              </p>
             </div>
-            
+
             <div>
               <Mail className="inline-block w-5 h-5 text-blue-600 mr-2" />
               <span className="font-semibold">Email</span>
@@ -123,10 +124,14 @@ export default function CompanyAbout() {
             </div>
           </aside>
 
-          {/* ✅ Left — Description (Text wraps automatically) */}
-          <div className="text-gray-700 leading-relaxed">
+          {/* Left Description with HTML support */}
+          <div className="text-gray-700 leading-relaxed prose max-w-none">
             {company.description ? (
-              <p className="whitespace-pre-line">{company.description}</p>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: company.description,
+                }}
+              />
             ) : (
               <p className="text-gray-500 italic">No description provided.</p>
             )}

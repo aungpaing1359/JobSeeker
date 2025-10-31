@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function ResumeModal({
   isOpen,
   onClose,
   profileId,
   profileName,
-  editData, // ✅ edit mode အတွက်
-  onSuccess, // ✅ refresh callback
+  editData,
+  onSuccess,
 }) {
   const [formData, setFormData] = useState({
     title: "",
@@ -16,7 +17,7 @@ export default function ResumeModal({
     is_default: false,
   });
 
-  // ✅ formData ကို editData အပေါ်မူတည်ပြီး ပြန်ဖြည့်
+  // editData
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -38,7 +39,7 @@ export default function ResumeModal({
     }
   }, [editData]);
 
-  // ✅ Get CSRF Token
+  // Get CSRF Token
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -56,7 +57,7 @@ export default function ResumeModal({
 
   if (!isOpen) return null;
 
-  // ✅ Form Input Change Handler
+  // Form Input Change Handler
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     setFormData((prev) => ({
@@ -66,7 +67,7 @@ export default function ResumeModal({
     }));
   };
 
-  // ✅ Submit Handler (POST or PUT)
+  // Submit Handler (POST or PUT)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -74,7 +75,7 @@ export default function ResumeModal({
     const token = localStorage.getItem("access");
 
     if (!profileId) {
-      alert("❌ Profile not found. Cannot save resume.");
+      toast.error("Profile not found. Cannot save resume.");
       return;
     }
 
@@ -83,7 +84,7 @@ export default function ResumeModal({
     dataToSend.append("title", formData.title);
     if (formData.file) dataToSend.append("file", formData.file);
 
-    // ✅ JSONField stringify
+    // JSONField stringify
     if (formData.data) {
       try {
         const jsonParsed = JSON.parse(formData.data);
@@ -98,7 +99,7 @@ export default function ResumeModal({
     try {
       let res;
       if (editData) {
-        // ✅ PUT Update
+        // PUT Update
         res = await axios.put(
           `http://127.0.0.1:8000/accounts-jobseeker/resume/${editData.id}/`,
           dataToSend,
@@ -111,9 +112,9 @@ export default function ResumeModal({
             withCredentials: true,
           }
         );
-        alert("✅ Resume updated successfully!");
+        toast.success("Resume updated successfully!");
       } else {
-        // ✅ POST Create
+        // POST Create
         res = await axios.post(
           "http://127.0.0.1:8000/accounts-jobseeker/resume/",
           dataToSend,
@@ -126,7 +127,7 @@ export default function ResumeModal({
             withCredentials: true,
           }
         );
-        alert("✅ Resume uploaded successfully!");
+        toast.success("Resume uploaded successfully!");
       }
 
       console.log("✅ Resume saved:", res.data);
@@ -134,8 +135,8 @@ export default function ResumeModal({
       onClose();
     } catch (error) {
       console.error("❌ Failed to save resume:", error.response?.data || error);
-      alert(
-        "❌ Failed to save resume:\n" +
+      toast.error(
+        "Failed to save resume:\n" +
           JSON.stringify(error.response?.data, null, 2)
       );
     }

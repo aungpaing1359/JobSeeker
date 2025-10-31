@@ -90,7 +90,7 @@ export default function EditProfile({
       if (value === null || value === undefined) return;
 
       if (key === "profile_picture") {
-        // ✅ Only include if it's a File (from <input type="file">)
+        // Only include if it's a File (from <input type="file">)
         if (value instanceof File) {
           formData.append(key, value);
         }
@@ -116,10 +116,10 @@ export default function EditProfile({
 
       setProfile(res.data);
       onSave?.(res.data);
-      toast.success("✅ Profile saved successfully!");
+      toast.success("Profile saved successfully!");
       navigate("/profile/me", { replace: true });
     } catch (err) {
-      console.error("❌ Save error:", err);
+      console.error("Save error:", err);
       setError(err.response?.data || "Something went wrong");
     } finally {
       setLoading(false);

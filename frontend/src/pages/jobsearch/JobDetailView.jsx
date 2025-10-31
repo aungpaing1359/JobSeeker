@@ -14,7 +14,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // ✅ Profile and related data
+  // Profile and related data
   const [profile, setProfile] = useState(null);
   const [skillList, setSkillList] = useState([]);
   const [languageList, setLanguageList] = useState([]);
@@ -22,7 +22,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   const [experienceList, setExperienceList] = useState([]);
   const [resumeList, setResumeList] = useState([]);
 
-  // ✅ CSRF token helper
+  // CSRF token helper
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -38,7 +38,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     return cookieValue;
   }
 
-  // ✅ Check if job already applied
+  // Check if job already applied
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       if (!token || !job?.id) return;
@@ -56,7 +56,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           }
         );
 
-        // ✅ ဒီမှာ job.id နဲ့ ချိန်စစ်
+        // job.id 
         const found = res.data.apply_jobs.some(
           (item) => item.job.id === job.id
         );
@@ -69,7 +69,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     fetchAppliedJobs();
   }, [job?.id, token]);
 
-  // ✅ Fetch profile and related info
+  // Fetch profile and related info
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -127,10 +127,10 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     fetchProfileData();
   }, []);
 
-  // ✅ Open Apply Modal or redirect if profile incomplete
+  // Open Apply Modal or redirect if profile incomplete
   const handleOpenModal = () => {
     if (!token) {
-      toast.error("⚠️ Please sign in to apply for jobs.");
+      toast.error("Please sign in to apply for jobs.");
       navigate("/sign-in");
       return;
     }
@@ -146,7 +146,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       resumeList.length === 0;
 
     if (missingProfileData) {
-      toast.error("⚠️ Please complete your profile before applying.");
+      toast.error("Please complete your profile before applying.");
       navigate("/profile/me");
       return;
     }
@@ -179,11 +179,11 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           withCredentials: true,
         }
       );
-      alert("Job saved successfully!");
+      toast.success("Job saved successfully!");
       console.log(response.data);
     } catch (error) {
       console.error("Failed to save job:", error);
-      alert("Failed to save job!");
+      toast.error("Failed to save job!");
     }
   }
 

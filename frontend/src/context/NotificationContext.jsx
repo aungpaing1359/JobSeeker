@@ -82,7 +82,7 @@ export const NotificationProvider = ({ children }) => {
         const names = deletedItems
           .map((item) => `• ${item.message}`)
           .join("\n");
-        toast.success(`✅ Deleted ${deletedCount} notifications:\n${names}`);
+        toast.success(`Deleted ${deletedCount} notifications:\n${names}`);
       } else {
         toast.info("ℹ️ No read notifications to clear.");
       }

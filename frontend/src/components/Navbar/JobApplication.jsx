@@ -127,7 +127,7 @@ export default function JobApplications() {
               <div
                 key={app.id}
                 className={`bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition relative ${
-                  // နောက်ဆုံးတစ်ခုကျန်တဲ့အခါ grid column 2ခုပြည့်ယူအောင်
+                  
                   applications.length % 2 === 1 &&
                   index === applications.length - 1
                     ? "sm:col-span-2"
