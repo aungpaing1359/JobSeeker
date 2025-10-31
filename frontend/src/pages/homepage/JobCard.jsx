@@ -1,6 +1,7 @@
 import { Save, ChevronDown } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {toast} from "react-hot-toast";
 
 export default function JobCard({ job }) {
   function getCookie(name) {
@@ -48,7 +49,7 @@ export default function JobCard({ job }) {
   const csrftoken = getCookie("csrftoken");
 
   async function handleSaveJob(e) {
-    e.stopPropagation(); // prevent triggering navigation
+    e.stopPropagation();
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/application/save/job/${job.id}/`,
@@ -61,18 +62,18 @@ export default function JobCard({ job }) {
           withCredentials: true,
         }
       );
-      alert("Job saved successfully!");
+      toast.success("Job saved successfully!");
       console.log(response.data);
     } catch (error) {
       console.error("Failed to save job:", error);
-      alert("Failed to save job!");
+      toast.error("Failed to save job!");
     }
   }
 
   return (
     <div
       className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer"
-      onClick={() => navigate(`/job-search/${job.id}`)} // 👈 navigate to detail page
+      onClick={() => navigate(`/job-search/${job.id}`)}
     >
       <h3 className="font-semibold text-lg gray-text-custom">{job.title}</h3>
       <p className="text-sm gray-text-custom">
@@ -84,13 +85,16 @@ export default function JobCard({ job }) {
       <ul className="text-sm mt-2 list-disc list-inside gray-text-custom">
         <li className="gray-text-custom">{job.location || "No location"}</li>
         <li className="gray-text-custom">${job.salary || "Negotiable"}</li>
-        <li className="gray-text-custom">
-          {job.description
-            ? job.description.length > 50
-              ? job.description.slice(0, 50) + "..."
-              : job.description
-            : "No description available"}
-        </li>
+        <li
+          className="gray-text-custom"
+          dangerouslySetInnerHTML={{
+            __html: job.description
+              ? job.description.length > 100
+                ? job.description.slice(0, 100) + "..."
+                : job.description
+              : "No description available",
+          }}
+        ></li>
       </ul>
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs gray-text-custom">

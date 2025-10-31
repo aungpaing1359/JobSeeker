@@ -18,7 +18,7 @@ export default function EditJob() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Choices arrays (Python → JS)
+  // job-type arrays
   const JOB_TYPE_CHOICES = [
     { value: "FULL", label: "Full-time" },
     { value: "PART", label: "Part-time" },
@@ -26,6 +26,7 @@ export default function EditJob() {
     { value: "REMOTE", label: "Remote" },
   ];
 
+  // Location arrays
   const LOCATION_CHOICES = [
     { value: "MO", label: "MRAUK-U" },
     { value: "MB", label: "MINBRAR" },
@@ -63,7 +64,7 @@ export default function EditJob() {
         setCategories(catRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
-        toast.error("❌ Failed to load job or categories");
+        toast.error("Failed to load job or categories");
       } finally {
         setLoading(false);
       }
@@ -83,16 +84,16 @@ export default function EditJob() {
     e.preventDefault();
     try {
       await updateJob(id, job);
-      toast.success("✅ Job updated successfully");
+      toast.success("Job updated successfully");
       navigate("/employer/dashboard/my-jobs");
     } catch (err) {
       console.error("Error updating job:", err.response?.data || err);
-      toast.error("❌ Failed to update job");
+      toast.error("Failed to update job");
     }
   };
 
   // description quillModuls
-  // ✅ Full toolbar configuration
+  // Full toolbar configuration
   const quillModules = {
     toolbar: [
       [{ font: [] }, { size: [] }],
@@ -122,7 +123,7 @@ export default function EditJob() {
     "strike",
     "color",
     "background",
-    "list", // ✅ keep only 'list', remove 'bullet'
+    "list",
     "indent",
     "align",
     "blockquote",

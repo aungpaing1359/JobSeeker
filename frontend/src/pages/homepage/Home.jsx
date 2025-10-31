@@ -16,7 +16,7 @@ export default function Home() {
       .get("http://127.0.0.1:8000/job/jobs/")
       .then((res) => {
         console.log("Job API Response:", res.data);
-        const data = res.data.jobs || []; // 👈 correct key
+        const data = res.data.jobs || [];
         setJobs(data);
       })
       .catch((err) => {

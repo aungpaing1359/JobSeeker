@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function ExperienceModal({ isOpen, onClose, profileId, profileName, editData, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
     description: "",
   });
 
-  // ✅ preload edit data
+  // preload edit data
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -71,7 +72,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
 
     const csrftoken = getCookie("csrftoken");
     if (!profileId) {
-      alert("Profile not found!");
+      toast.error("Profile not found!");
       return;
     }
 
@@ -96,7 +97,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
       onClose();
     } catch (err) {
       console.error("Error saving experience:", err.response?.data || err);
-      alert("Failed to update experience.");
+      toast.error("Failed to update experience.");
     }
   };
 

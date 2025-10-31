@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaFacebook } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/userAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState(""); // validation error state
+  const [error, setError] = useState("");
   const { loading, message, signIn } = useAuth();
   const navigate = useNavigate();
 
-  const allowedDomains = ["gmail.com", "outlook.com"]; // ✅ allowed domains
+  const allowedDomains = ["gmail.com", "outlook.com"];
 
   const validateEmail = (email) => {
     // basic email format check
@@ -94,7 +94,7 @@ const SignIn = () => {
             }`}
           />
 
-          {/* ✅ Error message only appears after clicking sign in */}
+          {/* Error message only appears after clicking sign in */}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
           <button

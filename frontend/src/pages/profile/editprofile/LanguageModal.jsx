@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function LanguageModal({
   isOpen,
@@ -15,7 +16,7 @@ export default function LanguageModal({
   });
   const [loading, setLoading] = useState(false);
 
-  // ✅ CSRF Helper
+  // CSRF Helper
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -31,7 +32,7 @@ export default function LanguageModal({
     return cookieValue;
   }
 
-  // ✅ When editing, prefill data
+  // When editing, prefill data
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -48,7 +49,7 @@ export default function LanguageModal({
 
   if (!isOpen) return null;
 
-  // ✅ Input change handler
+  // Input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -57,14 +58,14 @@ export default function LanguageModal({
     }));
   };
 
-  // ✅ Submit form
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
 
     if (!profileId) {
-      alert("❌ Profile not found. Cannot save language.");
+      toast.error("Profile not found. Cannot save language.");
       return;
     }
 
@@ -100,11 +101,11 @@ export default function LanguageModal({
       }
 
       onSuccess(response.data);
-      alert("✅ Language saved successfully!");
+      toast.success("Language saved successfully!");
       onClose();
     } catch (error) {
       console.error("❌ Failed to save language:", error.response?.data || error);
-      alert(
+      toast.error(
         `Failed to save language.\n${
           error.response?.data?.detail || "Check your token or form data."
         }`

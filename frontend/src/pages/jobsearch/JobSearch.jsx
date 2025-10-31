@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EnterSearch from "../EnterSearch";
 import JobDetailView from "./JobDetailView";
-import { useAuth } from "../../hooks/userAuth";
+import { useAuth } from "../../hooks/useAuth";
 import ApplyModal from "../../components/Navbar/ApplyModal"; // <-- Fix this import path if needed
 
 export default function JobSearch() {
@@ -58,14 +58,14 @@ export default function JobSearch() {
     fetchJobs();
   }, [id]);
 
-  // ✅ Apply Now handler
+  // Apply Now handler
   const handleApplyNow = () => {
     if (loading) return; // still checking auth
     if (user) {
-      // ✅ If logged in, open modal
+      // If logged in, open modal
       setIsApplyModalOpen(true);
     } else {
-      // ❌ Not logged in -> redirect
+      // Not logged in -> redirect
       navigate("/sign-in");
     }
   };
@@ -175,10 +175,10 @@ export default function JobSearch() {
         </div>
       </div>
 
-      {/* ✅ Apply Modal */}
+      {/* Apply Modal */}
       {isApplyModalOpen && (
         <ApplyModal
-          isOpen={isApplyModalOpen} // ✅ Add this line
+          isOpen={isApplyModalOpen}
           job={selectedJob}
           onClose={() => setIsApplyModalOpen(false)}
         />

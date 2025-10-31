@@ -42,7 +42,7 @@ export default function FeaturedCompanies() {
       .get("http://127.0.0.1:8000/accounts-employer/company/")
       .then((res) => {
         console.log("Company API Response:", res.data);
-        const data = res.data.companies || []; // 👈 correct key
+        const data = res.data.companies || [];
         setCompanies(data);
       })
       .catch((err) => {

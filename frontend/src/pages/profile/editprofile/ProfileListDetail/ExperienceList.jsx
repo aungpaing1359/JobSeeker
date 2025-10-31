@@ -4,7 +4,7 @@ import axios from "axios";
 export default function ExperienceList({ profileId, experienceList, setExperienceList, onEdit }) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Experience Data
+  // Fetch Experience Data
   useEffect(() => {
     if (!profileId) return;
 
@@ -52,7 +52,7 @@ export default function ExperienceList({ profileId, experienceList, setExperienc
                 {exp.start_date} - {exp.is_current ? "Present" : exp.end_date}
               </p>
               {exp.location && (
-                <p className="text-sm text-gray-500">📍 {exp.location}</p>
+                <p className="text-sm text-gray-500">{exp.location}</p>
               )}
               {exp.description && (
                 <p className="text-sm text-gray-500 italic mt-1">

@@ -8,7 +8,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Edit အတွက် detail load
+  // Edit detail load
   useEffect(() => {
     if (categoryId) {
       axios
@@ -41,7 +41,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
             withCredentials: true,
           }
         );
-        toast.success("✅ Category updated!");
+        toast.success("Category updated!");
       } else {
         // Create
         await axios.post(
@@ -55,7 +55,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
             withCredentials: true,
           }
         );
-        toast.success("✅ Category created!");
+        toast.success("Category created!");
       }
       setCategoryName("");
       onSuccess && onSuccess();
@@ -64,7 +64,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
 
     } catch (err) {
       console.error("Error saving:", err);
-      toast.error("❌ Error saving category");
+      toast.error("Error saving category");
     } finally {
       setLoading(false);
     }

@@ -9,7 +9,7 @@ export default function EducationList({
 }) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Education Data
+  // Fetch Education Data
   useEffect(() => {
     if (!profileId) return;
 
@@ -66,7 +66,7 @@ export default function EducationList({
               )}
             </div>
 
-            {/* ✏️ Edit Button */}
+            {/* Edit Button */}
             <button
               onClick={() => onEdit(edu)}
               className="text-blue-600 hover:text-blue-800 text-sm"

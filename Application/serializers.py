@@ -15,6 +15,8 @@ class ResumeSerializer(serializers.ModelSerializer):
 
 class ApplicationListSerializer(serializers.ModelSerializer):
     job = JobsSerializer(read_only=True)
+    jobseeker_name = serializers.CharField(source="job_seeker_profile.full_name", read_only=True)
+    jobseeker_email = serializers.CharField(source="job_seeker_profile.user.email", read_only=True)
     
     class Meta:
         model=Application

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function JobApplicationDetail() {
-  const { id } = useParams(); // application id
+  const { id } = useParams();
   const [applicationDetail, setApplicationDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -44,20 +44,20 @@ export default function JobApplicationDetail() {
         ← Back
       </button>
 
-      {/* ✅ Job Information */}
+      {/* Job Information */}
       <h1 className="text-2xl font-semibold mb-2">{job?.title}</h1>
       <p className="text-gray-600">{job?.employer}</p>
       <p className="text-gray-500 text-sm mb-3">
         {job?.location} • {job?.job_type}
       </p>
 
-      {/* ✅ Applied Date */}
+      {/* Applied Date */}
       <p className="text-sm text-gray-600 mt-1">
         Applied at:{" "}
         {applied_at ? new Date(applied_at).toLocaleString() : "—"}
       </p>
 
-      {/* ✅ Job Details */}
+      {/* Job Details */}
       <div className="bg-gray-50 p-5 rounded-lg border mt-4">
         <p className="text-gray-700 mb-2">
           <strong>Category:</strong> {job?.category_name}

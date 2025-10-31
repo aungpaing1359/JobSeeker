@@ -52,6 +52,8 @@ import EmployerProfile from "./pages/employer/profile/EmployerProfile";
 import EmployerProfileEditPage from "./pages/employer/profile/EmployerProfileEditPage";
 
 import JobApplication from "./pages/employer/job-application/JobApplication";
+import JobApplicationProfileDetail from "./pages/employer/job-application/JobApplicationProfileDetail";
+import ShortlistApplications from "./pages/employer/job-application/ShortlistApplications";
 
 // ✅ Auth Context import
 import { AuthProvider } from "./context/AuthContext";
@@ -162,6 +164,8 @@ function App() {
 
                 {/* Application */}
                 <Route path="applications" element={<JobApplication />} />
+                <Route path="applications/:id" element={<JobApplicationProfileDetail />} />
+                <Route path="applications/shortlist" element={<ShortlistApplications />} />
               </Route>
             </Routes>
 

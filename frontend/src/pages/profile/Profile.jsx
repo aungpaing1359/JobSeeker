@@ -9,7 +9,7 @@ export default function Profile() {
   // If the user exists, redirect.
   useEffect(() => {
     if(user) {
-      navigate("/profile/me"); //အလိုအလျောက် homepage သို့ ပြန်ပို့မယ်
+      navigate("/profile/me"); 
     }
   }, [user, navigate]);
 
