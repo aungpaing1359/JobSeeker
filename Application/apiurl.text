@@ -15,7 +15,8 @@ http://127.0.0.1:8000/application/employer/applications/
 http://127.0.0.1:8000/application/employer/application/detail/app_id/
 http://127.0.0.1:8000/application/employer/application/delete/app_id/
 
-#upate status
+#upate status application
+
 http://127.0.0.1:8000/application/applications/1dd46eca-e6d0-409e-b802-f586db1ff13a/update-status/
 
 http://127.0.0.1:8000/application/employer/application/pending/
