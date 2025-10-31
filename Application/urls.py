@@ -17,6 +17,8 @@ urlpatterns = [
     path("employer/application/rejected/",rejected_applications,name="employer-rejected-applicatons"),
     path("employer/application/shortlist/",shortlist_applications,name="employer-shortlist-applicatons"),
     path("employer/application/hired/",hired_applications,name="employer-hired-applicatons"),
+
+    path("applications/<uuid:app_id>/update-status/", update_application_status, name="application-update-status"),
     
     #save jobs
     path("save/job/<uuid:job_id>/", save_job, name="save-job"), 

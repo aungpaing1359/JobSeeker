@@ -20,7 +20,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=Application
-        fields="__all__"
+        fields = ["id", "job_seeker_profile","jobseeker_email","jobseeker_name", "job", "status", "applied_at","cover_letter_text"]
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
     job = JobsSerializer(read_only=True)

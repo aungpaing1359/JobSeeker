@@ -202,7 +202,7 @@ def pending_applications(request):
     apps = Application.objects.submitted_applications(request.user)
     s_apps=ApplicationListSerializer(apps,many=True).data
     return Response({
-        "applications":s_apps,
+        "pending_apps":s_apps,
         "count": len(s_apps)
         })
 
