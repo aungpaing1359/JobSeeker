@@ -285,8 +285,18 @@ def update_application_status(request, app_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    app.status = new_status
+    app.save()
 
-        )
+    return Response(
+        {
+            "success": True,
+            "id": app.id,
+            "new_status": app.status,
+            "message": f"Application {app.id} updated to '{new_status}'."
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 
