@@ -1,15 +1,21 @@
 # common/views.py
 from django.http import HttpResponse, Http404
 from django.contrib.auth import get_user_model
+from rest_framework.decorators import api_view, permission_classes, throttle_classes,parser_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import update_session_auth_hash
 import hashlib
 User = get_user_model()
+
+from .serializers import *
 
 def avatar_svg(request, user_id):
     try:
         u = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         raise Http404()
-
     name = (getattr(u, "full_name", "") or f"{getattr(u,'first_name','')} {getattr(u,'last_name','')}".strip() or getattr(u, "email", "").split("@")[0] or "User").strip()
     initials = (name[0] if name else "U").upper()
     key = (getattr(u, "email", "") or str(u.pk)).lower()
@@ -23,3 +29,12 @@ def avatar_svg(request, user_id):
     r = HttpResponse(svg, content_type="image/svg+xml; charset=utf-8")
     r["Cache-Control"] = "public, max-age=86400"
     return r
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):   
+    user=request.user    
+    user.save()
+    update_session_auth_hash(request, user)
+    return Response({"success": "Password updated successfully."}, status=200)
+
