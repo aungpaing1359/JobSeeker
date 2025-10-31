@@ -265,7 +265,7 @@ def update_application_status(request, app_id):
     app = get_object_or_404(Application, id=app_id, job__employer=employer)
     new_status = request.data.get("new_status")
 
-    # Map readable names → codes (optional, if you use short codes)
+    # hellor Map readable names → codes (optional, if you use short codes)
     STATUS_MAP = {
         "pending": "P",
         "review": "R",
