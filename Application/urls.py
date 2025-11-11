@@ -19,6 +19,7 @@ urlpatterns = [
     path("employer/application/hired/",hired_applications,name="employer-hired-applicatons"),
 
     path("applications/<uuid:app_id>/update-status/", update_application_status, name="application-update-status"),
+    path("applications/recent/",recent_applications,name="recent-applications"),
     
     #save jobs
     path("save/job/<uuid:job_id>/", save_job, name="save-job"), 
