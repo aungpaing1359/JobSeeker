@@ -1,5 +1,13 @@
 import { createContext, useState, useEffect } from "react";
-import { registerEmployer,registerEmployerDetail, signinEmployer, fetchCurrentEmployer, employerLogout, resendVerificationEmail } from "../utils/api/employerAPI";
+import {
+  registerEmployer,
+  registerEmployerDetail,
+  signinEmployer,
+  fetchCurrentEmployer,
+  employerLogout,
+  resendVerificationEmail,
+} from "../utils/api/employerAPI";
+import {toast} from "react-hot-toast";
 
 export const EmployerAuthContext = createContext();
 
@@ -49,15 +57,15 @@ export const EmployerAuthProvider = ({ children }) => {
     }
   };
 
-   // ✅ Submit company detail
+  // ✅ Submit company detail
   const submitCompanyDetail = async (formData) => {
     const data = await registerEmployerDetail(formData);
-    const updatedEmployer = { ...employer, ...formData, };
+    const updatedEmployer = { ...employer, ...formData };
     setEmployer(updatedEmployer);
     return updatedEmployer;
   };
 
-   // ✅ Signin with token + CSRF
+  // ✅ Signin with token + CSRF
   const signin = async ({ email, password }) => {
     const data = await signinEmployer({ email, password });
     const userWithToken = {
@@ -87,21 +95,31 @@ export const EmployerAuthProvider = ({ children }) => {
     }
   };
 
-   // Resend verification email
+  // Resend verification email
   const resendEmail = async () => {
     try {
       if (employer?.email) {
         await resendVerificationEmail(employer.email);
-        alert("Verification email resent!");
+        toast.success("Verification email resent!");
       }
     } catch (err) {
       console.error("Failed to resend email:", err);
-      alert("Failed to resend verification email.");
+      toast.error("Failed to resend verification email.");
     }
   };
 
   return (
-    <EmployerAuthContext.Provider value={{ employer, loading, register, submitCompanyDetail, signin, logout, resendEmail, }}>
+    <EmployerAuthContext.Provider
+      value={{
+        employer,
+        loading,
+        register,
+        submitCompanyDetail,
+        signin,
+        logout,
+        resendEmail,
+      }}
+    >
       {children}
     </EmployerAuthContext.Provider>
   );

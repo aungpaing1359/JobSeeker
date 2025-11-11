@@ -4,7 +4,7 @@ import axios from "axios";
 export default function LanguageList({ profileId, languageList, setLanguageList, onEdit }) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Language Data
+  // Fetch Language Data
   useEffect(() => {
     if (!profileId) return;
 

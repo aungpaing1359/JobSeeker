@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function EducationModal({
   isOpen,
   onClose,
   profileId,
   profileName,
-  editData, // <-- edit mode အတွက်
-  onSuccess, // <-- POST / PUT ပြီးနောက် refresh လုပ်ဖို့
+  editData,
+  onSuccess,
 }) {
   const [formData, setFormData] = useState({
     school_name: "",
@@ -37,7 +38,7 @@ export default function EducationModal({
     return cookieValue;
   }
 
-  // editData ရှိရင် form ထဲပြန်ဖြည့်
+  // editData
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -87,7 +88,7 @@ export default function EducationModal({
 
       // Success callback
       if (onSuccess) {
-        // onSuccess ကို refresh လုပ်စရာမလိုပဲ new data return
+        
         onSuccess(res.data);
       }
       onClose();
@@ -100,7 +101,7 @@ export default function EducationModal({
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
-    if (!profileId) return alert("Profile not found.");
+    if (!profileId) return toast.error("Profile not found.");
 
     try {
       let response;
@@ -131,13 +132,13 @@ export default function EducationModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        alert(editData ? "Education updated!" : "Education added!");
-        onSuccess?.(response.data); // ← refresh လိုစရာမလိုဘဲ data update
+        toast.success(editData ? "Education updated!" : "Education added!");
+        onSuccess?.(response.data);
         onClose();
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to save education. Check your form data.");
+      toast.error("Failed to save education. Check your form data.");
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../hooks/userAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const VerifyOTP = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -53,19 +53,19 @@ const VerifyOTP = () => {
     }
 
     try {
-      await verifyOTP(email, otp); // verifyOTP သည် message state ကို update လုပ်မယ်
-      // ✅ message ကို စစ်ပြီး error ပြ
+      await verifyOTP(email, otp);
+      
       if (message && !message.includes("successful")) {
-        setError(message); // message က error ဖြစ်ရင်
+        setError(message);
         setCode(["", "", "", "", "", ""]);
       }
     } catch (err) {
-      setError("Invalid verification code."); // fallback error
+      setError("Invalid verification code.");
       setCode(["", "", "", "", "", ""]);
     }
   };
 
-  // ✅ hide error after 3s
+  // hide error after 3s
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(""), 3000);
@@ -80,7 +80,7 @@ const VerifyOTP = () => {
     }
   }, [message]);
 
-  // ✅ auto-submit when all 6 digits are filled
+  // auto-submit when all 6 digits are filled
   useEffect(() => {
     if (code.every((digit) => digit !== "")) {
       handleVerifyClick();

@@ -4,7 +4,7 @@ import axios from "axios";
 export default function SkillList({ profileId, skillList, setSkillList, onEdit }) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Skills
+  // Fetch Skills
   useEffect(() => {
     if (!profileId) return;
 
@@ -32,7 +32,7 @@ export default function SkillList({ profileId, skillList, setSkillList, onEdit }
     return <p className="text-gray-500 mb-3">No skills added yet.</p>;
   }
 
-  // ✅ Helper for proficiency level
+  // Helper for proficiency level
   const getProficiencyText = (level) => {
     switch (level) {
       case 1:
@@ -64,7 +64,7 @@ export default function SkillList({ profileId, skillList, setSkillList, onEdit }
               </p>
             </div>
 
-            {/* ✏️ Edit Button */}
+            {/* Edit Button */}
             <button
               className="text-blue-600 text-sm hover:underline ml-4"
               onClick={() => onEdit(skill)}

@@ -10,7 +10,7 @@ const Companies = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
 
-  // ✅ Responsive itemsPerPage
+  // Responsive itemsPerPage
   const updateItemsPerPage = () => {
     const width = window.innerWidth;
     if (width >= 1024) {
@@ -41,7 +41,7 @@ const Companies = () => {
             },
           }
         );
-        setCompanies(res.data.companies || []); // API က "companies" key ထဲမှာရှိ
+        setCompanies(res.data.companies || []);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching companies:", error);

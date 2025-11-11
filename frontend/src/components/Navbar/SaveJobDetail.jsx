@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function SavedJobDetail() {
-  const { id } = useParams(); // saved job ID
+  const { id } = useParams(); 
   const [jobDetail, setJobDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

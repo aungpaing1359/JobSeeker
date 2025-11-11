@@ -13,14 +13,45 @@ import {
   AlignLeft,
 } from "lucide-react";
 
+// ✅ Rich Text Editor
+import ReactQuill, { Quill } from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
+
+// ✅ Register toolbar formats (to make font / size / align / header work)
+const Font = Quill.import("formats/font");
+Font.whitelist = ["sans-serif", "serif", "monospace", "inter", "roboto"];
+Quill.register(Font, true);
+
+const Size = Quill.import("attributors/style/size");
+Size.whitelist = ["small", "normal", "large", "huge"];
+Quill.register(Size, true);
+
+const Align = Quill.import("attributors/style/align");
+Quill.register(Align, true);
+
+const Header = Quill.import("formats/header");
+Quill.register(Header, true);
+
 export default function EmployerProfilePage() {
   const [profile, setProfile] = useState(null);
   const [email, setEmail] = useState(null);
   const [showUploadButton, setShowUploadButton] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [description, setDescription] = useState("");
+  const [expanded, setExpanded] = useState(false); // ✅ See More/Less toggle
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // ✅ HTML-safe truncate function (keep bold/italic formatting)
+  const truncateHTML = (html, maxLength) => {
+    if (!html) return "";
+    const clean = html.replace(/\s+/g, " ");
+    if (clean.length <= maxLength) return clean;
+    const sliced = clean.slice(0, maxLength);
+    const div = document.createElement("div");
+    div.innerHTML = sliced;
+    return div.innerHTML + "...";
+  };
 
   const getCSRFToken = () => {
     const cookieValue = document.cookie
@@ -30,6 +61,7 @@ export default function EmployerProfilePage() {
     return cookieValue;
   };
 
+  // ✅ Fetch profile data
   const fetchProfile = async () => {
     const token = localStorage.getItem("access");
     try {
@@ -43,7 +75,6 @@ export default function EmployerProfilePage() {
           },
         }
       );
-
       const emp = res.data.employer_profile[0];
       setProfile(emp);
     } catch (err) {
@@ -57,10 +88,10 @@ export default function EmployerProfilePage() {
       const parsedUser = JSON.parse(savedUser);
       setEmail(parsedUser.email);
     }
-
     fetchProfile();
   }, []);
 
+  // ✅ Avatar upload
   const handleAvatarClick = () => setShowUploadButton(true);
   const handleUploadClick = () => fileInputRef.current.click();
 
@@ -89,17 +120,15 @@ export default function EmployerProfilePage() {
     }
   };
 
-  // ✅ Description save handler
+  // ✅ Save description
   const handleDescriptionSave = async () => {
     if (!profile?.id) return;
-
     const token = localStorage.getItem("access");
     const csrfToken = getCSRFToken();
     const formData = new FormData();
     formData.append("description", description);
-
     try {
-      const res = await axios.patch(
+      await axios.patch(
         `http://127.0.0.1:8000/accounts-employer/employer/profile-update/${profile.id}/`,
         formData,
         {
@@ -110,18 +139,52 @@ export default function EmployerProfilePage() {
           },
         }
       );
-      console.log("✅ Description updated:", res.data);
-      await fetchProfile(); // Refresh UI
+      await fetchProfile();
       setEditMode(false);
     } catch (err) {
-      console.error(
-        "❌ Description update error:",
-        err.response?.data || err.message
-      );
+      console.error("❌ Description update error:", err);
     }
   };
 
   if (!profile) return <p className="p-6 text-gray-600">Loading...</p>;
+
+  // ✅ Toolbar setup
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ font: [] }],
+      [{ size: [] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["blockquote", "code-block"],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+  };
+
+  const quillFormats = [
+    "header",
+    "font",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "align",
+    "list",
+    "bullet",
+    "blockquote",
+    "code-block",
+    "link",
+    "image",
+    "video",
+  ];
+
+  const shouldTruncate = (profile.description || "").length > 300;
 
   const profileFields = [
     {
@@ -170,17 +233,16 @@ export default function EmployerProfilePage() {
     <div className="bg-white flex justify-center items-start py-10">
       <main className="w-full p-6">
         <h1 className="text-xl sm:text-2xl font-semibold mb-6 gray-text-custom">
-          Employee Profile
+          Employer Profile
         </h1>
 
         <section className="relative rounded-xl shadow-md p-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Avatar */}
+            {/* ✅ Avatar */}
             <div
               className="relative w-28 h-28 flex items-center justify-center"
               onClick={handleAvatarClick}
             >
-              {/* Avatar Circle */}
               <div
                 className="w-28 h-28 rounded-full flex items-center justify-center text-white text-3xl font-bold cursor-pointer hover:opacity-90 transition shadow-md border border-gray-200"
                 style={{
@@ -192,17 +254,12 @@ export default function EmployerProfilePage() {
                     src={`http://127.0.0.1:8000${profile.logo}`}
                     alt={profile.first_name || "Avatar"}
                     className="w-28 h-28 rounded-full object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "";
-                    }}
                   />
                 ) : (
                   profile?.first_name?.charAt(0).toUpperCase() || "U"
                 )}
               </div>
 
-              {/* ✅ Upload Button — click avatar ပေါ်မှပေါ်လာမယ် */}
               {showUploadButton && (
                 <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 animate-fadeIn">
                   <button
@@ -214,7 +271,6 @@ export default function EmployerProfilePage() {
                 </div>
               )}
 
-              {/* Hidden File Input */}
               <input
                 type="file"
                 accept="image/*"
@@ -224,7 +280,7 @@ export default function EmployerProfilePage() {
               />
             </div>
 
-            {/* Info Section */}
+            {/* ✅ Info Section */}
             <div className="flex-1 w-full">
               <h2 className="text-2xl font-semibold text-gray-800">
                 {profile.first_name} {profile.last_name}
@@ -243,21 +299,21 @@ export default function EmployerProfilePage() {
 
               <hr className="my-5" />
 
-              {/* Info Fields */}
+              {/* ✅ Info Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {profileFields.map((field, index) => (
+                {profileFields.map((f, i) => (
                   <div
-                    key={index}
+                    key={i}
                     className="flex items-center gap-2 text-gray-700"
                   >
-                    {field.icon}
-                    <span className="font-medium">{field.label}:</span>
-                    <span className="text-base">{field.value ?? "N/A"}</span>
+                    {f.icon}
+                    <span className="font-medium">{f.label}:</span>
+                    <span className="text-base">{f.value ?? "N/A"}</span>
                   </div>
                 ))}
               </div>
 
-              {/* ✅ Description Section */}
+              {/* ✅ Description */}
               <div className="mt-12">
                 <h3 className="flex items-center justify-between gap-2 text-lg font-semibold text-gray-800 mb-2">
                   <span className="flex items-center gap-2">
@@ -280,14 +336,15 @@ export default function EmployerProfilePage() {
 
                 {editMode ? (
                   <div className="space-y-3">
-                    <textarea
+                    <ReactQuill
+                      theme="snow"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      rows={5}
-                      placeholder="Enter company description..."
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    ></textarea>
-
+                      onChange={setDescription}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      placeholder="Write detailed company description..."
+                      className="bg-white rounded-lg border border-gray-300 min-h-[200px] mb-10"
+                    />
                     <div className="flex gap-3">
                       <button
                         onClick={handleDescriptionSave}
@@ -304,17 +361,42 @@ export default function EmployerProfilePage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-700 leading-relaxed border rounded-md p-4 bg-gray-50">
-                    {profile.description
-                      ? profile.description
-                      : "No description provided."}
-                  </p>
+                  <div className="text-gray-700 leading-relaxed border rounded-md p-4 bg-gray-50 prose max-w-none">
+                    {expanded ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            profile.description ||
+                            "<p>No description provided.</p>",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: truncateHTML(
+                            profile.description ||
+                              "<p>No description provided.</p>",
+                            300
+                          ),
+                        }}
+                      />
+                    )}
+
+                    {shouldTruncate && (
+                      <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="text-blue-600 text-sm mt-2 hover:underline"
+                      >
+                        {expanded ? "See Less" : "See More"}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Edit Icon */}
+          {/* ✅ Edit Icon */}
           <div
             onClick={() =>
               navigate("/employer/dashboard/profile/edit", {

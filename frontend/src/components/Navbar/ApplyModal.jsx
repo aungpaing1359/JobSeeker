@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function ApplyModal({ isOpen, onClose, job, onSuccess  }) {
   const [coverLetter, setCoverLetter] = useState("");
@@ -37,7 +38,7 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess  }) {
         `http://127.0.0.1:8000/application/application/${job.id}/apply/`,
         {
           cover_letter_text: coverLetter || "No cover letter provided.",
-          resume_form: { basic: true }, // ✅ dummy non-empty JSON
+          resume_form: { basic: true },
         },
         {
           headers: {
@@ -50,28 +51,28 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess  }) {
       );
 
       if (response.status === 201 || response.status === 200) {
-        alert("✅ Successfully applied for the job!");
+        toast.success("Successfully applied for the job!");
         onClose();
         onSuccess?.();
       }
     } catch (error) {
-      console.error("❌ Apply error:", error.response?.data || error);
+      console.error("Apply error:", error.response?.data || error);
       const data = error.response?.data;
 
       if (data?.code === "ALREADY_APPLIED") {
-        alert("⚠️ You’ve already applied to this job.");
+        toast.error("You’ve already applied to this job.");
       } else if (data?.code === "JOB_CLOSED") {
-        alert("🚫 This job is no longer accepting applications.");
+        toast.error("This job is no longer accepting applications.");
       } else if (Array.isArray(data?.detail)) {
-        alert(`❌ ${data.detail.join(", ")}`);
+        toast.error(`${data.detail.join(", ")}`);
       } else {
-        alert("❌ Failed to apply. Please check your data or login again.");
+        toast.error("Failed to apply. Please check your data or login again.");
       }
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-start justify-center z-50 bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-start justify-center z-50 bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-xl mt-14 max-h-[90vh] overflow-y-auto animate-slideDown p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Apply for {job.title}</h2>

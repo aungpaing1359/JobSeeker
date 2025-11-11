@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function SkillModal({
   isOpen,
@@ -14,7 +15,7 @@ export default function SkillModal({
     proficiency_level: 1,
   });
 
-  // ✅ Cookie getter (for CSRF)
+  // Cookie getter (for CSRF)
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -30,7 +31,7 @@ export default function SkillModal({
     return cookieValue;
   }
 
-  // ✅ If editData exists, fill form
+  // If editData exists, fill form
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -59,12 +60,12 @@ export default function SkillModal({
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
-    if (!profileId) return alert("Profile not found.");
+    if (!profileId) return toast.error("Profile not found.");
 
     try {
       let response;
       if (editData) {
-        // ✅ Update existing skill
+        // Update existing skill
         response = await axios.put(
           `http://127.0.0.1:8000/accounts-jobseeker/skill/${editData.id}/`,
           { ...formData, profile: profileId },
@@ -77,7 +78,7 @@ export default function SkillModal({
           }
         );
       } else {
-        // ✅ Create new skill
+        // Create new skill
         response = await axios.post(
           "http://127.0.0.1:8000/accounts-jobseeker/skill/",
           { ...formData, profile: profileId },
@@ -92,13 +93,13 @@ export default function SkillModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        alert("Skill updated successfully!");
+        toast.success("Skill updated successfully!");
         onSuccess?.(response.data);
         onClose();
       }
     } catch (err) {
       console.error("Error saving skill:", err);
-      alert("Failed to save skill. Check your form data.");
+      toast.error("Failed to save skill. Check your form data.");
     }
   };
 

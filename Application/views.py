@@ -10,6 +10,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from .models import *
 from Jobs.models import *
 from .serializers import *
+#hello wrold
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -246,6 +247,8 @@ def hired_applications(request):
         "hired_apps":s_apps,
         "count": len(s_apps)
         })
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

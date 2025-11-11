@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
+import {toast} from "react-hot-toast";
 
 export default function EmployerRegister() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function EmployerRegister() {
       navigate("/employer/company/detail", { state: { email: newUser.email } });
     } catch (err) {
       console.error(err);
-      alert("Registration failed. Please try again.");
+      toast.error("Registration failed. Please try again.");
     }
   };
 

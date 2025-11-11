@@ -115,22 +115,22 @@ export default function JobForm({ jobId }) {
     try {
       if (jobId) {
         await updateJob(jobId, formData);
-        toast.success("✅ Job updated successfully!");
+        toast.success("Job updated successfully!");
       } else {
         await createJob(formData);
-        toast.success("✅ Job created successfully!");
+        toast.success("Job created successfully!");
       }
       navigate("/employer/dashboard/my-jobs");
     } catch (err) {
       console.error(err);
-      toast.error("❌ Error saving job");
+      toast.error("Error saving job");
     } finally {
       setLoading(false);
     }
   };
 
   // description quillModuls
-  // ✅ Full toolbar configuration
+  // Full toolbar configuration
   const quillModules = {
     toolbar: [
       [{ font: [] }, { size: [] }],
@@ -160,7 +160,7 @@ export default function JobForm({ jobId }) {
     "strike",
     "color",
     "background",
-    "list", // ✅ keep only 'list', remove 'bullet'
+    "list",
     "indent",
     "align",
     "blockquote",

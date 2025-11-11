@@ -31,7 +31,7 @@ const EmployerSignIn = () => {
     }
   };
 
-  // ✅ auto-hide error after 3 seconds
+  // auto-hide error after 3 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(""), 3000);
@@ -59,7 +59,7 @@ const EmployerSignIn = () => {
           </p>
           <h2 className="text-2xl font-bold mb-6">Sign In as an employer</h2>
 
-          {/* ✅ Error message */}
+          {/* Error message */}
           {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
           <form className="space-y-4 text-left" onSubmit={handleSubmit}>

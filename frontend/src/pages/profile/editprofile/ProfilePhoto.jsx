@@ -25,7 +25,7 @@ export default function ProfilePhoto({ profile, setProfile }) {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      setProfile(res.data); // Update profile state
+      setProfile(res.data);
       toast.success("Profile picture updated!");
       setIsModalOpen(false);
     } catch (err) {
@@ -50,7 +50,7 @@ export default function ProfilePhoto({ profile, setProfile }) {
       {/* Modal */}
       {isModalOpen && (
         <Dialog
-          open={isModalOpen} // ✅ open prop လိုအပ်
+          open={isModalOpen} //
           onClose={() => setIsModalOpen(false)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         >

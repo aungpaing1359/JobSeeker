@@ -231,8 +231,13 @@ def jobseekerprofile_update(request, jp_id):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def skill_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        skills = Skill.objects.filter(profile__user=request.user)
+        if profile_id:
+            skills = Skill.objects.filter(profile_id=profile_id)
+        else:
+            skills = Skill.objects.filter(profile__user=request.user)
         serializer = SkillSerializar(skills, many=True)
         return Response(serializer.data)
 
@@ -276,8 +281,13 @@ def skill_detail(request, s_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def education_list(request):
+    profile_id = request.query_params.get("profile") 
+    
     if request.method == 'GET':   # READ all
-        educations = Education.objects.filter(profile__user=request.user)
+        if profile_id:
+            educations = Education.objects.filter(profile_id=profile_id)
+        else:
+            educations = Education.objects.filter(profile__user=request.user)
         serializer = EducationSerializer(educations, many=True)
         return Response(serializer.data)
 
@@ -323,8 +333,13 @@ def education_detail(request, e_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def experience_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        experiences = Experience.objects.filter(profile__user=request.user)
+        if profile_id:
+            experiences = Experience.objects.filter(profile_id=profile_id)
+        else:
+            experiences = Experience.objects.filter(profile__user=request.user)
         serializer = ExperienceSerializer(experiences, many=True)
         return Response(serializer.data)
 
@@ -369,8 +384,13 @@ def experience_detail(request, ex_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def language_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        languages = Language.objects.filter(profile__user=request.user)
+        if profile_id:
+            languages = Language.objects.filter(profile_id=profile_id)
+        else:
+            languages = Language.objects.filter(profile__user=request.user)
         serializer = LanguageSerializar(languages, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':   # CREATE

@@ -31,7 +31,7 @@ export default function SaveJobs() {
   const navigate = useNavigate();
   const { token } = useAuth();
 
-  // ✅ Fetch saved jobs
+  // Fetch saved jobs
   useEffect(() => {
     const fetchSavedJobs = async () => {
       try {
@@ -55,7 +55,7 @@ export default function SaveJobs() {
           ...jobItem,
           job: {
             ...jobItem.job,
-            isApplied: jobItem.is_applied, // ✅ backend မှာလာတဲ့ field
+            isApplied: jobItem.is_applied,
           },
         }));
         setJobs(jobsWithApplied);
@@ -70,7 +70,7 @@ export default function SaveJobs() {
     fetchSavedJobs();
   }, []);
 
-  // ✅ Delete saved job
+  // Delete saved job
   const handleDelete = async (jobId) => {
     const csrftoken = getCookie("csrftoken");
     try {
@@ -93,7 +93,7 @@ export default function SaveJobs() {
     }
   };
 
-  // ✅ Open Apply Modal
+  // Open Apply Modal
   const handleApplyNow = (job) => {
     if (!token) {
       toast.error("Please log in to apply for this job.");
