@@ -8,13 +8,15 @@ import ApplyModal from "../../components/Navbar/ApplyModal";
 import { toast } from "react-hot-toast";
 
 export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
+  // ==================== STATES ====================
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
-  const { token } = useAuth();
-  const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(false);
+  const [savedJobId, setSavedJobId] = useState(null); // ✅ SavedJob ID
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Profile and related data
+  // Profile Data
   const [profile, setProfile] = useState(null);
   const [skillList, setSkillList] = useState([]);
   const [languageList, setLanguageList] = useState([]);
@@ -22,7 +24,10 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   const [experienceList, setExperienceList] = useState([]);
   const [resumeList, setResumeList] = useState([]);
 
-  // CSRF token helper
+  const { token } = useAuth();
+  const navigate = useNavigate();
+
+  // ==================== CSRF HELPER ====================
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -37,26 +42,20 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     }
     return cookieValue;
   }
+  const csrftoken = getCookie("csrftoken");
 
-  // Check if job already applied
+  // ==================== CHECK IF APPLIED ====================
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       if (!token || !job?.id) return;
-
       try {
-        const csrftoken = getCookie("csrftoken");
         const res = await axios.get(
           "http://127.0.0.1:8000/application/application/apply/jobs/list/",
           {
-            headers: {
-              "X-CSRFToken": csrftoken,
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
           }
         );
-
-        // job.id 
         const found = res.data.apply_jobs.some(
           (item) => item.job.id === job.id
         );
@@ -65,11 +64,41 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         console.error("❌ Check applied failed:", err);
       }
     };
-
     fetchAppliedJobs();
   }, [job?.id, token]);
 
-  // Fetch profile and related info
+  // ==================== CHECK IF SAVED ====================
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      if (!token || !job?.id) return;
+      try {
+        const res = await axios.get(
+          "http://127.0.0.1:8000/application/saved/jobs/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        const savedList = res?.data?.s_savejobs || [];
+        if (!Array.isArray(savedList)) return;
+
+        const foundItem = savedList.find((item) => item.job?.id === job.id);
+        if (foundItem) {
+          setIsSaved(true);
+          setSavedJobId(foundItem.id); // ✅ store saved_job.id
+        } else {
+          setIsSaved(false);
+          setSavedJobId(null);
+        }
+      } catch (err) {
+        console.error("❌ Fetch saved jobs failed:", err);
+      }
+    };
+    fetchSavedJobs();
+  }, [job?.id, token]);
+
+  // ==================== FETCH PROFILE DATA ====================
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -84,40 +113,34 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         setProfile(prof);
 
         if (prof?.id) {
-          // Fetch Skills
-          const skillsRes = await axios.get(
-            `http://127.0.0.1:8000/accounts-jobseeker/skill/?profile=${prof.id}`,
-            { withCredentials: true }
-          );
-          setSkillList(skillsRes.data);
+          const [skills, langs, edu, exp, resume] = await Promise.all([
+            axios.get(
+              `http://127.0.0.1:8000/accounts-jobseeker/skill/?profile=${prof.id}`,
+              { withCredentials: true }
+            ),
+            axios.get(
+              `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${prof.id}`,
+              { withCredentials: true }
+            ),
+            axios.get(
+              `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${prof.id}`,
+              { withCredentials: true }
+            ),
+            axios.get(
+              `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${prof.id}`,
+              { withCredentials: true }
+            ),
+            axios.get(
+              `http://127.0.0.1:8000/accounts-jobseeker/resume/?profile=${prof.id}`,
+              { withCredentials: true }
+            ),
+          ]);
 
-          // Fetch Languages
-          const langRes = await axios.get(
-            `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${prof.id}`,
-            { withCredentials: true }
-          );
-          setLanguageList(langRes.data);
-
-          // Fetch Education
-          const eduRes = await axios.get(
-            `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${prof.id}`,
-            { withCredentials: true }
-          );
-          setEducationList(eduRes.data);
-
-          // Fetch Experience
-          const expRes = await axios.get(
-            `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${prof.id}`,
-            { withCredentials: true }
-          );
-          setExperienceList(expRes.data);
-
-          // Fetch Resume
-          const resumeRes = await axios.get(
-            `http://127.0.0.1:8000/accounts-jobseeker/resume/?profile=${prof.id}`,
-            { withCredentials: true }
-          );
-          setResumeList(resumeRes.data);
+          setSkillList(skills.data);
+          setLanguageList(langs.data);
+          setEducationList(edu.data);
+          setExperienceList(exp.data);
+          setResumeList(resume.data);
         }
       } catch (err) {
         console.error("❌ Error fetching profile data:", err);
@@ -127,7 +150,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     fetchProfileData();
   }, []);
 
-  // Open Apply Modal or redirect if profile incomplete
+  // ==================== APPLY MODAL HANDLER ====================
   const handleOpenModal = () => {
     if (!token) {
       toast.error("Please sign in to apply for jobs.");
@@ -154,6 +177,76 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     setIsModalOpen(true);
   };
 
+  // ==================== SAVE / UNSAVE TOGGLE ====================
+  async function handleToggleSave(e) {
+    e.stopPropagation();
+    if (!token) {
+      toast.error("Please sign in to save jobs.");
+      navigate("/sign-in");
+      return;
+    }
+
+    try {
+      if (!isSaved) {
+        // ✅ SAVE JOB
+        const res = await axios.post(
+          `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+          {},
+          {
+            headers: {
+              "X-CSRFToken": csrftoken,
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+
+        toast.success("Job saved successfully!");
+        setIsSaved(true);
+
+        // ✅ refresh saved list to get savedJobId
+        const refresh = await axios.get(
+          "http://127.0.0.1:8000/application/saved/jobs/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        const savedList = refresh.data.s_savejobs || [];
+        const foundItem = savedList.find((i) => i.job?.id === job.id);
+        if (foundItem) setSavedJobId(foundItem.id);
+
+        console.log("✅ Save Response:", res.data);
+      } else {
+        // ✅ UNSAVE JOB (use savedJobId)
+        if (!savedJobId) {
+          toast.error("Saved job ID not found!");
+          return;
+        }
+
+        const res = await axios.delete(
+          `http://127.0.0.1:8000/application/saved/job/remove/${savedJobId}/`,
+          {
+            headers: {
+              "X-CSRFToken": csrftoken,
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+
+        toast.success("Job unsaved successfully!");
+        setIsSaved(false);
+        setSavedJobId(null);
+        console.log("🗑️ Unsave Response:", res.data);
+      }
+    } catch (error) {
+      console.error("❌ Save toggle failed:", error);
+      toast.error("Something went wrong. Try again!");
+    }
+  }
+
+  // ==================== NO JOB SELECTED ====================
   if (!job) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -163,30 +256,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     );
   }
 
-  const csrftoken = getCookie("csrftoken");
-
-  async function handleSaveJob(e) {
-    e.stopPropagation();
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/application/save/job/${job.id}/`,
-        {},
-        {
-          headers: {
-            "X-CSRFToken": csrftoken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      toast.success("Job saved successfully!");
-      console.log(response.data);
-    } catch (error) {
-      console.error("Failed to save job:", error);
-      toast.error("Failed to save job!");
-    }
-  }
-
+  // ==================== RENDER ====================
   return (
     <>
       {/* Header */}
@@ -236,10 +306,14 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         </button>
 
         <button
-          onClick={handleSaveJob}
-          className="px-6 py-2 rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100 cursor-pointer"
+          onClick={handleToggleSave}
+          className={`px-6 py-2 rounded-md border font-semibold text-gray-700 cursor-pointer transition-all duration-200 ${
+            isSaved
+              ? "border-red-400 bg-red-50 hover:bg-red-100 text-red-600"
+              : "border-gray-400 hover:bg-gray-100"
+          }`}
         >
-          Save
+          {isSaved ? "Unsave" : "Save"}
         </button>
       </div>
 
