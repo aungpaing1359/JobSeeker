@@ -8,6 +8,9 @@ from django.utils import timezone
 from django.db.models import Q,F, Case, When, Value, IntegerField
 from django.db.models import Count
 from datetime import date
+from django.db.models import (
+    Q, F, Value, Func, Case, When, IntegerField, CharField
+)
 
 # import Application
 from Application.models import Application
@@ -180,38 +183,67 @@ def jobs_delete(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search(request):
-    q   = (request.GET.get("q") or "").strip()
+    q = (request.GET.get("q") or "").strip()
     loc = (request.GET.get("loc") or "").strip()
     today = date.today()
+
     not_expired = Q(deadline__isnull=True) | Q(deadline__gte=today)
-    # 🟢 Base queryset: only active and not expired
     qs = Jobs.objects.filter(is_active=True).filter(not_expired)
 
-    # --- keyword filter ---
+    normalized_q = q.replace(" ", "")
+    normalized_loc = loc.replace(" ", "")
+
+    # 🧩 annotate no-space versions with explicit output_field
+    qs = qs.annotate(
+        title_nospace=Func(
+            F("title"), Value(" "), Value(""),
+            function="REPLACE", output_field=CharField()
+        ),
+        location_nospace=Func(
+            F("location"), Value(" "), Value(""),
+            function="REPLACE", output_field=CharField()
+        ),
+        category_name=F("category__name"),
+        category_name_nospace=Func(
+            F("category__name"), Value(" "), Value(""),
+            function="REPLACE", output_field=CharField()
+        ),
+        description_nospace=Func(
+            F("description"), Value(" "), Value(""),
+            function="REPLACE", output_field=CharField()
+        ),
+    )
+
+    # 🔍 keyword filter (space-tolerant)
     if q:
         qs = qs.filter(
             Q(title__icontains=q) |
             Q(location__icontains=q) |
             Q(category__name__icontains=q) |
-            Q(description__icontains=q)
+            Q(description__icontains=q) |
+            Q(title_nospace__icontains=normalized_q) |
+            Q(location_nospace__icontains=normalized_q) |
+            Q(category_name_nospace__icontains=normalized_q) |
+            Q(description_nospace__icontains=normalized_q)
         )
 
-    # --- location filter ---
+    # 🔍 location filter (space-tolerant)
     if loc:
-        qs = qs.filter(location__icontains=loc)
+        qs = qs.filter(
+            Q(location__icontains=loc) |
+            Q(location_nospace__icontains=normalized_loc)
+        )
 
-    # --- add priority ranking ---
+    # 🏆 add priority ranking
     qs = qs.annotate(
-        category_name=F("category__name"),
         priority_rank=Case(
-            When(priority="FEATURED",then=Value(3)),
-            When(priority="URGENT",then=Value(2)),
+            When(priority="FEATURED", then=Value(3)),
+            When(priority="URGENT", then=Value(2)),
             default=Value(1),
             output_field=IntegerField()
         )
     ).order_by("-priority_rank", "-created_at")
 
-    # --- return limited data ---
     data = list(qs.values(
         "id", "title", "location", "category_name", "created_at", "priority"
     )[:30])

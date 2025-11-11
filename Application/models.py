@@ -44,6 +44,9 @@ class ApplicationManager(models.Manager):
     def hired_applications(self,user):
         return self.filter(status="H",job__employer__user=user)
     
+    def recent_applications(self,limit=2):
+        return self.get_queryset().order_by('-applied_at')[:limit]
+    
 class Application(models.Model):
     STATUS_CHOICES = [
         ('P', 'Pending'),

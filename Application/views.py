@@ -264,10 +264,8 @@ def update_application_status(request, app_id):
             {"error": "Only employers can perform this action."},
             status=status.HTTP_403_FORBIDDEN,
         )
-
     app = get_object_or_404(Application, id=app_id, job__employer=employer)
     new_status = request.data.get("new_status")
-
     # hellor Map readable names → codes (optional, if you use short codes)
     STATUS_MAP = {
         "pending": "P",
@@ -277,7 +275,6 @@ def update_application_status(request, app_id):
         "hired": "H",
     }
     new_status = STATUS_MAP.get(str(new_status).lower(), new_status)
-
     valid_statuses = [choice[0] for choice in Application.STATUS_CHOICES]
     if new_status not in valid_statuses:
         return Response(
@@ -287,7 +284,6 @@ def update_application_status(request, app_id):
 
     app.status = new_status
     app.save()
-
     return Response(
         {
             "success": True,
@@ -297,6 +293,14 @@ def update_application_status(request, app_id):
         },
         status=status.HTTP_200_OK,
     )
+
+@api_view(['GET'])
+def recent_applications(request):
+    recent_apps=Application.objects.recent_applications()
+    s_recent_apps=ApplicationListSerializer(recent_apps,many=True).data
+    return Response({
+        "s_recent_apps":s_recent_apps
+    })
 
 
 
