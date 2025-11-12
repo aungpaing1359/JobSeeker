@@ -84,6 +84,7 @@ export async function fetchApplicationDetail(id) {
 // Save Job APIs
 // Fetch all saved jobs
 export async function fetchSavedJobs() {
+  console.log("🔍 Fetching from:", `${API_BASE}/${SAVE_JOB_LIST_URL}`);
   const csrftoken = getCookie();
   const res = await api.get(SAVE_JOB_LIST_URL, {
     headers: { "X-CSRFToken": csrftoken },
