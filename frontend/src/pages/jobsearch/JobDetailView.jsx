@@ -76,7 +76,6 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           "http://127.0.0.1:8000/application/saved/jobs/",
           {
             headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
           }
         );
 
@@ -209,7 +208,6 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           "http://127.0.0.1:8000/application/saved/jobs/",
           {
             headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
           }
         );
         const savedList = refresh.data.s_savejobs || [];

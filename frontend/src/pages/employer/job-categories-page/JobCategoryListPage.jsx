@@ -3,7 +3,7 @@ import axios from "axios";
 import JobCategoryForm from "../../../components/employer/job-category/JobCategoryForm";
 import JobCategoryList from "../../../components/employer/job-category/JobCategoryList";
 import JobCategoryDeleteModal from "../../../components/employer/job-category/JobCategoryDeleteModal";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 export default function JobCategoryListPage() {
   const [categories, setCategories] = useState([]);
@@ -48,7 +48,10 @@ export default function JobCategoryListPage() {
   return (
     <div className="p-6">
       <JobCategoryForm onSuccess={fetchCategories} />
-      <JobCategoryList categories={categories} onDelete={(id) => setDeleteId(id)} />
+      <JobCategoryList
+        categories={categories}
+        onDelete={(id) => setDeleteId(id)}
+      />
 
       <JobCategoryDeleteModal
         isOpen={!!deleteId}
