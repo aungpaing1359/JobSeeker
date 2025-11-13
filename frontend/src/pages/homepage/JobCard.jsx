@@ -49,26 +49,44 @@ export default function JobCard({ job }) {
   const csrftoken = getCookie("csrftoken");
 
   async function handleSaveJob(e) {
-    e.stopPropagation();
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/application/save/job/${job.id}/`,
-        {},
-        {
-          headers: {
-            "X-CSRFToken": csrftoken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      toast.success("Job saved successfully!");
-      console.log(response.data);
-    } catch (error) {
-      console.error("Failed to save job:", error);
-      toast.error("Failed to save job!");
+  e.stopPropagation();
+
+  const token = localStorage.getItem("access"); // JWT token
+
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,     // <-- REQUIRED for DRF
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+
+    toast.success("Job saved successfully!");
+    console.log(response.data);
+
+  } catch (error) {
+    console.error("Failed to save job:", error);
+
+    // If no profile → backend returns 404
+    if (error.response?.status === 404) {
+      toast.error("Please create your profile before saving jobs.");
+      return;
     }
+
+    // Already saved job
+    if (error.response?.status === 400) {
+      toast.error("You have already saved this job.");
+      return;
+    }
+
+    toast.error("Failed to save job!");
   }
+}
 
   return (
     <div
