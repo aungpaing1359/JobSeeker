@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaBookmark } from "react-icons/fa";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
-import EnterSearch from "../EnterSearch";
 import QuickSearchSection from "../homepage/QuickSearchSection";
-import { useNavigate } from "react-router-dom";
+import EnterSearch from "../EnterSearch";
 
-// Job Card Component
 const JobCard = ({ job, onClick }) => (
   <div
     onClick={onClick}
@@ -34,40 +33,56 @@ const JobCard = ({ job, onClick }) => (
 
 const JobSearchAll = () => {
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState([]);
+  const location = useLocation();
+
+  const [allJobs, setAllJobs] = useState([]); // API မှ job အကုန်လုံး
+  const [jobs, setJobs] = useState([]); // UI တွင်ပြမည့် job list
   const [loading, setLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 15;
 
+  // ✅ 1. API မှ job အကုန်လုံးကို fetch
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/job/jobs/", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Jobs API Response:", data);
+    const fetchAllJobs = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/job/jobs/");
+        const data = await res.json();
 
-        const jobList = Array.isArray(data)
-          ? data
-          : Array.isArray(data.results)
-          ? data.results
-          : Array.isArray(data.jobs)
-          ? data.jobs
-          : [];
+        // ✅ Support both: object with "results" or plain array
+        let jobList = [];
+        if (Array.isArray(data)) jobList = data;
+        else if (Array.isArray(data.results)) jobList = data.results;
+        else if (Array.isArray(data.jobs)) jobList = data.jobs;
 
+        console.log("✅ Loaded All Jobs:", jobList);
+
+        setAllJobs(jobList);
         setJobs(jobList);
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching jobs:", err);
+      } catch (err) {
+        console.error("❌ Error fetching jobs:", err);
         setLoading(false);
-      });
+      }
+    };
+    fetchAllJobs();
   }, []);
 
+  // ✅ 2. Search result state ရှိရင် override
+  useEffect(() => {
+    if (location.state?.jobs) {
+      setJobs(location.state.jobs);
+      setIsSearching(true);
+      setCurrentPage(1);
+    } else if (!isSearching) {
+      // state မရှိရင် အကုန်ပြ
+      setJobs(allJobs);
+      setIsSearching(false);
+    }
+  }, [location.state, allJobs]);
+
+  // ✅ 3. Pagination logic
   const indexOfLastJob = currentPage * jobsPerPage;
   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
   const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
@@ -80,18 +95,28 @@ const JobSearchAll = () => {
       <div className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">
-            Jobs you can apply for as you wish
+            {isSearching ? "Search Results" : "All Available Jobs"}
           </h2>
           <div className="flex space-x-2">
             <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm">
               {jobs.length} Jobs
             </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">
-              New
-            </button>
+            {isSearching && (
+              <button
+                onClick={() => {
+                  setJobs(allJobs);
+                  setIsSearching(false);
+                  navigate("/job-search/all", { replace: true });
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded-full text-sm hover:bg-red-600"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         </div>
 
+        {/* ✅ Job Card UI */}
         {loading ? (
           <p className="text-center text-gray-500">Loading jobs...</p>
         ) : currentJobs.length > 0 ? (
@@ -105,44 +130,47 @@ const JobSearchAll = () => {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-500">No jobs available</p>
+          <p className="text-center text-gray-500">No jobs found.</p>
         )}
 
-        {/* Pagination Section */}
-        <div className="flex justify-center mt-8">
-          <nav className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50"
-            >
-              <HiOutlineChevronLeft size={20} className="text-gray-600" />
-            </button>
-
-            {/* Page Numbers */}
-            {[...Array(totalPages)].map((_, i) => (
+        {/* ✅ Pagination */}
+        {jobs.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <nav className="flex items-center space-x-2">
               <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-4 py-2 rounded-md ${
-                  currentPage === i + 1
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-gray-700 hover:bg-gray-200"
-                }`}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50"
               >
-                {i + 1}
+                <HiOutlineChevronLeft size={20} className="text-gray-600" />
               </button>
-            ))}
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50"
-            >
-              <HiOutlineChevronRight size={20} className="text-gray-600" />
-            </button>
-          </nav>
-        </div>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-4 py-2 rounded-md ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white font-semibold"
+                      : "text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50"
+              >
+                <HiOutlineChevronRight size={20} className="text-gray-600" />
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
 
       <QuickSearchSection />

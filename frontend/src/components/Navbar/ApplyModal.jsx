@@ -1,74 +1,18 @@
 import React, { useState } from "react";
-import axios from "axios";
-import {toast} from "react-hot-toast";
+import { useJobApply } from "../../context/JobApplyContext";
 
-export default function ApplyModal({ isOpen, onClose, job, onSuccess  }) {
+export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
   const [coverLetter, setCoverLetter] = useState("");
-
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + "=")) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
+  const { applyJob, loading } = useJobApply();
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!job?.id) {
-      alert("Invalid job. Please try again.");
-      return;
-    }
-
-    const csrftoken = getCookie("csrftoken");
-    const token = localStorage.getItem("access");
-
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/application/application/${job.id}/apply/`,
-        {
-          cover_letter_text: coverLetter || "No cover letter provided.",
-          resume_form: { basic: true },
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrftoken,
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.status === 201 || response.status === 200) {
-        toast.success("Successfully applied for the job!");
-        onClose();
-        onSuccess?.();
-      }
-    } catch (error) {
-      console.error("Apply error:", error.response?.data || error);
-      const data = error.response?.data;
-
-      if (data?.code === "ALREADY_APPLIED") {
-        toast.error("You’ve already applied to this job.");
-      } else if (data?.code === "JOB_CLOSED") {
-        toast.error("This job is no longer accepting applications.");
-      } else if (Array.isArray(data?.detail)) {
-        toast.error(`${data.detail.join(", ")}`);
-      } else {
-        toast.error("Failed to apply. Please check your data or login again.");
-      }
-    }
+    applyJob(job, coverLetter, () => {
+      onClose();
+      onSuccess?.();
+    });
   };
 
   return (
@@ -96,9 +40,12 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess  }) {
           <div className="flex gap-4 mt-6">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+              disabled={loading}
+              className={`${
+                loading ? "bg-gray-400" : "bg-blue-600"
+              } text-white px-6 py-2 rounded-lg`}
             >
-              Submit
+              {loading ? "Submitting..." : "Submit"}
             </button>
             <button
               type="button"

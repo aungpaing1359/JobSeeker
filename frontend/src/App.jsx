@@ -53,7 +53,6 @@ import EmployerProfileEditPage from "./pages/employer/profile/EmployerProfileEdi
 
 import JobApplication from "./pages/employer/job-application/JobApplication";
 import JobApplicationProfileDetail from "./pages/employer/job-application/JobApplicationProfileDetail";
-import ShortlistApplications from "./pages/employer/job-application/ShortlistApplications";
 
 // ✅ Auth Context import
 import { AuthProvider } from "./context/AuthContext";
@@ -61,6 +60,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { EmployerAuthProvider } from "./context/EmployerAuthContext";
 // Notification Auth Context
 import { NotificationProvider } from "./context/NotificationContext";
+// Apply Auth
+import { JobApplyProvider } from "./context/JobApplyContext";
 
 // ProtectedRoute
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -75,102 +76,115 @@ function App() {
     <AuthProvider>
       <EmployerAuthProvider>
         <NotificationProvider>
-          <>
-            <Routes>
-              <Route path="/" element={<MainLayout />}>
-                {/* Home */}
-                <Route index element={<Home />} />
+          <JobApplyProvider>
+            <>
+              <Routes>
+                <Route path="/" element={<MainLayout />}>
+                  {/* Home */}
+                  <Route index element={<Home />} />
 
-                <Route path="job-search">
-                  <Route index element={<JobSearch />} />
-                  <Route path=":id" element={<JobSearch />} />
-                  <Route path=":id" element={<JobDetailView />} />
-                  <Route path="all" element={<JobSearchAll />} />
-                  <Route path="saved" element={<SaveJobs />} />
-                  <Route path="saved/:id" element={<SavedJobDetail />} />
-                  <Route path="applications" element={<JobApplications />} />
-                  <Route path="applications/:id" element={<JobApplicationDetail />} />
+                  <Route path="job-search">
+                    <Route index element={<JobSearch />} />
+                    <Route path=":id" element={<JobSearch />} />
+                    <Route path=":id" element={<JobDetailView />} />
+                    <Route path="all" element={<JobSearchAll />} />
+                    <Route path="saved" element={<SaveJobs />} />
+                    <Route path="saved/:id" element={<SavedJobDetail />} />
+                    <Route path="applications" element={<JobApplications />} />
+                    <Route
+                      path="applications/:id"
+                      element={<JobApplicationDetail />}
+                    />
+                  </Route>
+
+                  <Route path="profile" element={<Profile />} />
+
+                  <Route path="companies" element={<Companies />} />
+                  <Route path="companies/:id" element={<CompanyAbout />} />
+
+                  <Route
+                    path="profile/me"
+                    element={
+                      <ProtectedRoute>
+                        <ProfileMe />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="profile/me/edit"
+                    element={
+                      <ProtectedRoute>
+                        <EditProfile />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Route>
 
-                <Route path="profile" element={<Profile />} />
+                {/* Jobseeker Auth */}
+                <Route path="sign-in" element={<SignIn />} />
+                <Route path="verify" element={<VerifyOTP />} />
 
-                <Route path="companies" element={<Companies />} />
-                <Route path="companies/:id" element={<CompanyAbout />} />
-
+                {/* Employer Auth */}
+                <Route path="employer/sign-in" element={<EmployerSignIn />} />
                 <Route
-                  path="profile/me"
-                  element={
-                    <ProtectedRoute>
-                      <ProfileMe />
-                    </ProtectedRoute>
-                  }
+                  path="employer/register"
+                  element={<EmployerRegister />}
                 />
                 <Route
-                  path="profile/me/edit"
-                  element={
-                    <ProtectedRoute>
-                      <EditProfile />
-                    </ProtectedRoute>
-                  }
+                  path="employer/company/detail"
+                  element={<EmployerCompanyDetail />}
                 />
-              </Route>
 
-              {/* Jobseeker Auth */}
-              <Route path="sign-in" element={<SignIn />} />
-              <Route path="verify" element={<VerifyOTP />} />
-
-              {/* Employer Auth */}
-              <Route path="employer/sign-in" element={<EmployerSignIn />} />
-              <Route path="employer/register" element={<EmployerRegister />} />
-              <Route
-                path="employer/company/detail"
-                element={<EmployerCompanyDetail />}
-              />
-
-              {/* Employer Auth */}
-              <Route
-                path="/employer/dashboard"
-                element={<EmployerDashboardLayout />}
-              >
-                <Route index element={<Overview />} />
-
-                {/* job */}
-                <Route path="my-jobs" element={<MyJobs />} />
-                <Route path="job-create" element={<PostJob />} />
-                <Route path="my-jobs/:id/edit" element={<EditJob />} />
-                <Route path="my-jobs/:id/detail" element={<JobDetail />} />
-
-                {/* job-category */}
-                <Route path="job-category" element={<JobCategoryListPage />} />
+                {/* Employer Auth */}
                 <Route
-                  path="job-category/create"
-                  element={<JobCategoryCreatePage />}
-                />
-                <Route
-                  path="job-categories/:id/edit"
-                  element={<JobCategoryEditPage />}
-                />
-                <Route
-                  path="job-categories/:id"
-                  element={<JobCategoryDetailPage />}
-                />
+                  path="/employer/dashboard"
+                  element={<EmployerDashboardLayout />}
+                >
+                  <Route index element={<Overview />} />
 
-                {/* Profile */}
-                <Route path="profile" element={<EmployerProfile />} />
-                <Route
-                  path="profile/edit"
-                  element={<EmployerProfileEditPage />}
-                />
+                  {/* job */}
+                  <Route path="my-jobs" element={<MyJobs />} />
+                  <Route path="job-create" element={<PostJob />} />
+                  <Route path="my-jobs/:id/edit" element={<EditJob />} />
+                  <Route path="my-jobs/:id/detail" element={<JobDetail />} />
 
-                {/* Application */}
-                <Route path="applications" element={<JobApplication />} />
-                <Route path="applications/:id" element={<JobApplicationProfileDetail />} />
-                <Route path="applications/shortlist" element={<ShortlistApplications />} />
-              </Route>
-            </Routes>
+                  {/* job-category */}
+                  <Route
+                    path="job-category"
+                    element={<JobCategoryListPage />}
+                  />
+                  <Route
+                    path="job-category/create"
+                    element={<JobCategoryCreatePage />}
+                  />
+                  <Route
+                    path="job-categories/:id/edit"
+                    element={<JobCategoryEditPage />}
+                  />
+                  <Route
+                    path="job-categories/:id"
+                    element={<JobCategoryDetailPage />}
+                  />
 
-            <Toaster position="top-center" reverseOrder={false} />
-          </>
+                  {/* Profile */}
+                  <Route path="profile" element={<EmployerProfile />} />
+                  <Route
+                    path="profile/edit"
+                    element={<EmployerProfileEditPage />}
+                  />
+
+                  {/* Application */}
+                  <Route path="applications" element={<JobApplication />} />
+                  <Route
+                    path="applications/:id"
+                    element={<JobApplicationProfileDetail />}
+                  />
+                </Route>
+              </Routes>
+
+              <Toaster position="top-center" reverseOrder={false} />
+            </>
+          </JobApplyProvider>
         </NotificationProvider>
       </EmployerAuthProvider>
     </AuthProvider>

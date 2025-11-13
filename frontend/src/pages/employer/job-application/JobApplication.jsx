@@ -12,7 +12,7 @@ import {
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-// CSRF Token getter
+// ✅ Get CSRF Token Helper
 export function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -30,7 +30,13 @@ export function getCookie(name) {
 
 export default function JobApplication() {
   const [applications, setApplications] = useState([]);
-  const [fullList, setFullList] = useState([]);
+  const [counts, setCounts] = useState({
+    P: 0,
+    R: 0,
+    RJ: 0,
+    SL: 0,
+    H: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -38,6 +44,9 @@ export default function JobApplication() {
   const [activeStatus, setActiveStatus] = useState("All");
   const menuRef = useRef(null);
 
+  const API_BASE = "http://127.0.0.1:8000";
+
+  // ✅ Detect click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -48,19 +57,31 @@ export default function JobApplication() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch Applications
+  // ✅ Fetch All Applications (for default view)
   const fetchApplications = async (endpoint = null) => {
     setLoading(true);
     try {
-      const url =
-        endpoint || "http://127.0.0.1:8000/application/employer/applications/";
+      const url = endpoint || `${API_BASE}/application/employer/applications/`;
       const res = await axios.get(url, { withCredentials: true });
-      if (!endpoint) {
-        setFullList(res.data.applications || []);
-      }
-      setApplications(res.data.applications || []);
+
+      // API မှာ key မတူနိုင်တာကြောင့် dynamic key handle
+      const data = res.data;
+      const key = Object.keys(data).find((k) => k.endsWith("_apps"));
+      const apps = key ? data[key] : data.applications || [];
+
+      setApplications(apps);
+
+      // ✅ Count ကို API response အပေါ်မူတည်မဟုတ်ဘဲ Local မှတင်တွက်မယ်
+      const newCounts = {
+        P: apps.filter((a) => a.status === "P").length,
+        R: apps.filter((a) => a.status === "R").length,
+        RJ: apps.filter((a) => a.status === "RJ").length,
+        SL: apps.filter((a) => a.status === "SL").length,
+        H: apps.filter((a) => a.status === "H").length,
+      };
+      setCounts(newCounts);
     } catch (error) {
-      console.error("Error fetching applications:", error);
+      console.error("❌ Error fetching applications:", error);
       toast.error("Failed to fetch applications!");
     } finally {
       setLoading(false);
@@ -71,94 +92,101 @@ export default function JobApplication() {
     fetchApplications();
   }, []);
 
-  // Count statuses (always based on fullList)
-  const statusCounts = {
-    P: fullList.filter((a) => a.status === "P").length,
-    RV: fullList.filter((a) => a.status === "RV").length,
-    RJ: fullList.filter((a) => a.status === "RJ").length,
-    AC: fullList.filter((a) => a.status === "AC").length,
-    HR: fullList.filter((a) => a.status === "HR").length,
-  };
-
-  // Dashboard summary cards
+  // ✅ Cards config
   const cards = [
     {
       title: "Pending",
-      value: statusCounts.P,
+      value: counts.P,
       color: "text-blue-500",
       icon: <Clock size={22} />,
-      endpoint:
-        "http://127.0.0.1:8000/application/employer/application/pending/",
+      endpoint: `${API_BASE}/application/employer/application/pending/`,
     },
     {
       title: "Review",
-      value: statusCounts.RV,
+      value: counts.R,
       color: "text-yellow-500",
       icon: <Eye size={22} />,
-      endpoint:
-        "http://127.0.0.1:8000/application/employer/application/reviewed/",
+      endpoint: `${API_BASE}/application/employer/application/reviewed/`,
     },
     {
       title: "Rejected",
-      value: statusCounts.RJ,
+      value: counts.RJ,
       color: "text-red-500",
       icon: <XCircle size={22} />,
-      endpoint:
-        "http://127.0.0.1:8000/application/employer/application/rejected/",
+      endpoint: `${API_BASE}/application/employer/application/rejected/`,
     },
     {
       title: "Shortlist",
-      value: statusCounts.AC,
+      value: counts.SL,
       color: "text-green-500",
       icon: <CheckCircle size={22} />,
-      endpoint:
-        "http://127.0.0.1:8000/application/employer/application/shortlist/",
+      endpoint: `${API_BASE}/application/employer/application/shortlist/`,
     },
     {
       title: "Hired",
-      value: statusCounts.HR,
+      value: counts.H,
       color: "text-purple-500",
       icon: <Handshake size={22} />,
-      endpoint: "http://127.0.0.1:8000/application/employer/application/hired/",
+      endpoint: `${API_BASE}/application/employer/application/hired/`,
     },
   ];
 
-  //  Card click handler
-  const handleCardClick = (card) => {
+  // ✅ Card click handler (list change only)
+  const handleCardClick = async (card) => {
     setActiveStatus(card.title);
-    if (card.title === "All") {
-      fetchApplications();
-    } else {
-      fetchApplications(card.endpoint);
+    try {
+      const res = await axios.get(card.endpoint, { withCredentials: true });
+      const data = res.data;
+      const key = Object.keys(data).find((k) => k.endsWith("_apps"));
+      const apps = key ? data[key] : data.applications || [];
+      setApplications(apps);
+      toast.success(`${card.title} applications loaded!`);
+    } catch (err) {
+      console.error("❌ Error:", err);
+      toast.error("Failed to load selected applications!");
     }
-    toast.success(`${card.title} applications loaded!`);
   };
 
-  // Filter
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      app.job?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.job?.employer.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "All" ||
-      (statusFilter === "Pending" && app.status === "P") ||
-      (statusFilter === "Review" && app.status === "RV") ||
-      (statusFilter === "Rejected" && app.status === "RJ") ||
-      (statusFilter === "Shortlist" && app.status === "AC") ||
-      (statusFilter === "Hired" && app.status === "HR");
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
-
-  const handleAction = (action, appId) => {
-    console.log("Selected:", action, "for app id:", appId);
+  // ✅ Update status
+  const handleAction = async (newStatus, appId) => {
+    const csrftoken = getCookie("csrftoken");
     setOpenMenuId(null);
+
+    const statusMap = {
+      Pending: "P",
+      Review: "R",
+      Rejected: "RJ",
+      Shortlist: "SL",
+      Hired: "H",
+    };
+    const code = statusMap[newStatus];
+
+    try {
+      await axios.post(
+        `${API_BASE}/application/applications/${appId}/update-status/`,
+        { new_status: code },
+        {
+          headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      toast.success(`Status updated to ${newStatus}!`);
+
+      // ✅ Update frontend state only for this app
+      setApplications((prev) =>
+        prev.map((a) => (a.id === appId ? { ...a, status: code } : a))
+      );
+    } catch (error) {
+      console.error("❌ Status update failed:", error);
+      toast.error("Failed to update status.");
+    }
   };
 
-  // Delete Application
+  // ✅ Delete
   const handleDelete = async (appId) => {
     if (!window.confirm("Are you sure you want to delete this application?"))
       return;
@@ -166,21 +194,38 @@ export default function JobApplication() {
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/application/employer/application/delete/${appId}/`,
+        `${API_BASE}/application/employer/application/delete/${appId}/`,
         {
           headers: { "X-CSRFToken": csrftoken },
           withCredentials: true,
         }
       );
-      toast.success("Application deleted successfully!");
+      toast.success("Application deleted!");
       setApplications((prev) => prev.filter((a) => a.id !== appId));
-      setFullList((prev) => prev.filter((a) => a.id !== appId));
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error("❌ Delete error:", error);
       toast.error("Failed to delete application.");
     }
   };
 
+  // ✅ Search + Filter
+  const filteredApplications = applications.filter((app) => {
+    const matchesSearch =
+      app.job?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.job?.employer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" ||
+      (statusFilter === "Pending" && app.status === "P") ||
+      (statusFilter === "Review" && app.status === "R") ||
+      (statusFilter === "Rejected" && app.status === "RJ") ||
+      (statusFilter === "Shortlist" && app.status === "SL") ||
+      (statusFilter === "Hired" && app.status === "H");
+    return matchesSearch && matchesStatus;
+  });
+
+  const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
+
+  // ✅ Render UI
   return (
     <div className="bg-[#e9f3fb] min-h-screen p-6 relative">
       <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -188,8 +233,8 @@ export default function JobApplication() {
         <span className="text-sm text-gray-500">({activeStatus})</span>
       </h2>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      {/* ===== Summary Cards ===== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {cards.map((card, i) => (
           <button
             key={i}
@@ -205,7 +250,7 @@ export default function JobApplication() {
         ))}
       </div>
 
-      {/* Search & Filter */}
+      {/* ===== Search & Filter ===== */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-5">
         <input
           type="text"
@@ -228,7 +273,7 @@ export default function JobApplication() {
         </select>
       </div>
 
-      {/* Applications Table */}
+      {/* ===== Table ===== */}
       <div className="bg-white shadow-sm rounded-xl border border-gray-100 relative overflow-visible">
         <div className="p-4 border-b border-gray-100">
           <h3 className="text-gray-700 font-semibold text-base">
@@ -271,6 +316,8 @@ export default function JobApplication() {
                   <td className="py-3 px-4 text-sm">
                     {new Date(app.applied_at).toLocaleDateString()}
                   </td>
+
+                  {/* Action */}
                   <td className="py-3 px-4 text-sm relative">
                     <div className="flex items-center gap-3">
                       <Link
@@ -279,14 +326,12 @@ export default function JobApplication() {
                       >
                         <Eye size={16} /> View
                       </Link>
-
                       <button
                         onClick={() => handleDelete(app.id)}
                         className="text-red-500 hover:text-red-700 flex items-center gap-1 hover:underline"
                       >
                         <Trash2 size={16} /> Delete
                       </button>
-
                       <button
                         className="text-gray-500 hover:text-gray-700"
                         onClick={() => toggleMenu(app.id)}
@@ -295,6 +340,7 @@ export default function JobApplication() {
                       </button>
                     </div>
 
+                    {/* Dropdown */}
                     {openMenuId === app.id && (
                       <div className="absolute right-10 top-8 bg-white border border-gray-200 rounded-lg shadow-lg w-32 z-50">
                         {[
