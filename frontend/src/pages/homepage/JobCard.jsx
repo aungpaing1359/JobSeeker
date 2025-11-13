@@ -83,7 +83,7 @@ export default function JobCard({ job }) {
         {job.employer || "Unknown Company"}
       </p>
       <ul className="text-sm mt-2 list-disc list-inside gray-text-custom">
-        <li className="gray-text-custom">{job.location || "No location"}</li>
+        <li className="gray-text-custom">{job.location_display || "No location"}</li>
         <li className="gray-text-custom">${job.salary || "Negotiable"}</li>
         <li
           className="gray-text-custom"
