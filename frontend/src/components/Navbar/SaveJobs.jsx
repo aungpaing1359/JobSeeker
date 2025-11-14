@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bookmark, Trash2, Briefcase, Building2, Folder } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -13,6 +13,10 @@ export default function SaveJobs() {
 
   const [selectedJob, setSelectedJob] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    console.log("🟢 Saved Jobs Updated:", savedJobs);
+  }, [savedJobs]);
 
   // 🟢 Open Apply Modal
   const handleApplyNow = (job) => {
@@ -97,14 +101,16 @@ export default function SaveJobs() {
                   <div className="flex items-center gap-3 mt-4">
                     <button
                       onClick={() => handleApplyNow(job)}
-                      disabled={job.isApplied}
+                      disabled={job.isApplied || job.is_applied}
                       className={`mt-2 ${
-                        job.isApplied
+                        job.isApplied || job.is_applied
                           ? "bg-green-600 cursor-not-allowed"
                           : "bg-[#D2691E] hover:bg-[#b45717]"
                       } text-white text-sm font-medium py-2 px-5 rounded-md`}
                     >
-                      {job.isApplied ? "✅ Applied" : "Apply Now"}
+                      {job.isApplied || job.is_applied
+                        ? "✅ Applied"
+                        : "Apply Now"}
                     </button>
 
                     <button
@@ -127,10 +133,7 @@ export default function SaveJobs() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           job={selectedJob}
-          onSuccess={() => {
-            // when apply success, update the job state locally
-            toast.success("Application submitted successfully!");
-          }}
+          onSuccess={() => toast.success("Application submitted successfully!")}
         />
       )}
     </div>

@@ -45,7 +45,14 @@ export const JobApplyProvider = ({ children }) => {
   const loadSavedJobs = async () => {
     try {
       const data = await fetchSavedJobs();
-      setSavedJobs(data);
+      const normalized = data.map((item) => ({
+        ...item,
+        job: {
+          ...item.job,
+          isApplied: item.is_applied, // convert snake_case to camelCase
+        },
+      }));
+      setSavedJobs(normalized);
     } catch (error) {
       console.error("Failed to load saved jobs:", error);
       toast.error("Failed to load saved jobs.");
@@ -74,6 +81,7 @@ export const JobApplyProvider = ({ children }) => {
   //Apply job
   const applyJob = async (job, coverLetter, onSuccess) => {
     await applyJobAPI(job, coverLetter, () => {
+      // Add new application record
       addApplication({
         id: Date.now(),
         job: {
@@ -83,7 +91,15 @@ export const JobApplyProvider = ({ children }) => {
         applied_at: new Date().toISOString(),
       });
 
-      onSuccess?.();
+      // ✅ Update savedJobs locally
+      setSavedJobs((prev) =>
+        prev.map((item) =>
+          item.job?.id === job.id
+            ? { ...item, job: { ...item.job, isApplied: true } }
+            : item
+        )
+      );
+      onSuccess?.(); // trigger toast from SaveJobs or Modal
     });
   };
 
@@ -98,25 +114,38 @@ export const JobApplyProvider = ({ children }) => {
   // Save Job
   const saveJob = async (job) => {
     try {
-      await handleSaveJob(job.id, (res) => {
-        // ✅ local update immediately
-        setSavedJobs((prev) => {
-          const exists = prev.some((j) => j.job?.id === job.id);
-          if (exists) return prev; // already in list
+      const token = localStorage.getItem("access");
+      const res = await axios.post(
+        `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-          // new saved job object
-          const newSavedJob = {
-            id: res?.id || Date.now(), // fallback if API didn’t return id
-            job: {
-              ...job,
-            },
-            is_applied: false,
-          };
-          return [newSavedJob, ...prev];
-        });
+      // ✅ backend DB save success
+      const savedData = res.data.data;
+
+      // ✅ frontend state update immediately
+      setSavedJobs((prev) => {
+        const exists = prev.some((j) => j.job?.id === job.id);
+        if (exists) return prev;
+
+        return [savedData, ...prev];
       });
+
+      toast.success(res.data.message || "Job saved successfully!");
+      console.log("✅ Save API Response:", res.data);
     } catch (error) {
-      console.error("❌ Failed to save job:", error);
+      const data = error.response?.data;
+      if (data?.detail?.includes("already saved")) {
+        toast.error("You have already saved this job");
+      } else {
+        toast.error("Failed to save job.");
+      }
+      console.error("❌ Save job failed:", error);
     }
   };
 

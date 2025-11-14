@@ -60,3 +60,4 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
     </div>
   );
 }
+

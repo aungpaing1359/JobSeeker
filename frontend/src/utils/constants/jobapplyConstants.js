@@ -1,23 +1,23 @@
 // Apply Jobs API
-export const JOB_APPLY_LIST_URL = "application/application/apply/jobs/list/";
+export const JOB_APPLY_LIST_URL = "/application/application/apply/jobs/list/";
 
 export const JOB_APPLY_REMOVE_URL = (id) =>
-  `application/application/apply/job/remove/${id}/`;
+  `/application/application/apply/job/remove/${id}/`;
 
 export const JOB_APPLY_ENDPOINT = (jobId) =>
-  `application/application/${jobId}/apply/`;
+  `/application/application/${jobId}/apply/`;
 
 export const JOB_APPLY_DETAIL_URL = (id) =>
-  `application/application/apply/job/detail/${id}/`;
+  `/application/application/apply/job/detail/${id}/`;
 
 // Save Jobs API
-export const SAVE_JOB_LIST_URL = "application/saved/jobs/";
+export const SAVE_JOB_LIST_URL = "/application/saved/jobs/";
 
 export const SAVE_JOB_ADD_URL = (jobId) =>
-  `application/saved/job/add/${jobId}/`;
+  `/application/saved/job/add/${jobId}/`;
 
 export const SAVE_JOB_REMOVE_URL = (savedJobId) =>
-  `application/saved/job/remove/${savedJobId}/`;
+  `/application/saved/job/remove/${savedJobId}/`;
 
 // Apply Jobs Message
 export const JOB_APPLY_MESSAGES = {

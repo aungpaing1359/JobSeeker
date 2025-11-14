@@ -80,15 +80,23 @@ export async function fetchApplicationDetail(id) {
   return res.data.application_detail;
 }
 
-
 // Save Job APIs
 // Fetch all saved jobs
 export async function fetchSavedJobs() {
-  console.log("🔍 Fetching from:", `${API_BASE}/${SAVE_JOB_LIST_URL}`);
   const csrftoken = getCookie();
-  const res = await api.get(SAVE_JOB_LIST_URL, {
-    headers: { "X-CSRFToken": csrftoken },
+  const token = localStorage.getItem("access");
+
+  const url = `${API_BASE}${SAVE_JOB_LIST_URL}`;
+  console.log("Final API calling:", url);
+
+  const res = await axios.get(url, {
+    withCredentials: true,
+    headers: {
+      "X-CSRFToken": csrftoken,
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   return res.data.s_savejobs || [];
 }
 

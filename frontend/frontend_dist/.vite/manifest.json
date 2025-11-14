@@ -1,11 +1,23 @@
 {
   "index.html": {
+<<<<<<< HEAD
     "file": "assets/index-CHbFobZ4.js",
+=======
+
+    "file": "assets/index-sFa-D5C-.js",
+
+>>>>>>> 0198ddec8b8a6986c096fbc38232450c4d38f642
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "css": [
+<<<<<<< HEAD
       "assets/index-96vA5zEJ.css"
+=======
+
+      "assets/index-BXFhyfak.css"
+
+>>>>>>> 0198ddec8b8a6986c096fbc38232450c4d38f642
     ],
     "assets": [
       "assets/jobseekerbg-UIsTa8TA.png",
