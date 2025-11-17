@@ -140,7 +140,6 @@ export default function JobApplication() {
       const key = Object.keys(data).find((k) => k.endsWith("_apps"));
       const apps = key ? data[key] : data.applications || [];
       setApplications(apps);
-      toast.success(`${card.title} applications loaded!`);
     } catch (err) {
       console.error("❌ Error:", err);
       toast.error("Failed to load selected applications!");
@@ -176,10 +175,24 @@ export default function JobApplication() {
 
       toast.success(`Status updated to ${newStatus}!`);
 
-      // ✅ Update frontend state only for this app
+      // 1️⃣ Update applications list (UI table)
       setApplications((prev) =>
         prev.map((a) => (a.id === appId ? { ...a, status: code } : a))
       );
+
+      // 2️⃣ Update Card Counts (Live Update)
+      setCounts((prev) => {
+        const oldStatus = applications.find((a) => a.id === appId)?.status;
+
+        if (!oldStatus) return prev;
+
+        const updated = { ...prev };
+
+        updated[oldStatus] = Math.max(0, updated[oldStatus] - 1);
+        updated[code] = (updated[code] || 0) + 1;
+
+        return updated;
+      });
     } catch (error) {
       console.error("❌ Status update failed:", error);
       toast.error("Failed to update status.");

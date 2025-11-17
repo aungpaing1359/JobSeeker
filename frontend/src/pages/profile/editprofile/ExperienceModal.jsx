@@ -97,6 +97,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
 
       onSuccess(res.data);
       onClose();
+      toast.success(editData ? "Education updated successfully" : "Education saved successfully")
     } catch (err) {
       console.error("Error saving experience:", err.response?.data || err);
       toast.error("Failed to update experience.");
@@ -225,7 +226,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
-              Update
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"

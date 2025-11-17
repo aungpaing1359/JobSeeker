@@ -109,9 +109,9 @@ export default function MyJobs() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-gray-700 font-semibold text-sm">Title</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Job Function</th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">Job Category</th>
               <th className="p-3 text-gray-700 font-semibold text-sm">Post Date</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Status</th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">Job Title</th>
               <th className="p-3 text-gray-700 font-semibold text-sm">Action</th>
             </tr>
           </thead>
@@ -127,7 +127,7 @@ export default function MyJobs() {
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-600">
-                    {job.status || "Status"}
+                    {job.title || "Job Title"}
                   </td>
                   <td className="p-3 space-x-3">
                     <button

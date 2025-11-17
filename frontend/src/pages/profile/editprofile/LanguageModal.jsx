@@ -14,7 +14,6 @@ export default function LanguageModal({
     name: "",
     proficiency: "Beginner",
   });
-  const [loading, setLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -71,7 +70,6 @@ export default function LanguageModal({
       return;
     }
 
-    setLoading(true);
     try {
       let response;
       if (editData) {
@@ -103,7 +101,7 @@ export default function LanguageModal({
       }
 
       onSuccess(response.data);
-      toast.success("Language saved successfully!");
+      toast.success(editData ? "Language updated successfully" : "Language saved successfully");
       onClose();
     } catch (error) {
       console.error("❌ Failed to save language:", error.response?.data || error);
@@ -112,8 +110,6 @@ export default function LanguageModal({
           error.response?.data?.detail || "Check your token or form data."
         }`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -178,9 +174,8 @@ export default function LanguageModal({
             <button
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
-              disabled={loading}
             >
-              {loading ? "Updating..." : "Update"}
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"
