@@ -5,6 +5,7 @@ import {
   verifyOTPAPI,
   fetchProfileAPI,
   logoutAPI,
+  resendOTPAPI
 } from "../utils/api/jobseekerAPI";
 
 export const AuthContext = createContext();
@@ -110,6 +111,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ---------------------- Resend OTP ----------------------
+const resendOTP = async (email) => {
+  try {
+    const res = await resendOTPAPI(email);
+    return true;
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    setMessage(err.response?.data?.error || "Failed to resend OTP");
+    return false;
+  }
+};
+
   // ---------------------- Provide Context ----------------------
   return (
     <AuthContext.Provider
@@ -121,6 +134,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         message,
         signIn,
+        resendOTP,
         verifyOTP,
         logout,
       }}

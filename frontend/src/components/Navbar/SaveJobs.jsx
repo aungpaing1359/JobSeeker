@@ -114,7 +114,7 @@ export default function SaveJobs() {
                     </button>
 
                     <button
-                      onClick={() => navigate(`/job-search/saved/${job.id}`)}
+                      onClick={() => navigate(`/job-search/saved/${item.id}`)}
                       className="mt-2 bg-[#D2691E] hover:bg-[#b45717] text-white text-sm font-medium py-2 px-5 rounded-md"
                     >
                       View Details

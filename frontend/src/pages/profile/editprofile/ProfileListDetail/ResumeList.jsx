@@ -20,13 +20,15 @@ export default function ResumeList({
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch resume list (initial load)
   useEffect(() => {
     if (!profileId) return;
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/resume/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {
@@ -58,7 +60,7 @@ export default function ResumeList({
   const handleSetDefault = async (id) => {
     try {
       await axios.put(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/${id}/`,
+        `${API_URL}/accounts-jobseeker/resume/${id}/`,
         { is_default: true },
         { withCredentials: true }
       );
@@ -83,7 +85,7 @@ export default function ResumeList({
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/${id}/`,
+        `${API_URL}/accounts-jobseeker/resume/${id}/`,
         {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",

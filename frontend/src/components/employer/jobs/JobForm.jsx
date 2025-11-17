@@ -26,6 +26,7 @@ export default function JobForm({ jobId }) {
   });
   const [employerName, setEmployerName] = useState("");
   const [loading, setLoading] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const JOB_TYPE_CHOICES = [
     { value: "FULL", label: "Full-time" },
@@ -96,7 +97,7 @@ export default function JobForm({ jobId }) {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/job/job-categories/")
+      .get(`${API_URL}/job/job-categories/`)
       .then((res) => setCategories(res.data))
       .catch((err) => console.error("Category fetch error:", err));
   }, []);

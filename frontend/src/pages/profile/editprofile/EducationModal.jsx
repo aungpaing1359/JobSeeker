@@ -22,6 +22,8 @@ export default function EducationModal({
     is_current: false,
   });
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Cookie getter
   function getCookie(name) {
     let cookieValue = null;
@@ -81,7 +83,7 @@ export default function EducationModal({
   const handleSave = async (formData) => {
     try {
       const res = await axios.post(
-        `http://127.0.0.1:8000/accounts-jobseeker/education/`,
+        `${API_URL}/accounts-jobseeker/education/`,
         formData,
         { withCredentials: true }
       );
@@ -107,7 +109,7 @@ export default function EducationModal({
       let response;
       if (editData) {
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/education/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/education/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -119,7 +121,7 @@ export default function EducationModal({
         );
       } else {
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/education/",
+          `${API_URL}/accounts-jobseeker/education/`,
           { ...formData, profile: profileId },
           {
             headers: {

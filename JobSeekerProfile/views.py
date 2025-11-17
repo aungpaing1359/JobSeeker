@@ -165,7 +165,6 @@ def sigout_jobseeker(request):
 @permission_classes([AllowAny])
 def current_user(request):
     u = request.user
-
     # if user not logged in or doesn't exist, return default safe response
     if not u or u.is_anonymous:
         return Response({
@@ -184,6 +183,7 @@ def current_user(request):
         "is_verified": getattr(u, "is_verified", False),
         "username": u.email.split("@")[0] if u.email else None,
     }, status=200)
+
 #start jobseekerprofile
 # Create + Read (List)
 @api_view(['GET', 'POST'])

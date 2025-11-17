@@ -14,6 +14,8 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
     description: "",
   });
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // preload edit data
   useEffect(() => {
     if (editData) {
@@ -78,8 +80,8 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
 
     try {
       const url = formData.id
-        ? `http://127.0.0.1:8000/accounts-jobseeker/experience/${formData.id}/`
-        : "http://127.0.0.1:8000/accounts-jobseeker/experience/";
+        ? `${API_URL}/accounts-jobseeker/experience/${formData.id}/`
+        : `${API_URL}/accounts-jobseeker/experience/`;
       const method = formData.id ? "put" : "post";
 
       const res = await axios({

@@ -9,9 +9,11 @@ export default function JobCategoryListPage() {
   const [categories, setCategories] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/job/job-categories/");
+      const res = await axios.get(`${API_URL}/job/job-categories/`);
       console.log(res.data);
       setCategories(res.data);
     } catch (err) {
@@ -29,7 +31,7 @@ export default function JobCategoryListPage() {
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/job/job-categories/delete/${id}/`,
+        `${API_URL}/job/job-categories/delete/${id}/`,
         { headers: { "X-CSRFToken": csrfToken }, withCredentials: true }
       );
       toast.success("✅ Category deleted!");

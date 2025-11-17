@@ -44,7 +44,7 @@ export default function JobApplication() {
   const [activeStatus, setActiveStatus] = useState("All");
   const menuRef = useRef(null);
 
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // ✅ Detect click outside dropdown
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function JobApplication() {
   const fetchApplications = async (endpoint = null) => {
     setLoading(true);
     try {
-      const url = endpoint || `${API_BASE}/application/employer/applications/`;
+      const url = endpoint || `${API_URL}/application/employer/applications/`;
       const res = await axios.get(url, { withCredentials: true });
 
       // API မှာ key မတူနိုင်တာကြောင့် dynamic key handle
@@ -99,35 +99,35 @@ export default function JobApplication() {
       value: counts.P,
       color: "text-blue-500",
       icon: <Clock size={22} />,
-      endpoint: `${API_BASE}/application/employer/application/pending/`,
+      endpoint: `${API_URL}/application/employer/application/pending/`,
     },
     {
       title: "Review",
       value: counts.R,
       color: "text-yellow-500",
       icon: <Eye size={22} />,
-      endpoint: `${API_BASE}/application/employer/application/reviewed/`,
+      endpoint: `${API_URL}/application/employer/application/reviewed/`,
     },
     {
       title: "Rejected",
       value: counts.RJ,
       color: "text-red-500",
       icon: <XCircle size={22} />,
-      endpoint: `${API_BASE}/application/employer/application/rejected/`,
+      endpoint: `${API_URL}/application/employer/application/rejected/`,
     },
     {
       title: "Shortlist",
       value: counts.SL,
       color: "text-green-500",
       icon: <CheckCircle size={22} />,
-      endpoint: `${API_BASE}/application/employer/application/shortlist/`,
+      endpoint: `${API_URL}/application/employer/application/shortlist/`,
     },
     {
       title: "Hired",
       value: counts.H,
       color: "text-purple-500",
       icon: <Handshake size={22} />,
-      endpoint: `${API_BASE}/application/employer/application/hired/`,
+      endpoint: `${API_URL}/application/employer/application/hired/`,
     },
   ];
 
@@ -163,7 +163,7 @@ export default function JobApplication() {
 
     try {
       await axios.post(
-        `${API_BASE}/application/applications/${appId}/update-status/`,
+        `${API_URL}/application/applications/${appId}/update-status/`,
         { new_status: code },
         {
           headers: {
@@ -194,7 +194,7 @@ export default function JobApplication() {
 
     try {
       await axios.delete(
-        `${API_BASE}/application/employer/application/delete/${appId}/`,
+        `${API_URL}/application/employer/application/delete/${appId}/`,
         {
           headers: { "X-CSRFToken": csrftoken },
           withCredentials: true,

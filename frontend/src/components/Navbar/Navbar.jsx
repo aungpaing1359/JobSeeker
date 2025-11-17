@@ -56,7 +56,7 @@ export default function Navbar() {
                   className={({ isActive }) =>
                     isActive
                       ? "custom-blue-text border-b-2 font-semibold"
-                      : "gray-text-custom nav-hover-blue"
+                      : "custom-blue-text border rounded-md py-[2px] px-2 hover-blue"
                   }
                 >
                   Sign In
@@ -66,10 +66,10 @@ export default function Navbar() {
                   className={({ isActive }) =>
                     isActive
                       ? "custom-blue-text border-b-2 font-semibold"
-                      : "gray-text-custom nav-hover-blue"
+                      : "custom-blue-text hover-blue"
                   }
                 >
-                  Employer Site
+                  Employer SignUp
                 </NavLink>
               </>
             ) : (
@@ -182,7 +182,7 @@ export default function Navbar() {
                     <li>
                       <NavLink
                         to="/sign-in"
-                        className="block gray-text-custom nav-hover-blue"
+                        className="custom-blue-text border rounded-md py-[4px] px-1 hover-blue"
                         onClick={() => setIsOpen(false)}
                       >
                         Sign In
@@ -191,7 +191,7 @@ export default function Navbar() {
                     <li>
                       <NavLink
                         to="/employer/sign-in"
-                        className="block gray-text-custom nav-hover-blue"
+                        className="block custom-blue-text hover-blue"
                         onClick={() => setIsOpen(false)}
                       >
                         Employer Site

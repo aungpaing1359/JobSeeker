@@ -40,13 +40,6 @@ export const JobApplyProvider = ({ children }) => {
       return;
     }
 
-    // ⭐ NO jobseeker profile → skip saved jobs + apps
-    if (!user.jobseeker_profile) {
-      console.log("No jobseeker profile → skipping saved jobs + apps");
-      setLoading(false);
-      return;
-    }
-
     // ⭐ Profile exists → load normally
     loadApplications();
     loadSavedJobs();
@@ -70,8 +63,8 @@ export const JobApplyProvider = ({ children }) => {
   // ================================
   const loadSavedJobs = async () => {
     try {
-      const data = await fetchSavedJobs();
-
+      const res = await fetchSavedJobs();
+      const data = res.s_savejobs || [];
       const normalized = data.map((item) => ({
         ...item,
         job: {

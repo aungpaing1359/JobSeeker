@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useJobApply } from "../../context/JobApplyContext";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function JobApplicationDetail() {
   const { id } = useParams();
@@ -30,7 +31,7 @@ export default function JobApplicationDetail() {
       <h1 className="text-2xl font-semibold mb-2">{job?.title}</h1>
       <p className="text-gray-600">{job?.employer}</p>
       <p className="text-gray-500 text-sm mb-3">
-        {job?.location} • {job?.job_type}
+        {getLocationLabel(job?.location)} • {job?.job_type}
       </p>
 
       <p className="text-sm text-gray-600 mt-1">

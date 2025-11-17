@@ -16,6 +16,7 @@ export default function ResumeModal({
     data: "",
     is_default: false,
   });
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // editData
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function ResumeModal({
       if (editData) {
         // PUT Update
         res = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/resume/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/resume/${editData.id}/`,
           dataToSend,
           {
             headers: {
@@ -116,7 +117,7 @@ export default function ResumeModal({
       } else {
         // POST Create
         res = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/resume/",
+          `${API_URL}/accounts-jobseeker/resume/`,
           dataToSend,
           {
             headers: {

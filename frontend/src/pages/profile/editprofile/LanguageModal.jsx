@@ -16,6 +16,8 @@ export default function LanguageModal({
   });
   const [loading, setLoading] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // CSRF Helper
   function getCookie(name) {
     let cookieValue = null;
@@ -75,7 +77,7 @@ export default function LanguageModal({
       if (editData) {
         // Update existing
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/language/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/language/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -88,7 +90,7 @@ export default function LanguageModal({
       } else {
         // Create new
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/language/",
+          `${API_URL}/accounts-jobseeker/language/`,
           { ...formData, profile: profileId },
           {
             headers: {

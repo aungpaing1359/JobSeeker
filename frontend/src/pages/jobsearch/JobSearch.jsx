@@ -4,7 +4,8 @@ import axios from "axios";
 import EnterSearch from "../EnterSearch";
 import JobDetailView from "./JobDetailView";
 import { useAuth } from "../../hooks/useAuth";
-import ApplyModal from "../../components/Navbar/ApplyModal"; // <-- Fix this import path if needed
+import ApplyModal from "../../components/Navbar/ApplyModal";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function JobSearch() {
   const navigate = useNavigate();
@@ -24,12 +25,14 @@ export default function JobSearch() {
   // Modal open state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const token = localStorage.getItem("access");
 
-        const res = await axios.get("http://127.0.0.1:8000/job/jobs/", {
+        const res = await axios.get(`${API_URL}/job/jobs/`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: token ? `Bearer ${token}` : "",
@@ -130,7 +133,7 @@ export default function JobSearch() {
                       <p className="text-sm text-gray-500">
                         {job.employer || "Unknown Company"}
                       </p>
-                      <p className="text-sm mt-1">{job.location}</p>
+                      <p className="text-sm mt-1">{getLocationLabel(job.location)}</p>
                       <p className="text-xs text-gray-400 mt-2">
                         {job.deadline
                           ? `Deadline: ${job.deadline}`

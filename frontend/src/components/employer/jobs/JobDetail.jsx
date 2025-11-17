@@ -2,10 +2,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getJobDetail } from "../../../utils/api/jobAPI";
+import { getLocationLabel } from "../../../utils/locationHelpers";
 
 export default function JobDetail() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
+
+  // Format job type for UI
+  const formatJobType = (type) => {
+    const map = {
+      FULL: "Full-time",
+      PART: "Part-time",
+      INTERN: "Internship",
+      REMOTE: "Remote",
+    };
+    return map[type] || type;
+  };
 
   useEffect(() => {
     getJobDetail(id)
@@ -27,11 +39,20 @@ export default function JobDetail() {
     <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10 border border-gray-200">
       {/* Header */}
       <div className="border-b border-gray-200 pb-4 mb-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">{job.title}</h1>
+
         <p className="text-orange-600 font-medium text-lg">{job.employer}</p>
-        <p className="text-gray-500 text-sm mt-1">
-          {job.location} • {job.job_type}
-        </p>
+
+        {/* Location & Job Type Badges */}
+        <div className="flex items-center gap-2 mt-3">
+          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+            📍 {getLocationLabel(job.location)}
+          </span>
+
+          <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+            💼 {formatJobType(job.job_type)}
+          </span>
+        </div>
       </div>
 
       {/* Job Info Grid */}
@@ -65,7 +86,7 @@ export default function JobDetail() {
         </div>
       </div>
 
-      {/* Status Section */}
+      {/* Status */}
       <div className="mb-6">
         <span
           className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
@@ -76,6 +97,7 @@ export default function JobDetail() {
         >
           {job.is_active ? "Active" : "Inactive"}
         </span>
+
         <span className="ml-3 text-gray-500 text-sm">
           Max Applicants: {job.max_applicants ?? 0}
         </span>
@@ -94,7 +116,7 @@ export default function JobDetail() {
         />
       </div>
 
-      {/* Footer Info */}
+      {/* Footer */}
       <div className="mt-8 border-t pt-4 text-sm text-gray-500 flex justify-between">
         <p>
           <b>Created at:</b>{" "}
