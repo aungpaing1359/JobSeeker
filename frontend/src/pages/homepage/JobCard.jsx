@@ -1,16 +1,23 @@
-import { Save, ChevronDown } from "lucide-react";
+import { Save, BookmarkCheck } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import { useState, useEffect } from "react";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function JobCard({ job }) {
+  const [isSaved, setIsSaved] = useState(job?.is_saved || false);
+  const [savedJobId, setSavedJobId] = useState(job?.saved_id || null);
+  const navigate = useNavigate();
+
+  // ------------------ CSRF ------------------
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
       const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
           cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
           break;
         }
@@ -18,79 +25,130 @@ export default function JobCard({ job }) {
     }
     return cookieValue;
   }
+  const csrftoken = getCookie("csrftoken");
 
-  const navigate = useNavigate();
-
+  // ------------------ Relative Time ------------------
   function getRelativeTime(dateString) {
     if (!dateString) return "No deadline";
 
-    const date = new Date(dateString);
+    const target = new Date(dateString); // deadline date
     const now = new Date();
-    const diffMs = now - date;
+
+    const diffMs = target - now; // ✔ future date တွေအတွက်မှန်တယ်
     const diffSec = Math.floor(diffMs / 1000);
 
-    const minutes = Math.floor(diffSec / 60);
+    const minutes = Math.floor(Math.abs(diffSec) / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    const weeks = Math.floor(days / 7);
-    const months = Math.floor(days / 30);
-    const years = Math.floor(days / 365);
 
-    if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
-    if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
-    if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    // Deadline မကြုံရသေးတဲ့အချိန် (future)
+    if (diffMs > 0) {
+      if (days > 0) return `${days} days left`;
+      if (hours > 0) return `${hours} hours left`;
+      if (minutes > 0) return `${minutes} minutes left`;
+      return "Ending soon";
+    }
+
+    // Deadline ကပြီးသွားပြီ (past)
+    if (days > 0) return `${days} days ago`;
+    if (hours > 0) return `${hours} hours ago`;
+    if (minutes > 0) return `${minutes} minutes ago`;
 
     return "Just now";
   }
 
-  const csrftoken = getCookie("csrftoken");
+  // ------------------ CHECK SAVED ON MOUNT ------------------
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || !job?.id) return;
 
-  async function handleSaveJob(e) {
-  e.stopPropagation();
+    async function checkSaved() {
+      try {
+        const res = await axios.get(
+          "http://127.0.0.1:8000/application/saved/jobs/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  const token = localStorage.getItem("access"); // JWT token
+        const found = res.data.s_savejobs.find(
+          (item) => item.job.id === job.id
+        );
 
-  try {
-    const response = await axios.post(
-      `http://127.0.0.1:8000/application/save/job/${job.id}/`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,     // <-- REQUIRED for DRF
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
+        if (found) {
+          setIsSaved(true);
+          setSavedJobId(found.id);
+        } else {
+          setIsSaved(false);
+          setSavedJobId(null);
+        }
+      } catch (err) {
+        console.log("Check saved error", err);
       }
-    );
+    }
 
-    toast.success("Job saved successfully!");
-    console.log(response.data);
+    checkSaved();
+  }, [job.id]);
 
-  } catch (error) {
-    console.error("Failed to save job:", error);
+  // ------------------ SAVE / UNSAVE ------------------
+  async function handleToggleSave(e) {
+    e.stopPropagation();
 
-    // If no profile → backend returns 404
-    if (error.response?.status === 404) {
-      toast.error("Please create your profile before saving jobs.");
+    const token = localStorage.getItem("token"); // FIXED!!
+    if (!token) {
+      toast.error("You need to sign in first!");
       return;
     }
 
-    // Already saved job
-    if (error.response?.status === 400) {
-      toast.error("You have already saved this job.");
-      return;
-    }
+    try {
+      if (!isSaved) {
+        // SAVE job
+        await axios.post(
+          `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "X-CSRFToken": csrftoken, // IMPORTANT!!
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
 
-    toast.error("Failed to save job!");
+        toast.success("Job saved!");
+        setIsSaved(true);
+      } else {
+        // UNSAVE
+        await axios.delete(
+          `http://127.0.0.1:8000/application/saved/job/remove/${savedJobId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "X-CSRFToken": csrftoken, // IMPORTANT!!
+            },
+            withCredentials: true,
+          }
+        );
+
+        toast.success("Removed from saved jobs.");
+        setIsSaved(false);
+        setSavedJobId(null);
+      }
+    } catch (error) {
+      console.error("Save/Unsave Error:", error);
+
+      if (error.response?.status === 403) {
+        toast.error("403 Forbidden — Check CSRF or Token");
+        return;
+      }
+
+      toast.error("Something went wrong!");
+    }
   }
-}
 
+  // ------------------ RENDER ------------------
   return (
     <div
-      className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer"
+      className="bg-white p-4 border border-[#F4F5F7] rounded-3xl shadow-md hover:shadow-lg transition cursor-pointer"
       onClick={() => navigate(`/job-search/${job.id}`)}
     >
       <h3 className="font-semibold text-lg gray-text-custom">{job.title}</h3>
@@ -100,29 +158,38 @@ export default function JobCard({ job }) {
       <p className="text-sm gray-text-custom">
         {job.employer || "Unknown Company"}
       </p>
+
       <ul className="text-sm mt-2 list-disc list-inside gray-text-custom">
-        <li className="gray-text-custom">{job.location_display || "No location"}</li>
-        <li className="gray-text-custom">${job.salary || "Negotiable"}</li>
+        <li>{getLocationLabel(job.location || "No location")}</li>
+        <li>${job.salary || "Negotiable"}</li>
         <li
-          className="gray-text-custom"
           dangerouslySetInnerHTML={{
             __html: job.description
-              ? job.description.length > 100
-                ? job.description.slice(0, 100) + "..."
+              ? job.description.length > 120
+                ? job.description.slice(0, 120) + "..."
                 : job.description
-              : "No description available",
+              : "No description",
           }}
         ></li>
       </ul>
+
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs gray-text-custom">
           {getRelativeTime(job.deadline)}
         </p>
+
         <div className="flex items-center gap-3">
-          <Save
-            className="text-blue-500 cursor-pointer"
-            onClick={handleSaveJob}
-          />
+          {isSaved ? (
+            <BookmarkCheck
+              className="text-green-600 cursor-pointer"
+              onClick={handleToggleSave}
+            />
+          ) : (
+            <Save
+              className="text-blue-500 cursor-pointer"
+              onClick={handleToggleSave}
+            />
+          )}
         </div>
       </div>
     </div>

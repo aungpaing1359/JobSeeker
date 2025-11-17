@@ -182,7 +182,7 @@ function App() {
                 </Route>
               </Routes>
 
-              <Toaster position="top-center" reverseOrder={false} />
+              <Toaster position="top-right" reverseOrder={false} />
             </>
           </JobApplyProvider>
         </NotificationProvider>

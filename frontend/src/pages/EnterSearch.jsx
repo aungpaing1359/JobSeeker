@@ -39,49 +39,52 @@ function EnterSearch() {
     <section
       className="bg-cover bg-center bg-no-repeat py-8"
       style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${jobseekerBg})`,
+        backgroundImage: `url(${jobseekerBg})`,
       }}
     >
-      <div className="w-full px-4 h-[650px]">
-        <div className="h-full w-full flex items-center justify-center md:relative">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full container px-4">
-            {/* Keyword input */}
-            <div className="md:col-span-3 w-full">
+      <div className="w-full max-lg:h-[400px] h-[650px] flex items-center justify-center px-4">
+        {/* Glass Panel */}
+        <div className="backdrop-blur-md bg-[#DBDBDB]/[0.55] shadow-xl rounded-3xl max-lg:p-7 p-10 w-full container mt-28">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
+            {/* WHAT */}
+            <div className="md:col-span-3 relative">
+              <p className="search-text-custom mb-2 text-xl font-semibold">
+                What
+              </p>
+
               <input
                 type="text"
                 placeholder="Enter keywords"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-3 h-[60px] border border-white rounded-md text-white bg-transparent text-lg w-full placeholder-white focus:outline-none"
+                className="p-4 h-[60px] rounded-xl border border-gray-300 text-gray-800 bg-white text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
-              <p className="absolute top-64 text-[#ffffffcf] text-xl hidden md:block">
-                What
-              </p>
             </div>
 
-            {/* Location input */}
-            <div className="md:col-span-2 w-full">
+            {/* WHERE */}
+            <div className="md:col-span-2 relative">
+              <p className="search-text-custom mb-2 text-xl font-semibold">
+                Where
+              </p>
+
               <input
                 type="text"
-                placeholder="Enter location"
+                placeholder="Enter locations"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-3 h-[60px] border border-white rounded-md text-white bg-transparent text-lg w-full placeholder-white focus:outline-none"
+                className="p-4 h-[60px] rounded-xl border border-gray-300 text-gray-800 bg-white text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
-              <p className="absolute top-64 text-[#ffffffcf] text-xl hidden md:block">
-                Where
-              </p>
             </div>
 
-            {/* Search button */}
-            <div className="md:col-span-1 w-full">
+            {/* BUTTON */}
+            <div className="md:col-span-1 flex items-end">
               <button
                 onClick={handleSearch}
-                className="h-[60px] w-full px-5 rounded-md text-lg bg-[#C46210] text-[#ffffffcf] font-semibold hover:bg-[#AB4812] transition cursor-pointer"
+                className="h-[60px] w-full px-5 rounded-xl text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md"
               >
-                Search
+                Job search
               </button>
             </div>
           </div>

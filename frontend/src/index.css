@@ -34,6 +34,9 @@
   .gray-text-custom {
     color: var(--blue-11, #363636);
   }
+  .search-text-custom{
+    color: var(--blue-11, #49494A);
+  }
 
   .sky-bg-employer {
     background-color: #e0f2fe; /* Tailwind bg-sky-50 */

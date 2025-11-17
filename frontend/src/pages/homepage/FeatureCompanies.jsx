@@ -79,20 +79,20 @@ export default function FeaturedCompanies() {
           <div key={i} className="px-3">
             <div
               onClick={() => navigate(`/companies/${company.id}`)}
-              className="border rounded-lg shadow-md text-center py-4 bg-gray-100 flex flex-col gap-[10px] items-center justify-center border-[#EDEDED] opacity-100 cursor-pointer"
+              className="border rounded-3xl shadow-md text-center py-4 bg-gray-100 flex flex-col gap-[10px] items-center justify-center border-[#EDEDED] opacity-100 cursor-pointer"
             >
               <img
                 src={company.logo || "/default-logo.png"}
                 alt={company.business_name}
-                className="h-12 mx-auto mb-4 object-contain gray-text-custom"
+                className="h-12 mb-1.5 mx-auto object-contain gray-text-custom"
               />
-              <h3 className="font-semibold gray-text-custom py-2 text-lg">
+              <h3 className="font-semibold gray-text-custom py-1 text-lg">
                 {company.business_name}
               </h3>
-              <p className="text-sm gray-text-custom mb-3">
+              <p className="text-sm gray-text-custom mb-1">
                 {company.industry || "No industry info"}
               </p>
-              <button className="px-4 py-1 rounded-md bg-[#E6F4FE] custom-blue-text">
+              <button className="px-10 py-1.5 border-2 rounded-xl custom-blue-text hover-blue cursor-pointer">
                 {company.job_count || 0} jobs
               </button>
             </div>

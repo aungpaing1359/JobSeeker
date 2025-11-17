@@ -30,15 +30,15 @@ export default function Home() {
       <EnterSearch />
 
       {/* Featured Companies */}
-      <section className="container mx-auto text-center py-8">
+      <section className="container mx-auto text-center py-8 px-4">
         <div className="py-4">
-          <h2 className="text-2xl font-bold gray-text-custom">Featured Companies</h2>
+          <h2 className="text-2xl font-bold gray-text-custom">Featured Of Companies</h2>
           <p className="gray-text-custom">Work for the best companies on the website</p>
         </div>
 
         <FeaturedCompanies />
 
-        <div className="py-4 text-start px-4">
+        <div className="py-4 text-start">
           <button
             onClick={() => navigateCompany("/companies")}
             className="px-2 py-1 border rounded-md cursor-pointer transition custom-blue-text custom-blue-border hover-blue hover:bg-gray-200"
@@ -51,13 +51,14 @@ export default function Home() {
       {/* Job Offers */}
       <section className="bg-gray-100">
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold text-center py-4 gray-text-custom">Job Offers</h2>
+          <h2 className="text-2xl font-bold text-center gray-text-custom">Job Offers</h2>
+          <p className="gray-text-custom text-center">Search your career opportunity Jobs</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {jobs.slice(0, 12).map((job, i) => (
               <JobCard key={i} job={job} />
             ))}
           </div>
-          <div className="py-4 text-center">
+          <div className="py-4 text-start">
             <button
               onClick={() => navigateJobs("/job-search/all")}
               className="px-2 py-1 border rounded-md cursor-pointer transition custom-blue-text custom-blue-border hover-blue hover:bg-gray-200"

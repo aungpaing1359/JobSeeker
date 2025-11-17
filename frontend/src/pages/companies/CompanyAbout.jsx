@@ -10,6 +10,8 @@ import {
   Users,
   Briefcase,
 } from "lucide-react";
+import { getLocationLabel } from "../../utils/locationHelpers";
+
 
 export default function CompanyAbout() {
   const { id } = useParams();
@@ -156,7 +158,7 @@ export default function CompanyAbout() {
                 <h4 className="text-lg font-semibold text-gray-800 mb-1">
                   {job.title}
                 </h4>
-                <p className="text-gray-600 text-sm mb-2">{job.location}</p>
+                <p className="text-gray-600 text-sm mb-2">{getLocationLabel(job.location)}</p>
                 <p className="text-gray-600 text-sm">
                   💰 <strong>{job.salary || "Negotiable"}</strong>
                 </p>

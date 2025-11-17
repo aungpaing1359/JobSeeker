@@ -70,3 +70,16 @@ export async function logoutAPI() {
     }
   );
 }
+
+// ✅ Resend OTP API
+export async function resendOTPAPI(email) {
+  const res = await axios.post(
+    `${API_URL}/accounts-jobseeker/jobseeker/resend/otp/`,
+    { email },
+    {
+      withCredentials: true,
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+    }
+  );
+  return res.data;
+}

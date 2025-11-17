@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const VerifyOTP = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState(""); // error state
-  const { loading, message, verifyOTP } = useAuth();
+  const { loading, message, verifyOTP, resendOTP } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
   const inputsRef = useRef([]);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
 
   useEffect(() => {
     if (!email) navigate("/sign-in");
@@ -54,7 +56,7 @@ const VerifyOTP = () => {
 
     try {
       await verifyOTP(email, otp);
-      
+
       if (message && !message.includes("successful")) {
         setError(message);
         setCode(["", "", "", "", "", ""]);
@@ -65,10 +67,27 @@ const VerifyOTP = () => {
     }
   };
 
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendMsg("");
+
+    const ok = await resendOTP(email);
+
+    if (ok) {
+      setResendMsg("A new verification code has been sent to your email.");
+    }
+
+    setResendLoading(false);
+
+    setTimeout(() => {
+      setResendMsg("");
+    }, 5000);
+  };
+
   // hide error after 3s
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(""), 3000);
+      const timer = setTimeout(() => setError(""), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -88,11 +107,13 @@ const VerifyOTP = () => {
   }, [code]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-[Inter]">
-      <header className="h-16 flex items-center px-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-blue-900 select-none">
-          Jobseeker
-        </h1>
+    <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "Poppins, sans-serif" }}>
+      <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <NavLink to="/" className="text-2xl font-bold custom-blue-text">
+            Jobseeker
+          </NavLink>
+        </div>
       </header>
 
       <main className="flex-grow flex justify-center items-center px-4">
@@ -123,6 +144,7 @@ const VerifyOTP = () => {
             ))}
           </div>
 
+          {/* VERIFY BUTTON */}
           <button
             onClick={handleVerifyClick}
             disabled={loading}
@@ -132,6 +154,20 @@ const VerifyOTP = () => {
           </button>
 
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+          {/* INSERT RESEND OTP BUTTON HERE */}
+          <button
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="mt-4 text-blue-600 text-sm hover:underline disabled:opacity-50"
+          >
+            {resendLoading ? "Resending..." : "Resend Code"}
+          </button>
+
+          {resendMsg && (
+            <p className="text-green-600 text-sm mt-2">{resendMsg}</p>
+          )}
+          {/* END INSERT */}
 
           <p className="mt-4 text-sm text-gray-700">Back in sign in options</p>
         </div>
