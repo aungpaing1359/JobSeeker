@@ -15,6 +15,8 @@ export default function SkillModal({
     proficiency_level: 1,
   });
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Cookie getter (for CSRF)
   function getCookie(name) {
     let cookieValue = null;
@@ -67,7 +69,7 @@ export default function SkillModal({
       if (editData) {
         // Update existing skill
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/skill/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/skill/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -80,7 +82,7 @@ export default function SkillModal({
       } else {
         // Create new skill
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/skill/",
+          `${API_URL}/accounts-jobseeker/skill/`,
           { ...formData, profile: profileId },
           {
             headers: {

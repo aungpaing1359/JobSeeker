@@ -7,12 +7,13 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
   const [categoryName, setCategoryName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Edit detail load
   useEffect(() => {
     if (categoryId) {
       axios
-        .get(`http://127.0.0.1:8000/job/job-categories/detail/${categoryId}/`)
+        .get(`${API_URL}/job/job-categories/detail/${categoryId}/`)
         .then((res) => setCategoryName(res.data.name))
         .catch((err) => console.error("Error fetching detail:", err));
     }
@@ -31,7 +32,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
       if (categoryId) {
         // Update
         await axios.put(
-          `http://127.0.0.1:8000/job/job-categories/update/${categoryId}/`,
+          `${API_URL}/job/job-categories/update/${categoryId}/`,
           { name: categoryName },
           {
             headers: {
@@ -45,7 +46,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
       } else {
         // Create
         await axios.post(
-          "http://127.0.0.1:8000/job/job-categories/create/",
+          `${API_URL}/job/job-categories/create/`,
           { name: categoryName },
           {
             headers: {

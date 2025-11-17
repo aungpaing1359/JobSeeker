@@ -9,6 +9,8 @@ function EnterSearch() {
   const [location, setLocation] = useState("");
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleSearch = async () => {
     if (!keyword.trim() && !location.trim()) {
       toast.error("Please enter keyword or location!");
@@ -16,7 +18,7 @@ function EnterSearch() {
     }
 
     try {
-      const res = await axios.get("http://127.0.0.1:8000/job/search/", {
+      const res = await axios.get(`${API_URL}/job/search/`, {
         params: { q: keyword.trim(), loc: location.trim() },
       });
 

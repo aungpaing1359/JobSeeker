@@ -25,6 +25,8 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   const [experienceList, setExperienceList] = useState([]);
   const [resumeList, setResumeList] = useState([]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -51,7 +53,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       if (!token || !job?.id) return;
       try {
         const res = await axios.get(
-          "http://127.0.0.1:8000/application/application/apply/jobs/list/",
+          `${API_URL}/application/application/apply/jobs/list/`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -74,7 +76,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       if (!token || !job?.id) return;
       try {
         const res = await axios.get(
-          "http://127.0.0.1:8000/application/saved/jobs/",
+          `${API_URL}/application/saved/jobs/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -103,7 +105,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     const fetchProfileData = async () => {
       try {
         const profileRes = await axios.get(
-          "http://127.0.0.1:8000/accounts-jobseeker/jobseekerprofile/",
+          `${API_URL}/accounts-jobseeker/jobseekerprofile/`,
           { withCredentials: true }
         );
         const prof =
@@ -115,23 +117,23 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         if (prof?.id) {
           const [skills, langs, edu, exp, resume] = await Promise.all([
             axios.get(
-              `http://127.0.0.1:8000/accounts-jobseeker/skill/?profile=${prof.id}`,
+              `${API_URL}/accounts-jobseeker/skill/?profile=${prof.id}`,
               { withCredentials: true }
             ),
             axios.get(
-              `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${prof.id}`,
+              `${API_URL}/accounts-jobseeker/language/?profile=${prof.id}`,
               { withCredentials: true }
             ),
             axios.get(
-              `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${prof.id}`,
+              `${API_URL}/accounts-jobseeker/education/?profile=${prof.id}`,
               { withCredentials: true }
             ),
             axios.get(
-              `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${prof.id}`,
+              `${API_URL}/accounts-jobseeker/experience/?profile=${prof.id}`,
               { withCredentials: true }
             ),
             axios.get(
-              `http://127.0.0.1:8000/accounts-jobseeker/resume/?profile=${prof.id}`,
+              `${API_URL}/accounts-jobseeker/resume/?profile=${prof.id}`,
               { withCredentials: true }
             ),
           ]);
@@ -190,7 +192,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       if (!isSaved) {
         // ✅ SAVE JOB
         const res = await axios.post(
-          `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+          `${API_URL}/application/save/job/${job.id}/`,
           {},
           {
             headers: {
@@ -206,7 +208,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
         // ✅ refresh saved list to get savedJobId
         const refresh = await axios.get(
-          "http://127.0.0.1:8000/application/saved/jobs/",
+          `${API_URL}/application/saved/jobs/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -224,7 +226,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         }
 
         const res = await axios.delete(
-          `http://127.0.0.1:8000/application/saved/job/remove/${savedJobId}/`,
+          `${API_URL}/application/saved/job/remove/${savedJobId}/`,
           {
             headers: {
               "X-CSRFToken": csrftoken,

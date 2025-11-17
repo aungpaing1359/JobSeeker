@@ -19,12 +19,13 @@ export default function CompanyAbout() {
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchCompany = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/accounts-employer/job/company/${id}/`
+          `${API_URL}/accounts-employer/job/company/${id}/`
         );
         const companyData = res.data.company_s[0];
         const jobsData = res.data.jobs_in_com_s;
@@ -56,7 +57,7 @@ export default function CompanyAbout() {
       <div className="relative w-full h-64 md:h-80 bg-gradient-to-r from-blue-700 to-indigo-600 flex flex-col justify-center items-center text-white">
         <img
           src={
-            company.logo ? `http://127.0.0.1:8000${company.logo}` : "/logo.png"
+            company.logo ? `${API_URL}${company.logo}` : "/logo.png"
           }
           alt="Company Logo"
           className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"

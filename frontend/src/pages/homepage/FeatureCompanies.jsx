@@ -37,9 +37,11 @@ export default function FeaturedCompanies() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(5);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/accounts-employer/company/")
+      .get(`${API_URL}/accounts-employer/company/`)
       .then((res) => {
         console.log("Company API Response:", res.data);
         const data = res.data.companies || [];

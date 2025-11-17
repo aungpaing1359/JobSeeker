@@ -9,6 +9,7 @@ const Companies = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Responsive itemsPerPage
   const updateItemsPerPage = () => {
@@ -33,7 +34,7 @@ const Companies = () => {
       try {
         const token = localStorage.getItem("access");
         const res = await axios.get(
-          "http://127.0.0.1:8000/accounts-employer/company/",
+          `${API_URL}/accounts-employer/company/`,
           {
             headers: {
               "Content-Type": "application/json",

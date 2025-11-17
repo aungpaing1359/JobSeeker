@@ -25,12 +25,14 @@ export default function JobSearch() {
   // Modal open state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const token = localStorage.getItem("access");
 
-        const res = await axios.get("http://127.0.0.1:8000/job/jobs/", {
+        const res = await axios.get(`${API_URL}/job/jobs/`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: token ? `Bearer ${token}` : "",

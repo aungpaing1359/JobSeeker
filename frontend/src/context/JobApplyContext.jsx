@@ -7,11 +7,13 @@ import {
   fetchApplicationDetail,
   fetchSavedJobs,
 } from "../utils/api/jobapplyAPI";
+import { useAuth } from "../hooks/useAuth";   // ⭐ ADD THIS
 import { toast } from "react-hot-toast";
 
 const JobApplyContext = createContext();
 
 export const JobApplyProvider = ({ children }) => {
+  const { user } = useAuth(); // ⭐ GET USER & PROFILE
   const {
     applyJob: applyJobAPI,
     handleSaveJob,
@@ -25,12 +27,27 @@ export const JobApplyProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
 
-  //  Load Applications
+  // ================================
+  //  FIXED LOAD EFFECT
+  // ================================
   useEffect(() => {
+    // ⭐ user still loading → do nothing
+    if (user === undefined) return;
+
+    // ⭐ user is logged out → skip everything
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // ⭐ Profile exists → load normally
     loadApplications();
     loadSavedJobs();
-  }, []);
+  }, [user]);
 
+  // ================================
+  // Load Applications
+  // ================================
   const loadApplications = async () => {
     try {
       setLoading(true);
@@ -41,25 +58,39 @@ export const JobApplyProvider = ({ children }) => {
     }
   };
 
-  // Load Saved Jobs
+  // ================================
+  // Load Saved Jobs  (FIXED)
+  // ================================
   const loadSavedJobs = async () => {
     try {
-      const data = await fetchSavedJobs();
+      const res = await fetchSavedJobs();
+      const data = res.s_savejobs || [];
       const normalized = data.map((item) => ({
         ...item,
         job: {
           ...item.job,
-          isApplied: item.is_applied, // convert snake_case to camelCase
+          isApplied: item.is_applied,
         },
       }));
+
       setSavedJobs(normalized);
+
     } catch (error) {
-      console.error("Failed to load saved jobs:", error);
-      toast.error("Failed to load saved jobs.");
+
+      // ⭐ FIX: Skip 404 silently (no profile yet)
+      if (error.response?.status === 404) {
+        console.log("No profile → skipping saved jobs");
+        return;
+      }
+
+      // ⭐ Skip network / auth errors silently
+      console.log("Error loading saved jobs:", error);
     }
   };
 
-  // ✅ Fetch single application detail
+  // ================================
+  // Get Application Detail
+  // ================================
   const getApplicationDetail = async (id) => {
     setLoading(true);
     try {
@@ -73,15 +104,18 @@ export const JobApplyProvider = ({ children }) => {
     }
   };
 
-  // Add new application
+  // ================================
+  // Add New Application
+  // ================================
   const addApplication = (app) => {
     setApplications((prev) => [app, ...prev]);
   };
 
-  //Apply job
+  // ================================
+  // Apply Job
+  // ================================
   const applyJob = async (job, coverLetter, onSuccess) => {
     await applyJobAPI(job, coverLetter, () => {
-      // Add new application record
       addApplication({
         id: Date.now(),
         job: {
@@ -91,7 +125,7 @@ export const JobApplyProvider = ({ children }) => {
         applied_at: new Date().toISOString(),
       });
 
-      // ✅ Update savedJobs locally
+      // update saved jobs list
       setSavedJobs((prev) =>
         prev.map((item) =>
           item.job?.id === job.id
@@ -99,11 +133,14 @@ export const JobApplyProvider = ({ children }) => {
             : item
         )
       );
-      onSuccess?.(); // trigger toast from SaveJobs or Modal
+
+      onSuccess?.();
     });
   };
 
-  // Remove application
+  // ================================
+  // Remove Application
+  // ================================
   const removeApplication = async (id) => {
     await deleteApplyJob(id);
     setApplications((prev) => prev.filter((a) => a.id !== id));
@@ -111,49 +148,12 @@ export const JobApplyProvider = ({ children }) => {
     setTimeout(() => setMessage(null), 2000);
   };
 
-  // Save Job
-  const saveJob = async (job) => {
-    try {
-      const token = localStorage.getItem("access");
-      const res = await axios.post(
-        `http://127.0.0.1:8000/application/save/job/${job.id}/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // ✅ backend DB save success
-      const savedData = res.data.data;
-
-      // ✅ frontend state update immediately
-      setSavedJobs((prev) => {
-        const exists = prev.some((j) => j.job?.id === job.id);
-        if (exists) return prev;
-
-        return [savedData, ...prev];
-      });
-
-      toast.success(res.data.message || "Job saved successfully!");
-      console.log("✅ Save API Response:", res.data);
-    } catch (error) {
-      const data = error.response?.data;
-      if (data?.detail?.includes("already saved")) {
-        toast.error("You have already saved this job");
-      } else {
-        toast.error("Failed to save job.");
-      }
-      console.error("❌ Save job failed:", error);
-    }
-  };
-
+  // ================================
   // Remove Saved Job
+  // ================================
   const unsaveJob = async (savedJobId) => {
     try {
       await handleRemoveSavedJob(savedJobId, () => {
-        // ✅ local state ထဲကနေ တစ်ခုပဲ filter လုပ်ဖျက်လိုက်မယ်
         setSavedJobs((prev) => prev.filter((job) => job.id !== savedJobId));
       });
     } catch (error) {
@@ -172,7 +172,6 @@ export const JobApplyProvider = ({ children }) => {
 
         applyJob,
         applyLoading,
-        saveJob,
         unsaveJob,
         addApplication,
         removeApplication,

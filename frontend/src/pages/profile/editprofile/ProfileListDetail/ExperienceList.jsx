@@ -4,6 +4,8 @@ import axios from "axios";
 export default function ExperienceList({ profileId, experienceList, setExperienceList, onEdit }) {
   const [loading, setLoading] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch Experience Data
   useEffect(() => {
     if (!profileId) return;
@@ -11,7 +13,7 @@ export default function ExperienceList({ profileId, experienceList, setExperienc
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/experience/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {

@@ -10,6 +10,8 @@ export default function JobCard({ job }) {
   const [savedJobId, setSavedJobId] = useState(job?.saved_id || null);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // ------------------ CSRF ------------------
   function getCookie(name) {
     let cookieValue = null;
@@ -65,7 +67,7 @@ export default function JobCard({ job }) {
     async function checkSaved() {
       try {
         const res = await axios.get(
-          "http://127.0.0.1:8000/application/saved/jobs/",
+          `${API_URL}/application/saved/jobs/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -102,7 +104,7 @@ export default function JobCard({ job }) {
       if (!isSaved) {
         // SAVE job
         await axios.post(
-          `http://127.0.0.1:8000/application/save/job/${job.id}/`,
+          `${API_URL}/application/save/job/${job.id}/`,
           {},
           {
             headers: {
@@ -119,7 +121,7 @@ export default function JobCard({ job }) {
       } else {
         // UNSAVE
         await axios.delete(
-          `http://127.0.0.1:8000/application/saved/job/remove/${savedJobId}/`,
+          `${API_URL}/application/saved/job/remove/${savedJobId}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -97,7 +97,7 @@ export async function fetchSavedJobs() {
     },
   });
 
-  return res.data.s_savejobs || [];
+  return res.data;
 }
 
 // Save a job (add bookmark)

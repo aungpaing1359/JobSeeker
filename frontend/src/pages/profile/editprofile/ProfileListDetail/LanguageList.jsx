@@ -4,6 +4,8 @@ import axios from "axios";
 export default function LanguageList({ profileId, languageList, setLanguageList, onEdit }) {
   const [loading, setLoading] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch Language Data
   useEffect(() => {
     if (!profileId) return;
@@ -11,7 +13,7 @@ export default function LanguageList({ profileId, languageList, setLanguageList,
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/language/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {

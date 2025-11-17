@@ -25,11 +25,13 @@ export default function Overview() {
     { title: "Expired Jobs", value: 100, icon: <AlertTriangle /> },
   ]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fatchData = async () => {
       try {
         const res = await axios.get(
-          "http://127.0.0.1:8000/accounts-employer/employer/dashboard/",
+          `${API_URL}/accounts-employer/employer/dashboard/`,
           {
             withCredentials: true,
           }

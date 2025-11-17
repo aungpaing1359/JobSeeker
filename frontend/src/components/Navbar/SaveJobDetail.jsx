@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function SavedJobDetail() {
   const { id } = useParams(); 
   const [jobDetail, setJobDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     async function fetchJobDetail() {
       try {
         const response = await axios.get(
-          `http://127.0.0.1:8000/application/saved/job/detail/${id}/`,
+          `${API_URL}/application/saved/job/detail/${id}/`,
           { withCredentials: true }
         );
         setJobDetail(response.data.saved_job);
@@ -43,7 +45,7 @@ export default function SavedJobDetail() {
       <h1 className="text-2xl font-semibold mb-2">{job.title}</h1>
       <p className="text-gray-600">{job.employer}</p>
       <p className="text-gray-500 text-sm mb-3">
-        {job.location} • {job.job_type}
+        {getLocationLabel(job.location)} • {job.job_type}
       </p>
 
       <div className="bg-gray-50 p-5 rounded-lg border">

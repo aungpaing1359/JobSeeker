@@ -4,6 +4,7 @@ import { FaBookmark } from "react-icons/fa";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import QuickSearchSection from "../homepage/QuickSearchSection";
 import EnterSearch from "../EnterSearch";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 const JobCard = ({ job, onClick }) => (
   <div
@@ -15,7 +16,7 @@ const JobCard = ({ job, onClick }) => (
     </div>
     <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
     <p className="text-sm text-gray-600">{job.employer || "Unknown Company"}</p>
-    <p className="text-sm text-gray-500 mt-1">{job.location}</p>
+    <p className="text-sm text-gray-500 mt-1">{getLocationLabel(job.location)}</p>
     <div
       className="text-sm text-gray-700 mt-3"
       dangerouslySetInnerHTML={{
@@ -43,11 +44,13 @@ const JobSearchAll = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 15;
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // ✅ 1. API မှ job အကုန်လုံးကို fetch
   useEffect(() => {
     const fetchAllJobs = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/job/jobs/");
+        const res = await fetch(`${API_URL}/job/jobs/`);
         const data = await res.json();
 
         // ✅ Support both: object with "results" or plain array

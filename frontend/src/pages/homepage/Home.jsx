@@ -11,9 +11,11 @@ export default function Home() {
   const navigateJobs = useNavigate();
   const [jobs, setJobs] = useState([]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/job/jobs/")
+      .get(`${API_URL}/job/jobs/`)
       .then((res) => {
         console.log("Job API Response:", res.data);
         const data = res.data.jobs || [];

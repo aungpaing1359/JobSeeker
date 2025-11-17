@@ -31,13 +31,14 @@ export default function EmployerProfileForm() {
 
   const [employerId, setEmployerId] = useState("");
   const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch old profile data
   useEffect(() => {
     const fetchOldData = async () => {
       try {
         const response = await axios.get(
-          "http://127.0.0.1:8000/accounts-employer/employer/profile/",
+          `${API_URL}/accounts-employer/employer/profile/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -111,7 +112,7 @@ export default function EmployerProfileForm() {
       const csrfToken = getCookie("csrftoken");
 
       const response = await axios.put(
-        `http://127.0.0.1:8000/accounts-employer/employer/profile-update/${employerId}/`,
+        `${API_URL}/accounts-employer/employer/profile-update/${employerId}/`,
         form,
         {
           headers: {

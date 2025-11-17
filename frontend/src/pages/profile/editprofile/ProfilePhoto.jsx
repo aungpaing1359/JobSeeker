@@ -7,6 +7,8 @@ export default function ProfilePhoto({ profile, setProfile }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Upload handler
   const handleUpload = async () => {
     if (!selectedFile) {
@@ -18,7 +20,7 @@ export default function ProfilePhoto({ profile, setProfile }) {
 
     try {
       const res = await axios.put(
-        `http://127.0.0.1:8000/accounts-jobseeker/jobseekerprofile/${profile.id}/`,
+        `${API_URL}/accounts-jobseeker/jobseekerprofile/${profile.id}/`,
         formData,
         {
           withCredentials: true,
@@ -39,7 +41,7 @@ export default function ProfilePhoto({ profile, setProfile }) {
       <img
         src={
           profile.profile_picture
-            ? `${import.meta.env.VITE_API_URL}${profile.profile_picture}`
+            ? `${API_URL}${profile.profile_picture}`
             : "/default-avatar.png"
         }
         alt="Profile"

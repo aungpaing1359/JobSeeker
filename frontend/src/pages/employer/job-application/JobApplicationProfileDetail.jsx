@@ -15,13 +15,15 @@ export default function JobApplicationProfileDetail() {
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch All Data
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         // Application detail
         const appRes = await axios.get(
-          `http://127.0.0.1:8000/application/employer/application/detail/${id}/`
+          `${API_URL}/application/employer/application/detail/${id}/`
         );
         const appData = appRes.data.s_app;
         setApplication(appData);
@@ -34,23 +36,23 @@ export default function JobApplicationProfileDetail() {
             await Promise.all([
               // profile API
               axios.get(
-                `http://127.0.0.1:8000/accounts-jobseeker/jobseekerprofile/${seekerId}/`
+                `${API_URL}/accounts-jobseeker/jobseekerprofile/${seekerId}/`
               ),
               // education API
               axios.get(
-                `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${seekerId}`
+                `${API_URL}/accounts-jobseeker/education/?profile=${seekerId}`
               ),
               // experience API
               axios.get(
-                `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${seekerId}`
+                `${API_URL}/accounts-jobseeker/experience/?profile=${seekerId}`
               ),
               // skill API
               axios.get(
-                `http://127.0.0.1:8000/accounts-jobseeker/skill/?profile=${seekerId}`
+                `${API_URL}/accounts-jobseeker/skill/?profile=${seekerId}`
               ),
               // language API
               axios.get(
-                `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${seekerId}`
+                `${API_URL}/accounts-jobseeker/language/?profile=${seekerId}`
               ),
             ]);
 

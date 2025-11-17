@@ -9,6 +9,8 @@ export default function EducationList({
 }) {
   const [loading, setLoading] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch Education Data
   useEffect(() => {
     if (!profileId) return;
@@ -16,7 +18,7 @@ export default function EducationList({
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/education/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {
