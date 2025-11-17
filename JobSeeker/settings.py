@@ -211,7 +211,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "jobseeker_resend": "1/minute",
+        "otp": "5/minute",
     },
 }
 

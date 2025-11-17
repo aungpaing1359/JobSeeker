@@ -5,6 +5,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss(),],
-  base: '/static/frontend/',            // <-- critical
+  base: '',            // <-- critical
   build: { outDir: 'frontend_dist', assetsDir: 'assets', manifest: true }
 })
