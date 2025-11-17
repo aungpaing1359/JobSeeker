@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404  # see below
 from django.db import IntegrityError, transaction
 from .models import Jobs, JobseekerProfile
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny
 from .models import *
 from Jobs.models import *
 from .serializers import *
@@ -82,7 +83,7 @@ def apply_job(request, job_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def save_job(request,job_id):
     try:
         profile=JobseekerProfile.objects.get(user=request.user)
