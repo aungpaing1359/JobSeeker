@@ -275,7 +275,6 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       {/* Meta Info */}
       <div className="mt-4 space-y-2 text-gray-600 text-sm">
         <p className="flex items-center gap-2">
-          <MapPin size={16} /> {getLocationLabel(job.location || "No location")}
         </p>
         <p className="flex items-center gap-2">
           <Briefcase size={16} /> {job.category_name || "Not specified"}

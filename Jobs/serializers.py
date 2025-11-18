@@ -9,6 +9,7 @@ class JobCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = JobCategory
         fields = ['id', 'name']
+    
 
     
 class JobsSerializer(serializers.ModelSerializer):
