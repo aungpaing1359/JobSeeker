@@ -454,7 +454,7 @@ def resume_list(request):
 # Read (Single) + Update + Delete
 @api_view(['GET', 'PUT', 'DELETE'])
 @parser_classes([MultiPartParser, FormParser, JSONParser]) 
-def resume_detail(request, r_id):
+def resume_detail(request,r_id):
     try:
         resume = Resume.objects.get(id=r_id)
     except Resume.DoesNotExist:

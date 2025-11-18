@@ -133,7 +133,6 @@ export default function SaveJobs() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           job={selectedJob}
-          onSuccess={() => toast.success("Application submitted successfully!")}
         />
       )}
     </div>

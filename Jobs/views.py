@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db.models import Q,F, Case, When, Value, IntegerField
 from django.db.models import Count
 from datetime import date
+from django.db import IntegrityError
 from django.db.models import (
     Q, F, Value, Func, Case, When, IntegerField, CharField
 )
@@ -46,15 +47,32 @@ class IsAdminOrEmployer(BasePermission):
             and (request.user.is_staff or request.user.role == 'employer')
         )
     
+    
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def job_category_create(request):
-    user=request.user
-    serializer = JobCategorySerializer(data=request.data)
+    serializer = JobCategorySerializer(
+        data=request.data,
+        context={"request": request}
+    )
+
     if serializer.is_valid():
-       serializer.save(user=request.user)
-       return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        try:
+            category = serializer.save(user=request.user)
+            return Response(JobCategorySerializer(category).data, status=201)
+
+        except IntegrityError:
+            return Response(
+                {
+                    "error": "You already created this category name.",
+                    "code": "CATEGORY_EXISTS"
+                },
+                status=409
+            )
+
+    return Response(serializer.errors, status=400)
+
+
 
 # Category Detail
 @api_view(['GET'])
@@ -187,34 +205,30 @@ def search(request):
     loc = (request.GET.get("loc") or "").strip()
     today = date.today()
 
+    # Not expired filter
     not_expired = Q(deadline__isnull=True) | Q(deadline__gte=today)
+
+    # Base queryset
     qs = Jobs.objects.filter(is_active=True).filter(not_expired)
+
+    # Ensure employer is joined
+    qs = qs.select_related("employer")
 
     normalized_q = q.replace(" ", "")
     normalized_loc = loc.replace(" ", "")
 
-    # 🧩 annotate no-space versions with explicit output_field
+    # Annotate everything we need
     qs = qs.annotate(
-        title_nospace=Func(
-            F("title"), Value(" "), Value(""),
-            function="REPLACE", output_field=CharField()
-        ),
-        location_nospace=Func(
-            F("location"), Value(" "), Value(""),
-            function="REPLACE", output_field=CharField()
-        ),
+        title_nospace=Func(F("title"), Value(" "), Value(""), function="REPLACE", output_field=CharField()),
+        location_nospace=Func(F("location"), Value(" "), Value(""), function="REPLACE", output_field=CharField()),
         category_name=F("category__name"),
-        category_name_nospace=Func(
-            F("category__name"), Value(" "), Value(""),
-            function="REPLACE", output_field=CharField()
-        ),
-        description_nospace=Func(
-            F("description"), Value(" "), Value(""),
-            function="REPLACE", output_field=CharField()
-        ),
+        category_name_nospace=Func(F("category__name"), Value(" "), Value(""), function="REPLACE", output_field=CharField()),
+        description_nospace=Func(F("description"), Value(" "), Value(""), function="REPLACE", output_field=CharField()),
+
+        # ✔️ Annotated employer business name
+        employer_business_name=F("employer__business_name"),
     )
 
-    # 🔍 keyword filter (space-tolerant)
     if q:
         qs = qs.filter(
             Q(title__icontains=q) |
@@ -227,31 +241,41 @@ def search(request):
             Q(description_nospace__icontains=normalized_q)
         )
 
-    # 🔍 location filter (space-tolerant)
     if loc:
         qs = qs.filter(
             Q(location__icontains=loc) |
             Q(location_nospace__icontains=normalized_loc)
         )
 
-    # 🏆 add priority ranking
     qs = qs.annotate(
         priority_rank=Case(
             When(priority="FEATURED", then=Value(3)),
             When(priority="URGENT", then=Value(2)),
             default=Value(1),
-            output_field=IntegerField()
+            output_field=IntegerField(),
         )
     ).order_by("-priority_rank", "-created_at")
 
-    data = list(qs.values(
-        "id", "title", "location", "category_name", "created_at", "priority"
-    )[:30])
+    # 🚨 FIXED: Use employer_business_name not employer__business_name
+    data = list(
+        qs.values(
+            "id",
+            "title",
+            "location",
+            "category_name",
+            "employer_business_name",  # ← THE KEY FIX
+            "description",
+            "deadline",
+            "created_at",
+            "priority"
+        )[:30]
+    )
 
     return Response({
         "count": len(data),
         "results": data
     }, status=status.HTTP_200_OK)
+
 
 
 #quck search 

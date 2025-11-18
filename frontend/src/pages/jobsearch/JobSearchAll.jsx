@@ -15,7 +15,7 @@ const JobCard = ({ job, onClick }) => (
       <FaBookmark size={20} />
     </div>
     <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
-    <p className="text-sm text-gray-600">{job.employer || "Unknown Company"}</p>
+    <p className="text-sm text-gray-600">{job.employer_business_name|| "Unknown Company"}</p>
     <p className="text-sm text-gray-500 mt-1">{getLocationLabel(job.location)}</p>
     <div
       className="text-sm text-gray-700 mt-3"

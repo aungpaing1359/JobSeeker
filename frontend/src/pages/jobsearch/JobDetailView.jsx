@@ -171,7 +171,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       resumeList.length === 0;
 
     if (missingProfileData) {
-      toast.error("Please complete your profile before applying.");
+      toast.error("Your profile is incomplete. Please finish it to continue applying.");
       navigate("/profile/me");
       return;
     }
@@ -243,7 +243,8 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       }
     } catch (error) {
       console.error("❌ Save toggle failed:", error);
-      toast.error("Something went wrong. Try again!");
+      toast.error("Your profile is incomplete. Please finish it to continue saving jobs");
+      navigate("/profile/me");
     }
   }
 

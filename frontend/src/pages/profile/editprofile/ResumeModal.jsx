@@ -113,7 +113,7 @@ export default function ResumeModal({
             withCredentials: true,
           }
         );
-        toast.success("Resume updated successfully!");
+        toast.success(editData ? "Resume updated successfully" : "Resume saved successfully");
       } else {
         // POST Create
         res = await axios.post(
@@ -128,7 +128,7 @@ export default function ResumeModal({
             withCredentials: true,
           }
         );
-        toast.success("Resume uploaded successfully!");
+        toast.success(editData ? "Resume updated successfully" : "Resume saved successfully");
       }
 
       console.log("✅ Resume saved:", res.data);

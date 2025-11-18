@@ -48,74 +48,111 @@ def preregister_employer(request):
 # Complete registration (collect profile info)
 
 
-# register employerprofile
 @api_view(["POST"])
-@parser_classes([ MultiPartParser, FormParser])
+@parser_classes([MultiPartParser, FormParser])
 def register_employer(request, role):
     data = request.data.copy()
-    # profile ကို dict ပြောင်း
+
+    # --- Parse profile JSON ---
     profile_str = data.get("profile")
     if profile_str:
         try:
             profile_data = json.loads(profile_str)
         except json.JSONDecodeError:
-            return Response({"profile": ["Invalid JSON"]}, status=400)
+            return Response({"profile": ["Invalid JSON format."]}, status=400)
     else:
         profile_data = {}
+
     logo_file = request.FILES.get("logo")
-    serializer = EmployerRegisterSerializer(data={"profile": profile_data, "logo": logo_file})
-    if not serializer.is_valid():
-        print(serializer.errors)  # 🔍 check which field fail
-    if serializer.is_valid(raise_exception=True):
-        profile_data = serializer.validated_data["profile"]
-        logo= serializer.validated_data.get("logo")
-        # email & password from session (pre-register step)
-        email = request.session.get("user_email")
-        raw_password = request.session.get("user_password")
-        if not email or not raw_password:
-            return Response(
-                {"error": "Session expired. Please pre-register again."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        username = email.split("@")[0]
-        # create user
-        user = User.objects.create(
-            email=email,
-            role=role,
-            password=make_password(raw_password),
-            is_active=False,
-            is_verified=False
+
+    serializer = EmployerRegisterSerializer(
+        data={"profile": profile_data, "logo": logo_file}
+    )
+    serializer.is_valid(raise_exception=True)
+
+    # Fetch from session
+    email = request.session.get("user_email")
+    raw_password = request.session.get("user_password")
+
+    if not email or not raw_password:
+        return Response(
+            {"error": "Your session has expired. Please start registration again."},
+            status=400
         )
-        user.set_password(raw_password)   # <-- correct way
-        user.save()
-        # create employer profile
-        employer_profile = EmployerProfile.objects.create(user=user, **profile_data,logo=logo)
-        # log them in (session)
-        login(request, user)
-        # send verification email
-        send_verification_email(request, user)
-        request.session["pending_activation"] = True
-        # prepare response data
-        response_data = {
-           "profile": {
-                "message": "Employer registered successfully. Verification email sent.",
+
+    # ---------------------------------------------------------
+    # 1️⃣ Friendly User Exists Check
+    # ---------------------------------------------------------
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {
+                "error": "This email is already registered. Try logging in instead.",
+                "code": "EMAIL_EXISTS",
+            },
+            status=409
+        )
+
+    # ---------------------------------------------------------
+    # 2️⃣ EmployerProfile Exists Check
+    # (must check via user__email, not contact_email)
+    # ---------------------------------------------------------
+    if EmployerProfile.objects.filter(user__email=email).exists():
+        return Response(
+            {
+                "error": "An employer profile already exists for this email.",
+                "code": "PROFILE_EXISTS",
+            },
+            status=409
+        )
+
+    # ---------------------------------------------------------
+    # 3️⃣ Create User safely
+    # ---------------------------------------------------------
+    user = User.objects.create(
+        email=email,
+        role=role,
+        is_active=False,
+        is_verified=False,
+    )
+    user.set_password(raw_password)
+    user.save()
+
+    # ---------------------------------------------------------
+    # 4️⃣ Create Employer Profile
+    # ---------------------------------------------------------
+    profile_data = serializer.validated_data["profile"]
+    logo = serializer.validated_data.get("logo")
+
+    employer_profile = EmployerProfile.objects.create(
+        user=user, logo=logo, **profile_data
+    )
+
+    # Login + send email
+    login(request, user)
+    send_verification_email(request, user)
+    request.session["pending_activation"] = True
+
+    return Response(
+        {
+            "message": "Employer registered successfully. Verification email sent.",
+            "profile": {
                 "id": str(employer_profile.id),
-                "first_name": employer_profile.first_name,
-                "last_name": employer_profile.last_name,
                 "business_name": employer_profile.business_name,
                 "city": employer_profile.city,
-                "phone":employer_profile.phone,
-                "size":employer_profile.size,
-                "website":employer_profile.website,
-                "industry":employer_profile.industry,
-                "logo": request.build_absolute_uri(employer_profile.logo.url) 
-                        if employer_profile.logo and employer_profile.logo.name else None,
-                "founded_year":employer_profile.founded_year,
-                "contact_email":employer_profile.contact_email,
-            }
-        }
-    
-    return Response(response_data, status=status.HTTP_201_CREATED)
+                "phone": employer_profile.phone,
+                "logo": (
+                    request.build_absolute_uri(employer_profile.logo.url)
+                    if employer_profile.logo else None
+                ),
+            },
+        },
+        status=201
+    )
+
+
+
+
+
 # end register employerprofile
 
 #sign in employer

@@ -134,7 +134,7 @@ export default function EducationModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(editData ? "Education updated!" : "Education added!");
+        toast.success(editData ? "Education updated successfully" : "Education saved successfully");
         onSuccess?.(response.data);
         onClose();
       }

@@ -95,7 +95,7 @@ export default function SkillModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Skill updated successfully!");
+        toast.success(editData ? "Skill updated successfully" : "Skill saved successfully");
         onSuccess?.(response.data);
         onClose();
       }
@@ -166,7 +166,7 @@ export default function SkillModal({
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
-              Update
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"
