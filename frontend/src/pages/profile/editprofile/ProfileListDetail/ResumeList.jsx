@@ -8,6 +8,7 @@ import {
   Trash2,
   Image as ImageIcon,
   X,
+  FileTextIcon,
 } from "lucide-react";
 import {toast} from "react-hot-toast";
 
@@ -154,6 +155,7 @@ export default function ResumeList({
 
                   <div>
                     <p className="font-medium text-gray-800 text-lg flex items-center gap-2">
+                      <FileTextIcon size={18} className="text-blue-600" />
                       {resume.title}
                       {resume.is_default && (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">

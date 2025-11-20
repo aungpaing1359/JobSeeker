@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function SkillList({ profileId, skillList, setSkillList, onEdit }) {
+export default function SkillList({
+  profileId,
+  skillList,
+  setSkillList,
+  onEdit,
+}) {
   const [loading, setLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -12,10 +17,9 @@ export default function SkillList({ profileId, skillList, setSkillList, onEdit }
 
     setLoading(true);
     axios
-      .get(
-        `${API_URL}/accounts-jobseeker/skill/?profile=${profileId}`,
-        { withCredentials: true }
-      )
+      .get(`${API_URL}/accounts-jobseeker/skill/?profile=${profileId}`, {
+        withCredentials: true,
+      })
       .then((res) => {
         setSkillList(res.data);
         setLoading(false);
@@ -27,7 +31,9 @@ export default function SkillList({ profileId, skillList, setSkillList, onEdit }
   }, [profileId, setSkillList]);
 
   if (loading) {
-    return <div className="text-gray-500 text-sm italic">Loading skills...</div>;
+    return (
+      <div className="text-gray-500 text-sm italic">Loading skills...</div>
+    );
   }
 
   if (!skillList || skillList.length === 0) {
@@ -60,7 +66,7 @@ export default function SkillList({ profileId, skillList, setSkillList, onEdit }
             className="flex justify-between items-center border-b pb-2"
           >
             <div>
-              <p className="font-medium">{skill.name}</p>
+              <p className="font-medium">Skill Name: {skill.name}</p>
               <p className="text-gray-500 text-sm">
                 Proficiency: {getProficiencyText(skill.proficiency_level)}
               </p>

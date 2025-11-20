@@ -65,6 +65,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         setIsApplied(found);
       } catch (err) {
         console.error("❌ Check applied failed:", err);
+        setIsApplied(false);
       }
     };
     fetchAppliedJobs();
@@ -73,14 +74,15 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   // ==================== CHECK IF SAVED ====================
   useEffect(() => {
     const fetchSavedJobs = async () => {
-      if (!token || !job?.id) return;
+      if (!token || !job?.id) {
+        setIsSaved(false);
+        setSavedJobId(null);
+        return;
+      }
       try {
-        const res = await axios.get(
-          `${API_URL}/application/saved/jobs/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await axios.get(`${API_URL}/application/saved/jobs/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const savedList = res?.data?.s_savejobs || [];
         if (!Array.isArray(savedList)) return;
@@ -95,6 +97,8 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         }
       } catch (err) {
         console.error("❌ Fetch saved jobs failed:", err);
+        setIsSaved(false);
+        setSavedJobId(null);
       }
     };
     fetchSavedJobs();
@@ -103,10 +107,20 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   // ==================== FETCH PROFILE DATA ====================
   useEffect(() => {
     const fetchProfileData = async () => {
+      if (!token) {
+        setProfile(null);
+        setSkillList([]);
+        setLanguageList([]);
+        setEducationList([]);
+        setExperienceList([]);
+        setResumeList([]);
+        return;
+      }
+
       try {
         const profileRes = await axios.get(
           `${API_URL}/accounts-jobseeker/jobseekerprofile/`,
-          { withCredentials: true }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const prof =
           Array.isArray(profileRes.data) && profileRes.data.length > 0
@@ -118,23 +132,23 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           const [skills, langs, edu, exp, resume] = await Promise.all([
             axios.get(
               `${API_URL}/accounts-jobseeker/skill/?profile=${prof.id}`,
-              { withCredentials: true }
+              { headers: { Authorization: `Bearer ${token}` } }
             ),
             axios.get(
               `${API_URL}/accounts-jobseeker/language/?profile=${prof.id}`,
-              { withCredentials: true }
+              { headers: { Authorization: `Bearer ${token}` } }
             ),
             axios.get(
               `${API_URL}/accounts-jobseeker/education/?profile=${prof.id}`,
-              { withCredentials: true }
+              { headers: { Authorization: `Bearer ${token}` } }
             ),
             axios.get(
               `${API_URL}/accounts-jobseeker/experience/?profile=${prof.id}`,
-              { withCredentials: true }
+              { headers: { Authorization: `Bearer ${token}` } }
             ),
             axios.get(
               `${API_URL}/accounts-jobseeker/resume/?profile=${prof.id}`,
-              { withCredentials: true }
+              { headers: { Authorization: `Bearer ${token}` } }
             ),
           ]);
 
@@ -171,7 +185,9 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       resumeList.length === 0;
 
     if (missingProfileData) {
-      toast.error("Your profile is incomplete. Please finish it to continue applying.");
+      toast.error(
+        "Your profile is incomplete. Please finish it to continue applying."
+      );
       navigate("/profile/me");
       return;
     }
@@ -207,12 +223,9 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         setIsSaved(true);
 
         // ✅ refresh saved list to get savedJobId
-        const refresh = await axios.get(
-          `${API_URL}/application/saved/jobs/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const refresh = await axios.get(`${API_URL}/application/saved/jobs/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const savedList = refresh.data.s_savejobs || [];
         const foundItem = savedList.find((i) => i.job?.id === job.id);
         if (foundItem) setSavedJobId(foundItem.id);
@@ -243,7 +256,9 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       }
     } catch (error) {
       console.error("❌ Save toggle failed:", error);
-      toast.error("Your profile is incomplete. Please finish it to continue saving jobs");
+      toast.error(
+        "Your profile is incomplete. Please finish it to continue saving jobs"
+      );
       navigate("/profile/me");
     }
   }

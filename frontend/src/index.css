@@ -38,6 +38,14 @@
     color: var(--blue-11, #49494A);
   }
 
+  .company-bg-custom{
+    background-color: var(--blue-11, #F4F5F7);
+  }
+
+  .company-border-custom{
+    border-color: var(--blue-11, #E6F4FE);
+  }
+
   .sky-bg-employer {
     background-color: #e0f2fe; /* Tailwind bg-sky-50 */
     min-height: 100vh;

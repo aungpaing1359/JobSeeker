@@ -232,7 +232,7 @@ export default function Navbar() {
                           </li>
                           <li>
                             <NavLink
-                              to="/applications"
+                              to="/job-search/applications"
                               className="flex items-center gap-2 gray-text-custom nav-hover-blue"
                               onClick={() => setIsOpen(false)}
                             >
