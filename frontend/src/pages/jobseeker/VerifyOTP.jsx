@@ -11,14 +11,55 @@ const VerifyOTP = () => {
   const location = useLocation();
   const email = location.state?.email || "";
   const inputsRef = useRef([]);
+
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMsg, setResendMsg] = useState("");
 
+  const [resendTimer, setResendTimer] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [lockTimer, setLockTimer] = useState(0);
+
+  // -----------------------------------------
+  // Restore timers from localStorage on load
+  // -----------------------------------------
+  useEffect(() => {
+    const savedResendEnd = localStorage.getItem("resend_end");
+    const savedLockEnd = localStorage.getItem("lock_end");
+
+    const now = Math.floor(Date.now() / 1000);
+
+    if (savedResendEnd) {
+      const remaining = savedResendEnd - now;
+      if (remaining > 0) setResendTimer(remaining);
+    }
+
+    if (savedLockEnd) {
+      const remaining = savedLockEnd - now;
+      if (remaining > 0) setLockTimer(remaining);
+    }
+  }, []);
+
+  // If email missing → redirect
   useEffect(() => {
     if (!email) navigate("/sign-in");
   }, [email, navigate]);
 
   // Handle typing in each digit
+  useEffect(() => {
+    const savedResendEnd = Number(localStorage.getItem("resend_end") || 0);
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!savedResendEnd || savedResendEnd <= now) {
+      // No active timer → start new 60s
+      const newEnd = now + 60;
+      localStorage.setItem("resend_end", newEnd);
+      setResendTimer(60);
+    }
+  }, []);
+
+  // -----------------------------------------
+  // OTP Input Logic
+  // -----------------------------------------
   const handleChange = (value, index) => {
     if (value.length > 1) return;
     if (value && !/^\d$/.test(value)) return;
@@ -39,19 +80,29 @@ const VerifyOTP = () => {
   const handlePaste = (e) => {
     e.preventDefault();
     const paste = e.clipboardData.getData("text").slice(0, 6);
+
     if (/^\d+$/.test(paste)) {
       const pasteArr = paste.split("");
+
       setCode((prev) => {
         const newCode = [...prev];
         for (let i = 0; i < pasteArr.length; i++) newCode[i] = pasteArr[i];
         return newCode;
       });
-      if (paste.length < 6) inputsRef.current[paste.length]?.focus();
     }
   };
 
-  // === VERIFY OTP ===
+
+
+  // -----------------------------------------
+  // Verify Button Logic
+  // -----------------------------------------
   const handleVerifyClick = async () => {
+    if (lockTimer > 0) {
+      setError(`Too many attempts. Try again in ${lockTimer}s`);
+      return;
+    }
+
     const otp = code.join("");
 
     if (otp.length < 6) {
@@ -61,45 +112,112 @@ const VerifyOTP = () => {
     }
 
     try {
-      await verifyOTP(email, otp);
-    } catch (err) {
-      const msg = err?.response?.data?.detail || "Invalid verification code.";
+      const ok = await verifyOTP(email, otp);
 
-      // ⭐ RATE LIMIT ERROR HANDLING
-      if (msg.includes("Too many verification attempts")) {
-        toast.error(msg, { icon: "⏳" });
-        setError(msg);
+      if (!ok) {
+        setAttempts((prev) => prev + 1);
+
+        if (attempts + 1 >= 5) {
+          const end = Math.floor(Date.now() / 1000) + 60;
+          localStorage.setItem("lock_end", end);
+          setLockTimer(60);
+          setAttempts(0);
+          setError("Too many attempts. Try again in 60 seconds.");
+          return;
+        }
+
+        setError(`Invalid code. Attempts left: ${4 - attempts}`);
+        setCode(["", "", "", "", "", ""]);
+        return;
+      }
+    } catch (err) {
+      setAttempts((prev) => prev + 1);
+
+      if (attempts + 1 >= 5) {
+        const end = Math.floor(Date.now() / 1000) + 60;
+        localStorage.setItem("lock_end", end);
+        setLockTimer(60);
+        setAttempts(0);
+        setError("Too many attempts. Try again in 60 seconds.");
         return;
       }
 
-      // ⭐ INVALID OTP
-      if (msg.includes("Invalid") || msg.includes("incorrect")) {
-        setError("Invalid verification code.");
-      } else {
-        setError(msg);
-      }
-
+      setError(`Invalid verification code. Attempts left: ${4 - attempts}`);
       setCode(["", "", "", "", "", ""]);
     }
   };
 
-  // === RESEND OTP ===
+
+  // -----------------------------------------
+  // Resend OTP Logic
+  // -----------------------------------------
   const handleResend = async () => {
+    if (resendTimer > 0 || lockTimer > 0) return;
+
+    const end = Math.floor(Date.now() / 1000) + 60;
+    localStorage.setItem("resend_end", end);
+
+    setResendTimer(60);
     setResendLoading(true);
-    setResendMsg("");
 
     const ok = await resendOTP(email);
 
     if (ok) {
       setResendMsg("A new verification code has been sent to your email.");
+      setTimeout(() => setResendMsg(""), 5000);
     }
 
     setResendLoading(false);
-
-    setTimeout(() => setResendMsg(""), 5000);
   };
 
-  // hide error after 3s
+  // -----------------------------------------
+  // RESEND TIMER COUNTDOWN
+  // -----------------------------------------
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendTimer((t) => t - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  // Save resend timer → localStorage
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const end = Math.floor(Date.now() / 1000) + resendTimer;
+      localStorage.setItem("resend_end", end);
+    } else {
+      localStorage.removeItem("resend_end");
+    }
+  }, [resendTimer]);
+
+  // -----------------------------------------
+  // LOCK TIMER COUNTDOWN
+  // -----------------------------------------
+  useEffect(() => {
+    if (lockTimer <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockTimer((t) => t - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockTimer]);
+
+  useEffect(() => {
+    if (lockTimer > 0) {
+      const end = Math.floor(Date.now() / 1000) + lockTimer;
+      localStorage.setItem("lock_end", end);
+    } else {
+      localStorage.removeItem("lock_end");
+    }
+  }, [lockTimer]);
+
+  // -----------------------------------------
+  // Hide error auto
+  // -----------------------------------------
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(""), 4000);
@@ -107,22 +225,24 @@ const VerifyOTP = () => {
     }
   }, [error]);
 
-  // auto-submit when all 6 digits filled
+
+  // Auto-submit
   useEffect(() => {
-    if (code.every((digit) => digit !== "")) {
-      handleVerifyClick();
-    }
+    if (code.every((d) => d !== "")) handleVerifyClick();
   }, [code]);
 
+  // -----------------------------------------
+  // UI Rendering
+  // -----------------------------------------
   return (
-    <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "Poppins, sans-serif" }}>
-      {/* Header */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <NavLink to="/" className="text-2xl font-bold custom-blue-text">
-            Jobseeker
-          </NavLink>
-        </div>
+    <div
+      className="min-h-screen bg-white flex flex-col"
+      style={{ fontFamily: "Poppins, sans-serif" }}
+    >
+      <header className="fixed top-0 left-0 w-full bg-white shadow-md py-3 px-4">
+        <NavLink to="/" className="text-2xl font-bold custom-blue-text">
+          Jobseeker
+        </NavLink>
       </header>
 
       {/* Main */}
@@ -130,7 +250,7 @@ const VerifyOTP = () => {
         <div className="bg-blue-50 rounded-xl p-8 w-full max-w-md shadow-md text-center">
           <p className="mb-4">Check your email for a code</p>
           <p className="mb-6 text-sm">
-            Enter the 6-digit code sent to {email}
+            Enter the 6-digit code we sent to {email}
           </p>
 
           {/* OTP INPUTS */}
@@ -138,26 +258,24 @@ const VerifyOTP = () => {
             {code.map((digit, index) => (
               <input
                 key={index}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 maxLength={1}
                 value={digit}
+                ref={(el) => (inputsRef.current[index] = el)}
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={handlePaste}
-                ref={(el) => (inputsRef.current[index] = el)}
-                className="w-12 h-12 text-center border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-600 transition"
+                className="w-12 h-12 text-center border rounded-lg text-lg focus:ring-2 focus:ring-blue-600"
                 placeholder="-"
               />
             ))}
           </div>
 
-          {/* Verify button */}
+
+          {/* VERIFY */}
           <button
             onClick={handleVerifyClick}
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+            disabled={loading || lockTimer > 0}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Verify Code"}
           </button>
@@ -166,23 +284,33 @@ const VerifyOTP = () => {
             <p className="mt-3 text-sm text-red-600 font-medium">{error}</p>
           )}
 
-          {/* Resend OTP */}
-          <button
-            onClick={handleResend}
-            disabled={resendLoading}
-            className="mt-4 text-blue-600 text-sm hover:underline disabled:opacity-50"
-          >
-            {resendLoading ? "Resending..." : "Resend Code"}
-          </button>
+          {/* RESEND */}
+          <div className="mt-4">
+            {lockTimer > 0 ? (
+              <p className="text-red-600 text-sm font-medium">
+                Wait ({lockTimer}s)
+              </p>
+            ) : resendTimer > 0 ? (
+              <p className="text-blue-600 text-sm">Resend in {resendTimer}s</p>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={resendLoading}
+                className="text-blue-600 text-sm hover:underline"
+              >
+                {resendLoading ? "Resending..." : "Resend Code"}
+              </button>
+            )}
 
-          {resendMsg && (
-            <p className="text-green-600 text-sm mt-2">{resendMsg}</p>
-          )}
+            {resendMsg && (
+              <p className="text-green-600 text-sm mt-2">{resendMsg}</p>
+            )}
+          </div>
         </div>
       </main>
 
-      <footer className="h-12 flex items-center justify-center border-t border-gray-200 text-sm text-gray-500">
-        ©2023 Jobstreet.com
+      <footer className="text-center py-3 text-gray-500 border-t">
+        © 2023 Jobstreet.com
       </footer>
     </div>
   );

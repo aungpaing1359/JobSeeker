@@ -16,15 +16,15 @@ const Companies = () => {
     const width = window.innerWidth;
     if (width >= 1024) {
       // xl: >=1024px
-      setItemsPerPage(20);
+      setItemsPerPage(12);
     } else if (width >= 768) {
       // lg: >=768px
-      setItemsPerPage(15);
-    } else if (width >= 640) {
-      // md: >=640px
-      setItemsPerPage(10);
+      setItemsPerPage(9);
+    } else if (width >= 548) {
+      // md: >=548px
+      setItemsPerPage(8);
     } else {
-      // sm: <640px
+      // sm: <548px
       setItemsPerPage(6);
     }
   };
@@ -33,15 +33,12 @@ const Companies = () => {
     const fetchCompanies = async () => {
       try {
         const token = localStorage.getItem("access");
-        const res = await axios.get(
-          `${API_URL}/accounts-employer/company/`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-          }
-        );
+        const res = await axios.get(`${API_URL}/accounts-employer/company/`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
         setCompanies(res.data.companies || []);
         setLoading(false);
       } catch (error) {
@@ -117,7 +114,19 @@ const Companies = () => {
         </p>
 
         {/* Companies Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div
+          className="grid md:grid-cols-3 lg:grid-cols-4 gap-6"
+          style={{
+            gridTemplateColumns:
+              window.innerWidth >= 1024
+                ? "repeat(4, 1fr)"
+                : window.innerWidth >= 768
+                ? "repeat(3, 1fr)"
+                : window.innerWidth >= 548
+                ? "repeat(2, 1fr)"
+                : "repeat(1, 1fr)",
+          }}
+        >
           {currentCompanies.map((company) => (
             <div
               key={company.id}
@@ -129,7 +138,9 @@ const Companies = () => {
                   src={company.logo ? `${API_URL}${company.logo}` : "/logo.png"}
                   alt="Company Logo"
                 />
-                <h3 className="font-semibold text-lg mb-2">{company.business_name}</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  {company.business_name}
+                </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   {company.industry || "No industry info"}
                 </p>

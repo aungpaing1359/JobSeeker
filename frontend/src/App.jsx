@@ -66,6 +66,8 @@ import { JobApplyProvider } from "./context/JobApplyContext";
 // ProtectedRoute
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import RedirectIfAuthenticated from "./components/RedirectIfAuthenticated";
+
 // Toaster
 import { Toaster } from "react-hot-toast";
 
@@ -121,8 +123,10 @@ function App() {
                 </Route>
 
                 {/* Jobseeker Auth */}
-                <Route path="sign-in" element={<SignIn />} />
-                <Route path="verify" element={<VerifyOTP />} />
+                <Route element={<RedirectIfAuthenticated />}>
+                  <Route path="sign-in" element={<SignIn />} />
+                  <Route path="verify" element={<VerifyOTP />} />
+                </Route>
 
                 {/* Employer Auth */}
                 <Route path="employer/sign-in" element={<EmployerSignIn />} />

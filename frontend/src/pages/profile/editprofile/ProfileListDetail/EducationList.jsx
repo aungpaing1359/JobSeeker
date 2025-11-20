@@ -51,19 +51,25 @@ export default function EducationList({
             className="flex justify-between items-start border-b pb-2"
           >
             <div>
-              <p className="font-medium">{edu.school_name}</p>
+              <p className="font-medium">School Name: {edu.school_name}</p>
               <p className="text-gray-500 text-sm">
-                {edu.degree} - {edu.field_of_study}
+                Degree: {edu.degree} - {edu.field_of_study}
+              </p>
+              <p className="text-gray-500 text-sm">
+                Field Of Study: {edu.field_of_study}
               </p>
               <p className="text-gray-400 text-sm">
-                {edu.start_year} - {edu.is_current ? "Present" : edu.end_year}
+                Work Time: {edu.start_year} - {edu.is_current ? "Present" : edu.end_year}
               </p>
               {edu.gpa && (
                 <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
               )}
+              {edu.location && (
+                <p className="text-sm text-gray-500">{edu.location}</p>
+              )}
               {edu.description && (
                 <p className="text-sm text-gray-500 italic mt-1">
-                  {edu.description}
+                  Description: {edu.description}
                 </p>
               )}
             </div>

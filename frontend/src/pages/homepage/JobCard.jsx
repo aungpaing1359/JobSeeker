@@ -1,4 +1,4 @@
-import { Save, BookmarkCheck } from "lucide-react";
+import { Save, BookmarkCheck, Building, Briefcase, MapPin, DollarSign, ClipboardList } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -66,10 +66,9 @@ export default function JobCard({ job }) {
 
     async function checkSaved() {
       try {
-        const res = await axios.get(
-          `${API_URL}/application/saved/jobs/`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await axios.get(`${API_URL}/application/saved/jobs/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const found = res.data.s_savejobs.find(
           (item) => item.job.id === job.id
@@ -96,7 +95,8 @@ export default function JobCard({ job }) {
 
     const token = localStorage.getItem("token"); // FIXED!!
     if (!token) {
-      toast.error("You need to sign in first!");
+      toast.error("Please sign in to save jobs.");
+      navigate("/sign-in");
       return;
     }
 
@@ -154,25 +154,52 @@ export default function JobCard({ job }) {
       onClick={() => navigate(`/job-search/${job.id}`)}
     >
       <h3 className="font-semibold text-lg gray-text-custom">{job.title}</h3>
-      <p className="text-sm gray-text-custom">
+
+      {/* Job Category and Employer */}
+      <p className="text-sm gray-text-custom mt-1 flex items-center gap-2">
+        <Briefcase size={16} className="text-purple-500" />
         {job.category_name || "Not specified"}
       </p>
+<<<<<<< HEAD
       <p className="text-sm gray-text-custom">
         {job.employer_business_name || "Unknown Company"}
+=======
+      <p className="text-sm gray-text-custom mt-1 flex items-center gap-2">
+        <Building size={16} className="text-orange-500" />
+        {job.employer || "Unknown Company"}
+>>>>>>> 537615d9e24d1731ed7488a3fb08c7e46e4e49c2
       </p>
 
-      <ul className="text-sm mt-2 list-disc list-inside gray-text-custom">
-        <li>{getLocationLabel(job.location || "No location")}</li>
-        <li>${job.salary || "Negotiable"}</li>
-        <li
-          dangerouslySetInnerHTML={{
-            __html: job.description
-              ? job.description.length > 120
-                ? job.description.slice(0, 120) + "..."
-                : job.description
-              : "No description",
-          }}
-        ></li>
+      {/* Meta Info List with Icons */}
+      <ul className="text-sm mt-3 space-y-1 gray-text-custom">
+        {/* Location */}
+        <li className="flex items-center gap-2">
+          <MapPin size={16} className="text-blue-500" />
+          <span>{getLocationLabel(job.location || "No location")}</span>
+        </li>
+
+        {/* Salary */}
+        <li className="flex items-center gap-2">
+          <DollarSign size={16} className="text-green-600" />
+          <span>${job.salary || "Negotiable"}</span>
+        </li>
+
+        {/* Short Description */}
+        <li className="flex items-start gap-2 pt-2">
+          <ClipboardList
+            size={16}
+            className="text-gray-400 mt-1 flex-shrink-0"
+          />
+          <span
+            dangerouslySetInnerHTML={{
+              __html: job.description
+                ? job.description.length > 120
+                  ? job.description.slice(0, 120) + "..."
+                  : job.description
+                : "No description available.",
+            }}
+          ></span>
+        </li>
       </ul>
 
       <div className="flex items-center justify-between mt-3">

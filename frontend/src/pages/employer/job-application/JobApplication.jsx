@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import Pagination from "../../../components/common/Pagination";
 
 // ✅ Get CSRF Token Helper
 export function getCookie(name) {
@@ -43,6 +44,10 @@ export default function JobApplication() {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [activeStatus, setActiveStatus] = useState("All");
   const menuRef = useRef(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -236,6 +241,13 @@ export default function JobApplication() {
     return matchesSearch && matchesStatus;
   });
 
+  // ⭐ Pagination logic
+  const indexLast = currentPage * itemsPerPage;
+  const indexFirst = indexLast - itemsPerPage;
+  const currentItems = filteredApplications.slice(indexFirst, indexLast);
+
+  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
+
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
   // ✅ Render UI
@@ -313,7 +325,7 @@ export default function JobApplication() {
               </tr>
             </thead>
             <tbody ref={menuRef}>
-              {filteredApplications.map((app, i) => (
+              {currentItems.map((app, i) => (
                 <tr
                   key={app.id}
                   className="border-t border-gray-100 text-gray-700 hover:bg-gray-50 transition relative"
@@ -380,6 +392,11 @@ export default function JobApplication() {
           </table>
         )}
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
     </div>
   );
 }
