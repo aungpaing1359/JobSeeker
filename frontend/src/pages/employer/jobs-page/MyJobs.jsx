@@ -112,6 +112,7 @@ export default function MyJobs() {
               <th className="p-3 text-gray-700 font-semibold text-sm">Job Category</th>
               <th className="p-3 text-gray-700 font-semibold text-sm">Post Date</th>
               <th className="p-3 text-gray-700 font-semibold text-sm">Job Title</th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">Applicants</th>
               <th className="p-3 text-gray-700 font-semibold text-sm">Action</th>
             </tr>
           </thead>
@@ -129,6 +130,11 @@ export default function MyJobs() {
                   <td className="p-3 text-gray-600">
                     {job.title || "Job Title"}
                   </td>
+
+                  <td className="p-3 text-gray-600">
+                    <td>{job.application_count}</td>
+                  </td>
+
                   <td className="p-3 space-x-3">
                     <button
                       onClick={() => handleDetail(job.id)}

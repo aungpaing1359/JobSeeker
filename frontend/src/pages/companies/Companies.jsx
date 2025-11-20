@@ -124,10 +124,10 @@ const Companies = () => {
               className="border rounded-lg p-4 text-center shadow-sm hover:shadow-md transition cursor-pointer"
             >
               <Link to={`/companies/${company.id}`}>
+
                 <img
-                  src={company.logo ? `http://127.0.0.1:8000${company.logo}` : "/logo.png"}
-                  alt={company.business_name}
-                  className="w-16 h-16 mx-auto mb-4"
+                  src={company.logo ? `${API_URL}${company.logo}` : "/logo.png"}
+                  alt="Company Logo"
                 />
                 <h3 className="font-semibold text-lg mb-2">{company.business_name}</h3>
                 <p className="text-sm text-gray-500 mb-4">
@@ -155,11 +155,10 @@ const Companies = () => {
             <button
               key={i + 1}
               onClick={() => setCurrentPage(i + 1)}
-              className={`w-8 h-8 rounded-md ${
-                currentPage === i + 1
+              className={`w-8 h-8 rounded-md ${currentPage === i + 1
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
-              }`}
+                }`}
             >
               {i + 1}
             </button>

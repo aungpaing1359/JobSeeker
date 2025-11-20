@@ -43,10 +43,14 @@ def apply_job(request, job_id):
         if job.is_active:
             job.is_active = False
             job.save(update_fields=["is_active"])
+        
         return Response(
         {"message": "The maximum number of applicants for this job has been reached."},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+    
+
     # 4️⃣ Serialize incoming data
     serializer = ApplicationCreateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)

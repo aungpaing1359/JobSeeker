@@ -158,7 +158,7 @@ export default function JobCard({ job }) {
         {job.category_name || "Not specified"}
       </p>
       <p className="text-sm gray-text-custom">
-        {job.employer || "Unknown Company"}
+        {job.employer_business_name || "Unknown Company"}
       </p>
 
       <ul className="text-sm mt-2 list-disc list-inside gray-text-custom">

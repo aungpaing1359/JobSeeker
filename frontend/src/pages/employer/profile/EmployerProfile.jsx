@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL;
 import {
   Edit,
   Mail,
@@ -66,7 +67,7 @@ export default function EmployerProfilePage() {
     const token = localStorage.getItem("access");
     try {
       const res = await axios.get(
-        "http://127.0.0.1:8000/accounts-employer/employer/profile/",
+        `${API_URL}/accounts-employer/employer/profile/`,
         {
           withCredentials: true,
           headers: {
@@ -103,7 +104,7 @@ export default function EmployerProfilePage() {
     formData.append("logo", file);
     try {
       await axios.patch(
-        `http://127.0.0.1:8000/accounts-employer/employer/profile-update/${profile.id}/`,
+        `${API_URL}/accounts-employer/employer/profile-update/${profile.id}/`,
         formData,
         {
           headers: {
@@ -129,7 +130,7 @@ export default function EmployerProfilePage() {
     formData.append("description", description);
     try {
       await axios.patch(
-        `http://127.0.0.1:8000/accounts-employer/employer/profile-update/${profile.id}/`,
+        `${API_URL}/accounts-employer/employer/profile-update/${profile.id}/`,
         formData,
         {
           headers: {
@@ -251,7 +252,7 @@ export default function EmployerProfilePage() {
               >
                 {profile?.logo ? (
                   <img
-                    src={`http://127.0.0.1:8000${profile.logo}`}
+                    src={`${API_URL}${profile.logo}`}
                     alt={profile.first_name || "Avatar"}
                     className="w-28 h-28 rounded-full object-cover"
                   />
