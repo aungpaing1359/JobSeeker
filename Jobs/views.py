@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import BasePermission,IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q,F, Case, When, Value, IntegerField
@@ -115,7 +115,7 @@ def job_category_delete(request, pk):
 
 # jobs list
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def jobs_list(request):
     today = date.today()
     user = request.user
