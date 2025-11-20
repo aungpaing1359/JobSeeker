@@ -131,7 +131,7 @@ export default function JobSearch() {
                     <div>
                       <h3 className="font-semibold">{job.title}</h3>
                       <p className="text-sm text-gray-500">
-                        {job.employer || "Unknown Company"}
+                        {job.employer_business_name || "Unknown Company"}
                       </p>
                       <p className="text-sm mt-1">{getLocationLabel(job.location)}</p>
                       <p className="text-xs text-gray-400 mt-2">
