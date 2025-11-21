@@ -55,21 +55,15 @@ def job_category_create(request):
         data=request.data,
         context={"request": request}
     )
-
     if serializer.is_valid():
         try:
             category = serializer.save(user=request.user)
             return Response(JobCategorySerializer(category).data, status=201)
-
         except IntegrityError:
-            return Response(
-                {
+            return Response({
                     "error": "You already created this category name.",
                     "code": "CATEGORY_EXISTS"
-                },
-                status=409
-            )
-
+                            },status=409)
     return Response(serializer.errors, status=400)
 
 

@@ -140,13 +140,7 @@ export default function MyJobs() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-gray-700 font-semibold text-sm">Title</th>
-<<<<<<< HEAD
-              <th className="p-3 text-gray-700 font-semibold text-sm">Job Category</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Post Date</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Job Title</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Applicants</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Action</th>
-=======
+
               <th className="p-3 text-gray-700 font-semibold text-sm">
                 Job Category
               </th>
@@ -159,7 +153,6 @@ export default function MyJobs() {
               <th className="p-3 text-gray-700 font-semibold text-sm">
                 Action
               </th>
->>>>>>> 537615d9e24d1731ed7488a3fb08c7e46e4e49c2
             </tr>
           </thead>
 
@@ -182,14 +175,6 @@ export default function MyJobs() {
                   <td className="p-3 text-gray-600">
                     {job.title || "Job Title"}
                   </td>
-
-<<<<<<< HEAD
-                  <td className="p-3 text-gray-600">
-                    <td>{job.application_count}</td>
-                  </td>
-
-=======
->>>>>>> 537615d9e24d1731ed7488a3fb08c7e46e4e49c2
                   <td className="p-3 space-x-3">
                     <button
                       onClick={() => handleDetail(job.id)}

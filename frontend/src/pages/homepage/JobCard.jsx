@@ -160,14 +160,10 @@ export default function JobCard({ job }) {
         <Briefcase size={16} className="text-purple-500" />
         {job.category_name || "Not specified"}
       </p>
-<<<<<<< HEAD
-      <p className="text-sm gray-text-custom">
-        {job.employer_business_name || "Unknown Company"}
-=======
+
       <p className="text-sm gray-text-custom mt-1 flex items-center gap-2">
         <Building size={16} className="text-orange-500" />
-        {job.employer || "Unknown Company"}
->>>>>>> 537615d9e24d1731ed7488a3fb08c7e46e4e49c2
+        {job.employer_business_name || "Unknown Company"}
       </p>
 
       {/* Meta Info List with Icons */}
