@@ -52,7 +52,6 @@ def preregister_employer(request):
 @parser_classes([MultiPartParser, FormParser])
 def register_employer(request, role):
     data = request.data.copy()
-
     # --- Parse profile JSON ---
     profile_str = data.get("profile")
     if profile_str:
@@ -62,14 +61,11 @@ def register_employer(request, role):
             return Response({"profile": ["Invalid JSON format."]}, status=400)
     else:
         profile_data = {}
-
     logo_file = request.FILES.get("logo")
-
     serializer = EmployerRegisterSerializer(
         data={"profile": profile_data, "logo": logo_file}
     )
     serializer.is_valid(raise_exception=True)
-
     # Fetch from session
     email = request.session.get("user_email")
     raw_password = request.session.get("user_password")
@@ -79,9 +75,8 @@ def register_employer(request, role):
             {"error": "Your session has expired. Please start registration again."},
             status=400
         )
-
     # ---------------------------------------------------------
-    # 1️⃣ Friendly User Exists Check
+    #Friendly User Exists Check
     # ---------------------------------------------------------
     if User.objects.filter(email=email).exists():
         return Response(
@@ -93,7 +88,7 @@ def register_employer(request, role):
         )
 
     # ---------------------------------------------------------
-    # 2️⃣ EmployerProfile Exists Check
+    #EmployerProfile Exists Check
     # (must check via user__email, not contact_email)
     # ---------------------------------------------------------
     if EmployerProfile.objects.filter(user__email=email).exists():
@@ -106,7 +101,7 @@ def register_employer(request, role):
         )
 
     # ---------------------------------------------------------
-    # 3️⃣ Create User safely
+    #Create User safely
     # ---------------------------------------------------------
     user = User.objects.create(
         email=email,
@@ -118,11 +113,10 @@ def register_employer(request, role):
     user.save()
 
     # ---------------------------------------------------------
-    # 4️⃣ Create Employer Profile
+    #Create Employer Profile
     # ---------------------------------------------------------
     profile_data = serializer.validated_data["profile"]
     logo = serializer.validated_data.get("logo")
-
     employer_profile = EmployerProfile.objects.create(
         user=user, logo=logo, **profile_data
     )
@@ -131,7 +125,6 @@ def register_employer(request, role):
     login(request, user)
     send_verification_email(request, user)
     request.session["pending_activation"] = True
-
     return Response(
         {
             "message": "Employer registered successfully. Verification email sent.",
@@ -148,34 +141,29 @@ def register_employer(request, role):
         },
         status=201
     )
-
-
-
-
-
 # end register employerprofile
 
 #sign in employer
+@ratelimit(key='ip', rate='5/m', block=False)
 @api_view(["POST"])
-@ratelimit(key='ip', rate='5/m', block=False, method='POST')
 def login_employer(request):
-    # Check if rate limited with custom message
     if getattr(request, 'limited', False):
-        response = Response({
-            "detail": "Too many employer login attempts. Please wait one minute before trying again."
-        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
-        # Add retry-after header for better rate limit handling
+        response = Response(
+            {"detail": "Too many employer login attempts. Please wait one minute."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
         response['Retry-After'] = '60'
         return response
     email = request.data.get("email")
     password = request.data.get("password")
     user = authenticate(request, email=email, password=password)
     if user is not None:
-        if not user.is_verified:   # check your custom flag
-            return Response({"detail": "Please verify your email first."}, status=status.HTTP_403_FORBIDDEN)
-        login(request, user)  # ✅ sets sessionid cookie
-        return Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-    return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_verified:
+            return Response({"detail": "Please verify your email first."}, status=403)
+        login(request, user)
+        return Response({"detail": "Login successful"}, status=200)
+    return Response({"detail": "Invalid credentials"}, status=400)
+
 #end sign in employer
 
 #sign out employer
@@ -207,9 +195,17 @@ def emailverify_employer(request, uidb64, token):
 #end email verify
 
 #resend verification email
+@ratelimit(key='ip', rate='2/m', block=False)
 @api_view(["POST"])
 @permission_classes([AllowAny])  # not logged in — fine
 def resend_verification(request):
+    if getattr(request, 'limited', False):
+        response = Response(
+            {"detail": "Too many resend attempts. Please wait one minute."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+        response['Retry-After'] = '60'
+        return response    
     email = (request.session.get("user_email") or "").strip()
     if not email:
         email = (request.data.get("email") or "").strip()
@@ -314,6 +310,16 @@ def jobs_in_company(request,com_id):
     company_s=CompanySerializer(company,many=True).data
     return Response({"company_s":company_s,"jobs_in_com_s":jobs_in_com_s})
 #end
+
+#company serach
+@api_view(['GET'])
+def company_search(request):
+    query=request.GET.get('q','')
+    companies=EmployerProfile.objects.filter(business_name__icontains=query)
+    companies_s=CompanySerializer(companies,many=True).data
+    return Response({
+        "companies":companies_s
+    })
 
 
 

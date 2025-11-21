@@ -20,4 +20,7 @@ urlpatterns = [
     path('company/',views.company_list,name="company-list"),
     path('job/company/<uuid:com_id>/',views.jobs_in_company,name='job-in-company'),
 
+    #company search
+    path('company/search/',views.company_search,name="company-search"),
+
 ]

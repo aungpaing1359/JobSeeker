@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import BasePermission,IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q,F, Case, When, Value, IntegerField
@@ -55,21 +55,15 @@ def job_category_create(request):
         data=request.data,
         context={"request": request}
     )
-
     if serializer.is_valid():
         try:
             category = serializer.save(user=request.user)
             return Response(JobCategorySerializer(category).data, status=201)
-
         except IntegrityError:
-            return Response(
-                {
+            return Response({
                     "error": "You already created this category name.",
                     "code": "CATEGORY_EXISTS"
-                },
-                status=409
-            )
-
+                            },status=409)
     return Response(serializer.errors, status=400)
 
 
@@ -115,7 +109,7 @@ def job_category_delete(request, pk):
 
 # jobs list
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def jobs_list(request):
     today = date.today()
     user = request.user
@@ -175,15 +169,32 @@ def jobs_detail(request, pk):
 @permission_classes([IsAuthenticated, IsAdminOrEmployer])
 def jobs_update(request, pk):
     user = request.user
+
+    # Admin = can edit all, Employer = his own job
     if user.is_staff:
         job = get_object_or_404(Jobs, pk=pk)
     else:
         job = get_object_or_404(Jobs, pk=pk, employer__user=user)
-    serializer = JobsSerializer(job, data=request.data, partial=True)  # partial=True = PATCH နဲ့လည်းအဆင်ပြေ
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    old_max = job.max_applicants  # keep previous value
+
+    serializer = JobsSerializer(job, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    updated_job = serializer.save()
+
+    # ------------------------------------------
+    # 🔥 AUTO REACTIVATE JOB IF MAX APPLICANTS INCREASED
+    # ------------------------------------------
+    total_apps = updated_job.applications.count()
+
+    # If the new max is higher AND job is inactive → reactivate
+    if updated_job.max_applicants and total_apps < updated_job.max_applicants:
+        if not updated_job.is_active:
+            updated_job.is_active = True
+            updated_job.save(update_fields=["is_active"])
+
+    return Response(JobsSerializer(updated_job).data, status=200)
+
 
 # Job Delete (DELETE)
 @api_view(['DELETE'])

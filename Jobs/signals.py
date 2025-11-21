@@ -49,6 +49,5 @@ def cache_old_status(sender, instance, **kwargs):
         instance._old_status = getattr(old, "status", None)
     except Application.DoesNotExist:
         instance._old_status = None
-
-
+        
 # -------- Application status changed -> notify jobseeker --------

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "react-hot-toast";
 
 const VerifyOTP = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -43,6 +44,7 @@ const VerifyOTP = () => {
     if (!email) navigate("/sign-in");
   }, [email, navigate]);
 
+  // Handle typing in each digit
   useEffect(() => {
     const savedResendEnd = Number(localStorage.getItem("resend_end") || 0);
     const now = Math.floor(Date.now() / 1000);
@@ -89,6 +91,8 @@ const VerifyOTP = () => {
       });
     }
   };
+
+
 
   // -----------------------------------------
   // Verify Button Logic
@@ -142,6 +146,7 @@ const VerifyOTP = () => {
       setCode(["", "", "", "", "", ""]);
     }
   };
+
 
   // -----------------------------------------
   // Resend OTP Logic
@@ -215,10 +220,11 @@ const VerifyOTP = () => {
   // -----------------------------------------
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(""), 5000);
+      const timer = setTimeout(() => setError(""), 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
+
 
   // Auto-submit
   useEffect(() => {
@@ -239,13 +245,15 @@ const VerifyOTP = () => {
         </NavLink>
       </header>
 
+      {/* Main */}
       <main className="flex-grow flex justify-center items-center px-4">
         <div className="bg-blue-50 rounded-xl p-8 w-full max-w-md shadow-md text-center">
-          <p className="mb-4">Check Your email for a code</p>
+          <p className="mb-4">Check your email for a code</p>
           <p className="mb-6 text-sm">
             Enter the 6-digit code we sent to {email}
           </p>
 
+          {/* OTP INPUTS */}
           <div className="flex justify-center gap-2 mb-6">
             {code.map((digit, index) => (
               <input
@@ -262,16 +270,19 @@ const VerifyOTP = () => {
             ))}
           </div>
 
+
           {/* VERIFY */}
           <button
             onClick={handleVerifyClick}
             disabled={loading || lockTimer > 0}
             className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50"
           >
-            {loading ? "Verifying..." : "Sign In"}
+            {loading ? "Verifying..." : "Verify Code"}
           </button>
 
-          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="mt-3 text-sm text-red-600 font-medium">{error}</p>
+          )}
 
           {/* RESEND */}
           <div className="mt-4">

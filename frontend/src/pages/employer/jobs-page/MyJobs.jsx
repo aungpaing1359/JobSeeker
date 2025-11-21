@@ -140,6 +140,7 @@ export default function MyJobs() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-gray-700 font-semibold text-sm">Title</th>
+
               <th className="p-3 text-gray-700 font-semibold text-sm">
                 Job Category
               </th>
@@ -174,7 +175,6 @@ export default function MyJobs() {
                   <td className="p-3 text-gray-600">
                     {job.title || "Job Title"}
                   </td>
-
                   <td className="p-3 space-x-3">
                     <button
                       onClick={() => handleDetail(job.id)}
