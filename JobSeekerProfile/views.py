@@ -1,8 +1,7 @@
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes, throttle_classes,parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import ScopedRateThrottle
@@ -28,7 +27,7 @@ def signin_jobseeker(request, role):
     # Check if rate limited
     if getattr(request, 'limited', False):
         return Response({"error": "Too many attempts, please wait one minute before trying again."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
- 
+
     serializer = JobSeekerSignInSerializer(data=request.data)
     if not serializer.is_valid():
         # ✅ Always return when invalid

@@ -1,13 +1,12 @@
 # applications/views.py
 from rest_framework.decorators import api_view, permission_classes, parser_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404  # see below
 from django.db import IntegrityError, transaction
-from .models import Jobs, JobseekerProfile
+from .models import Jobs,JobseekerProfile
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from rest_framework.permissions import AllowAny
 from .models import *
 from Jobs.models import *
 from .serializers import *
@@ -17,21 +16,20 @@ from .serializers import *
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def apply_job(request, job_id):
-    # 1️⃣ Get job seeker profile & job
+    #Get job seeker profile & job
     profile = get_object_or_404(JobseekerProfile, user=request.user)
     job = get_object_or_404(Jobs, id=job_id)
     print(job.id)
     print("Max applicants:", job.max_applicants, type(job.max_applicants))
     
-
-    # 2️⃣ Duplicate application check
+    # Duplicate application check
     if Application.objects.filter(job=job, job_seeker_profile=profile).exists():
         return Response(
             {"message": "You have already applied for this job."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # 3️⃣ Max applicants null-safe check
+    #Max applicants null-safe check
     max_limit = getattr(job, "max_applicants", None)
     total = Application.objects.filter(job=job).count()
 
@@ -43,15 +41,18 @@ def apply_job(request, job_id):
         if job.is_active:
             job.is_active = False
             job.save(update_fields=["is_active"])
+        
         return Response(
         {"message": "The maximum number of applicants for this job has been reached."},
         status=status.HTTP_400_BAD_REQUEST
     )
-    # 4️⃣ Serialize incoming data
+
+    
+
+    #Serialize incoming data
     serializer = ApplicationCreateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    # 5️⃣ Create application inside a transaction
+    #Create application inside a transaction
     try:
         with transaction.atomic():
             application = Application.objects.create(
@@ -61,7 +62,7 @@ def apply_job(request, job_id):
                 cover_letter_text=serializer.validated_data.get("cover_letter_text", "")
             )
 
-            # ✅ Re-count AFTER creating; close job if hitting limit
+            #Re-count AFTER creating; close job if hitting limit
             total_after = Application.objects.filter(job=job).count()
             if max_limit is not None and total_after >= max_limit and job.is_active:
                 job.is_active = False
@@ -73,7 +74,6 @@ def apply_job(request, job_id):
                 "message": f"You have successfully applied for the job '{job.title}'.",
                 "data": s_application
             }, status=status.HTTP_201_CREATED)
-   
 
     except IntegrityError:
         return Response(
@@ -117,6 +117,7 @@ def saved_jobs(request):
     savejobs=SaveJob.objects.filter(profile=profile)
     s_savejobs=SaveJobsSerializer(savejobs,many=True).data
     return Response({"s_savejobs":s_savejobs})
+
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -207,6 +208,7 @@ def pending_applications(request):
         "pending_apps":s_apps,
         "count": len(s_apps)
         })
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

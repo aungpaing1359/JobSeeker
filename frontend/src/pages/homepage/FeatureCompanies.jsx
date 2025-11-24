@@ -110,7 +110,7 @@ export default function FeaturedCompanies() {
 
               <p className="text-sm mb-1">{company.industry || "No industry info"}</p>
 
-              <button className="px-10 py-1.5 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB]">
+              <button className="px-10 py-1.5 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB] cursor-pointer hover:font-bold">
                 {company.job_count || 0} jobs
               </button>
             </div>

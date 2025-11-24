@@ -516,7 +516,7 @@ export default function ProfileMe() {
         </div>
 
         {/* Resume Panel */}
-        <div className="w-full md:w-1/3 bg-blue-50 rounded-lg p-6 shadow-inner">
+        <div className="w-full md:w-2/5 bg-blue-50 rounded-lg p-6 shadow-inner">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-blue-900">Resume</h2>
             <button

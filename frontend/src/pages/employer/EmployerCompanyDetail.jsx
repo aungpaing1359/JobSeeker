@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import logo from "../../assets/images/logo.png";
 
 export default function EmployerCompanyDetail() {
   const location = useLocation();
@@ -56,24 +57,32 @@ export default function EmployerCompanyDetail() {
     } catch (err) {
       console.error("Error 👉", err.response.data);
       console.log("Status:", err.response.status);
-      toast.error("Failed: " + JSON.stringify(err.message || err));
+      toast.error("Email already exist!");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col font-inter">
       {/* Header */}
-      <header className="flex justify-between items-center px-8 py-4 shadow-sm">
-        <h1 className="text-2xl font-bold text-blue-900">Seek Employer</h1>
-        <div className="text-gray-700 cursor-pointer">
-          {user?.username || user?.email || "Employer"} ▼
+      <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+        <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
+          <NavLink to="/" className="text-2xl font-bold custom-blue-text">
+            <img
+              src={logo}
+              alt="JobSeeker Logo"
+              className="h-13 object-contain"
+            />
+          </NavLink>
+          <div className="text-gray-700 cursor-pointer">
+            {user?.username || user?.email || "Employer"} ▼
+          </div>
         </div>
       </header>
 
       {/* Main Form */}
-      <main className="flex flex-col items-center py-10">
+      <main className="flex flex-col items-center py-25">
         <div className="w-full max-w-3xl">
           <h2 className="text-2xl font-bold mb-2">
             Your employer Account Create

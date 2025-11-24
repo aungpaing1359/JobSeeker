@@ -62,7 +62,7 @@ export default function EmployerDashboardLayout() {
   const emailNotVerified = showVerificationMessage;
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-gray-100 font-inter">
       {/* Sidebar (fixed left) */}
       <aside className="fixed top-0 left-0 h-full w-64 bg-white shadow-md z-20">
         <div className="p-6 text-2xl font-bold text-blue-700">Employer</div>

@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 const getCSRFToken = () => {
   const cookieValue = document.cookie
@@ -52,7 +54,7 @@ export default function EmployerProfileEditPage() {
 
     try {
       const res = await axios.put(
-        `http://127.0.0.1:8000/accounts-employer/employer/profile-update/${profile.id}/`,
+        `${API_URL}/accounts-employer/employer/profile-update/${profile.id}/`,
         data,
         {
           headers: {
@@ -77,7 +79,7 @@ export default function EmployerProfileEditPage() {
         className="bg-white shadow-md rounded-xl p-8 w-full max-w-5xl border border-gray-100"
       >
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          ✏️ Edit Employer Profile
+        Edit Employer Profile
         </h2>
 
         {/* Logo preview */}
@@ -87,7 +89,7 @@ export default function EmployerProfileEditPage() {
               src={
                 profile.logo.startsWith("http")
                   ? profile.logo
-                  : `http://127.0.0.1:8000${profile.logo}`
+                  : `${API_URL}${profile.logo}`
               }
               alt="Company Logo"
               className="w-24 h-24 rounded-full object-cover mb-3 border shadow-sm"

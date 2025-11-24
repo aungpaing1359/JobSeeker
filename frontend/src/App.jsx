@@ -71,6 +71,9 @@ import RedirectIfAuthenticated from "./components/RedirectIfAuthenticated";
 // Toaster
 import { Toaster } from "react-hot-toast";
 
+// 404
+import NotFound from "./pages/NotFound";
+
 function App() {
   return (
     // ✅ Wrap whole app with AuthProvider
@@ -184,6 +187,8 @@ function App() {
                     element={<JobApplicationProfileDetail />}
                   />
                 </Route>
+
+                <Route path="*" element={<NotFound />} />
               </Routes>
 
               <Toaster position="top-right" reverseOrder={false} />

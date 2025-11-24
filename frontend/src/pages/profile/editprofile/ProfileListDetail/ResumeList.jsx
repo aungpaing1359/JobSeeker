@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FileText,
   Eye,
   Edit,
   Star,
   Trash2,
   Image as ImageIcon,
   X,
-  FileTextIcon,
 } from "lucide-react";
 import {toast} from "react-hot-toast";
 
@@ -107,8 +105,7 @@ export default function ResumeList({
 
   return (
     <div className="bg-white shadow-md rounded-xl p-6 mb-8 border border-gray-100">
-      <h2 className="text-xl font-semibold mb-5 text-gray-800 flex items-center gap-2">
-        <FileText className="w-5 h-5 text-blue-600" />
+      <h2 className="text-xl font-semibold mb-5 text-gray-800 flex items-center">
         My Resumes
       </h2>
 
@@ -155,7 +152,6 @@ export default function ResumeList({
 
                   <div>
                     <p className="font-medium text-gray-800 text-lg flex items-center gap-2">
-                      <FileTextIcon size={18} className="text-blue-600" />
                       {resume.title}
                       {resume.is_default && (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
@@ -175,10 +171,6 @@ export default function ResumeList({
                         View File
                       </a>
                     )}
-
-                    <p className="text-gray-500 text-sm mt-1">
-                      {resume.data?.text || "No description"}
-                    </p>
                   </div>
                 </div>
 
@@ -186,10 +178,9 @@ export default function ResumeList({
                 <div className="flex flex-col gap-2 items-end">
                   <button
                     onClick={() => onEdit(resume)}
-                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     <Edit className="w-4 h-4" />
-                    Edit
                   </button>
 
                   {!resume.is_default && (
@@ -204,10 +195,9 @@ export default function ResumeList({
 
                   <button
                     onClick={() => handleDelete(resume.id)}
-                    className="flex items-center gap-1 text-red-600 hover:text-red-800 text-sm font-medium"
+                    className="flex items-center text-red-600 hover:text-red-800 text-sm font-medium"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete
                   </button>
                 </div>
               </li>

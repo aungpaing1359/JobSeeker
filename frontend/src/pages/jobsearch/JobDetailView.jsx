@@ -284,7 +284,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold">{job.title}</h2>
-          <p className="text-gray-600">{job.employer || "Unknown Company"}</p>
+          <p className="text-gray-600">{job.employer_business_name || "Unknown Company"}</p>
         </div>
         <button onClick={onToggleMaximize}>
           <CiMaximize1 size={20} className="text-gray-600 cursor-pointer" />

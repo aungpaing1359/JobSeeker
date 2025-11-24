@@ -96,3 +96,7 @@
 .container {
   max-width: 1140px !important;
 }
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}

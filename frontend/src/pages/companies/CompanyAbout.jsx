@@ -1,17 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Mail,
-  Phone,
-  User,
-  MapPin,
-  Calendar,
-  Users,
-  Briefcase,
-} from "lucide-react";
 import { getLocationLabel } from "../../utils/locationHelpers";
-
 
 export default function CompanyAbout() {
   const { id } = useParams();
@@ -56,9 +46,7 @@ export default function CompanyAbout() {
       {/* Banner */}
       <div className="relative w-full h-64 md:h-80 bg-gradient-to-r from-blue-700 to-indigo-600 flex flex-col justify-center items-center text-white">
         <img
-          src={
-            company.logo ? `${API_URL}${company.logo}` : "/logo.png"
-          }
+          src={company.logo ? `${API_URL}${company.logo}` : "/logo.png"}
           alt="Company Logo"
           className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
         />
@@ -82,49 +70,23 @@ export default function CompanyAbout() {
         <div className="relative">
           {/* Right Info Card */}
           <aside className="float-right w-full md:w-1/3 bg-gray-50 rounded-xl shadow-sm p-6 space-y-4 border border-gray-200 ml-6 mb-4">
-            <div>
-              <User className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Full Name</span>
-              <p>
-                {company.first_name} {company.last_name}
-              </p>
-            </div>
-
-            <div>
-              <Mail className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Email</span>
-              <p>{company.contact_email || "N/A"}</p>
-            </div>
-
-            <div>
-              <MapPin className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Address</span>
-              <p>{company.city || "N/A"}</p>
-            </div>
-
-            <div>
-              <Phone className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Phone</span>
-              <p>{company.phone || "N/A"}</p>
-            </div>
-
-            <div>
-              <Briefcase className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Industry</span>
-              <p>{company.industry || "N/A"}</p>
-            </div>
-
-            <div>
-              <Calendar className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Founded year</span>
-              <p>{company.founded_year || "N/A"}</p>
-            </div>
-
-            <div>
-              <Users className="inline-block w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-semibold">Company size</span>
-              <p>{company.size || "N/A"}</p>
-            </div>
+            {[
+              {
+                label: "Full Name",
+                value: `${company.first_name} ${company.last_name}`,
+              },
+              { label: "Email", value: company.contact_email || "N/A" },
+              { label: "Address", value: company.city || "N/A" },
+              { label: "Phone", value: company.phone || "N/A" },
+              { label: "Industry", value: company.industry || "N/A" },
+              { label: "Founded Year", value: company.founded_year || "N/A" },
+              { label: "Company Size", value: company.size || "N/A" },
+            ].map((item, index) => (
+              <div key={index}>
+                <span className="font-semibold block">{item.label}</span>
+                <p>{item.value}</p>
+              </div>
+            ))}
           </aside>
 
           {/* Left Description with HTML support */}
@@ -159,9 +121,11 @@ export default function CompanyAbout() {
                 <h4 className="text-lg font-semibold text-gray-800 mb-1">
                   {job.title}
                 </h4>
-                <p className="text-gray-600 text-sm mb-2">{getLocationLabel(job.location)}</p>
+                <p className="text-gray-600 text-sm mb-2">
+                  {getLocationLabel(job.location)}
+                </p>
                 <p className="text-gray-600 text-sm">
-                  💰 <strong>{job.salary || "Negotiable"}</strong>
+                  $<strong>{job.salary || "Negotiable"}</strong>
                 </p>
                 <p className="text-gray-500 text-sm mt-2">
                   Deadline: {job.deadline || "N/A"}

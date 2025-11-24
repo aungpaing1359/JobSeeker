@@ -28,7 +28,7 @@ class JobCategory(models.Model):
 
 #manager job
 class JobsManager(models.Manager):  
-    
+     
     def quick_search_by_city(self, city_name):
         qs=self.get_queryset()
         if city_name:

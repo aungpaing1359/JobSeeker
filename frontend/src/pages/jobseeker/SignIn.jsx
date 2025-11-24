@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaFacebook } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import logo from "../../assets/images/logo.png"
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -49,11 +50,17 @@ const SignIn = () => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "Poppins, sans-serif" }}>
+    <div
+      className="min-h-screen bg-white flex flex-col font-inter"
+    >
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
           <NavLink to="/" className="text-2xl font-bold custom-blue-text">
-            Jobseeker
+            <img
+              src={logo}
+              alt="JobSeeker Logo"
+              className="h-13 object-contain"
+            />
           </NavLink>
         </div>
       </header>

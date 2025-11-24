@@ -16,7 +16,7 @@ const JobCard = ({ job, onClick }) => (
     </div>
     <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
     <p className="text-sm text-gray-600">
-      {job.employer || "Unknown Company"}
+      {job.employer_business_name || "Unknown Company"}
     </p>
     <p className="text-sm text-gray-500 mt-1">
       {getLocationLabel(job.location)}

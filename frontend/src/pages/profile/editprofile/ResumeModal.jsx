@@ -207,19 +207,6 @@ export default function ResumeModal({
             )}
           </div>
 
-          {/* Data (Optional Note) */}
-          <div>
-            <label className="block font-medium mb-1">Notes (Optional)</label>
-            <textarea
-              name="data"
-              value={formData.data}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-              placeholder="Add notes or description about your resume..."
-              rows={3}
-            />
-          </div>
-
           {/* Default Checkbox */}
           <div className="flex items-center gap-2">
             <input

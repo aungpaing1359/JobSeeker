@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 
 export default function MainLayout() {
   return (
-    <div className="flex flex-col min-h-screen" style={{ fontFamily: "Poppins, sans-serif" }}>
+    <div className="flex flex-col min-h-screen font-inter">
       <Navbar />
       <main className="flex-1">
         <Outlet />

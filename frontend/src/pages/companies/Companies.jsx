@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import jobseekerBg from "../../assets/images/jobseekerbg.png";
 
-const Companies = () => {
+const Companies = ({ collapse }) => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,28 +75,37 @@ const Companies = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-[#002366] to-[#003AB3] py-8 mb-6">
+      <section
+        className={`bg-cover bg-center bg-no-repeat transition-all duration-500 overflow-hidden ${
+          collapse
+            ? "h-0 py-0 opacity-0"
+            : "h-[530px] max-2xl:h-[350px] max-xl:h-[320px] max-lg:h-[300px] py-8 opacity-100"
+        }`}
+        style={{
+          backgroundImage: `url(${jobseekerBg})`,
+        }}
+      >
         <div className="container mx-auto px-4 w-full h-[300px]">
-          <div className="h-full w-full flex flex-col justify-center items-start">
+          <div className="h-full w-full flex flex-col justify-center items-start mt-28 max-2xl:mt-0">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-[#ffffffcf]">
+              <h1 className="text-3xl font-bold mb-2">
                 Find jobs from companies near you.
               </h1>
-              <p className="mb-6 text-[#ffffffcf]">
+              <p className="mb-6">
                 You can search for jobs from any company you like.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full container">
-              <div className="md:col-span-3 w-full">
+            <div className="grid grid-cols-6 gap-4 w-full container">
+              <div className="max-sm:col-span-4 col-span-3 w-full">
                 <input
                   type="text"
                   placeholder="Search"
-                  className="p-3 h-[60px] border border-[#999] rounded-md bg-[#ffffffcf] text-lg w-full placeholder:text-blue-400"
+                  className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
                 />
               </div>
-              <div className="md:col-span-1 w-full">
-                <button className="h-[60px] w-full px-5 rounded-md text-lg bg-[#C46210] text-[#ffffffcf] font-semibold hover:bg-[#AB4812] transition">
+              <div className="max-sm:col-span-2 col-span-1 w-full">
+                <button className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md">
                   Search
                 </button>
               </div>
@@ -115,7 +125,7 @@ const Companies = () => {
 
         {/* Companies Grid */}
         <div
-          className="grid md:grid-cols-3 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-7"
           style={{
             gridTemplateColumns:
               window.innerWidth >= 1024
@@ -130,26 +140,46 @@ const Companies = () => {
           {currentCompanies.map((company) => (
             <div
               key={company.id}
-              className="border rounded-lg p-4 text-center shadow-sm hover:shadow-md transition cursor-pointer"
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 cursor-pointer flex flex-col items-center"
             >
-              <Link to={`/companies/${company.id}`}>
-                <img
-                  src={
-                    company.logo
-                      ? `http://127.0.0.1:8000${company.logo}`
-                      : "/logo.png"
-                  }
-                  alt={company.business_name}
-                  className="w-16 h-16 mx-auto mb-4"
-                />
-                <h3 className="font-semibold text-lg mb-2">
-                  {company.business_name}
+              <Link
+                to={`/companies/${company.id}`}
+                className="w-full flex flex-col items-center"
+              >
+                {/* Logo */}
+                <div className="flex items-center gap-2 mb-2 overflow-hidden">
+                  <img
+                    src={
+                      company.logo ? `${API_URL}${company.logo}` : "/logo.png"
+                    }
+                    alt="Company Logo"
+                    className="w-20 h-20 object-contain"
+                  />
+                </div>
+
+                {/* Business Name */}
+                <h3 className="text-sm gray-text-custom my-2 flex items-center">
+                  {company.business_name || "Not specified"}
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  {company.industry || "No industry info"}
+
+                {/* Description */}
+                <p className="text-sm text-gray-500 text-center line-clamp-2 mb-4">
+                  {" "}
+                  {company.description ? (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: company.description }}
+                    />
+                  ) : (
+                    <p className="text-gray-500 italic">
+                      {" "}
+                      No description provided.{" "}
+                    </p>
+                  )}{" "}
                 </p>
-                <button className="px-4 py-2 text-sm bg-gray-100 text-blue-600 font-medium rounded-md">
-                  {company.job_count || "0"} Jobs
+
+                {/* Job Count Button */}
+                <button className="px-5 py-2 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB] font-medium cursor-pointer hover:font-bold">
+                  {company.job_count || "0"} jobs
                 </button>
               </Link>
             </div>

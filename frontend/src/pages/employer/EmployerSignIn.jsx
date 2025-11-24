@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
+import logo from "../../assets/images/logo.png";
 
 const EmployerSignIn = () => {
   const { signin } = useEmployerAuth();
@@ -40,11 +41,15 @@ const EmployerSignIn = () => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col font-inter">
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <NavLink to="/" className="text-2xl font-bold text-blue-600">
-            Jobseeker
+        <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
+          <NavLink to="/" className="text-2xl font-bold custom-blue-text">
+            <img
+              src={logo}
+              alt="JobSeeker Logo"
+              className="h-13 object-contain"
+            />
           </NavLink>
         </div>
       </header>
