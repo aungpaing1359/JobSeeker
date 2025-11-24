@@ -23,4 +23,8 @@ urlpatterns = [
     #company search
     path('company/search/',views.company_search,name="company-search"),
 
+    path('job/filter/',views.job_filter_by_status,name="job-filter"),
+    # path('application/filter/',views.application_filter_by_status,name="application-filter"),
+    
+
 ]

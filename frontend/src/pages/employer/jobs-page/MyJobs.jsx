@@ -73,18 +73,42 @@ export default function MyJobs() {
   const handleEdit = (job) =>
     navigate(`/employer/dashboard/my-jobs/${job.id}/edit`);
 
+  // ⭐ Compute job status
+  function getJobStatus(job) {
+    const today = new Date();
+
+    // Expired (deadline passed)
+    if (job.deadline && new Date(job.deadline) < today) {
+      return "Expired";
+    }
+
+    // Closed (is_active = false)
+    if (!job.is_active) {
+      return "Closed";
+    }
+
+    // Active
+    return "Active";
+  }
+
   // ⭐ 1 — Filter jobs BEFORE pagination
   const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = job.title
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase();
+
+    // Search by title OR category name
+    const matchesSearch =
+      job.title?.toLowerCase().includes(search) ||
+      job.category_name?.toLowerCase().includes(search);
+
+    const jobStatus = getJobStatus(job);
 
     const matchesStatus =
       statusFilter === "All Status" ||
-      job.status?.toLowerCase() === statusFilter.toLowerCase();
+      jobStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
+
 
   // ⭐ 2 — Pagination logic AFTER filteredJobs exists
   const indexLast = currentPage * itemsPerPage;
@@ -114,7 +138,7 @@ export default function MyJobs() {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset to page 1
+            setCurrentPage(1);
           }}
           className="flex-1 bg-white border rounded-md p-3 shadow-sm focus:outline-none"
         />
@@ -123,14 +147,14 @@ export default function MyJobs() {
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
-            setCurrentPage(1); // Reset page on filter change
+            setCurrentPage(1);
           }}
           className="w-full md:w-48 bg-white border rounded-md p-3 shadow-sm"
         >
           <option>All Status</option>
           <option>Active</option>
           <option>Closed</option>
-          <option>Pending</option>
+          <option>Expired</option>
         </select>
       </div>
 
@@ -140,7 +164,6 @@ export default function MyJobs() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-gray-700 font-semibold text-sm">Title</th>
-
               <th className="p-3 text-gray-700 font-semibold text-sm">
                 Job Category
               </th>
@@ -148,7 +171,7 @@ export default function MyJobs() {
                 Post Date
               </th>
               <th className="p-3 text-gray-700 font-semibold text-sm">
-                Job Title
+                Status
               </th>
               <th className="p-3 text-gray-700 font-semibold text-sm">
                 Action
@@ -173,7 +196,7 @@ export default function MyJobs() {
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-600">
-                    {job.title || "Job Title"}
+                    {getJobStatus(job)}
                   </td>
                   <td className="p-3 space-x-3">
                     <button

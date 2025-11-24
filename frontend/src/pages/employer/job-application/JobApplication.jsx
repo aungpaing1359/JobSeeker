@@ -291,7 +291,7 @@ export default function JobApplication() {
         >
           <option value="All">All Status</option>
           <option value="Pending">Pending</option>
-          <option value="Review">Review</option>
+          <option value="Review">Reviewed</option>
           <option value="Rejected">Rejected</option>
           <option value="Shortlist">Shortlist</option>
           <option value="Hired">Hired</option>

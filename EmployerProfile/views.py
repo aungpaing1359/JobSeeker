@@ -14,9 +14,11 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q,F
 import json
 from .serializers import *
+from Jobs.serializers import *
+from Application.serializers import ApplicationListSerializer
 #models
 from Jobs.models import Jobs
 from Application.models import Application
@@ -320,6 +322,71 @@ def company_search(request):
     return Response({
         "companies":companies_s
     })
+
+#job search in employer dashboard
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def job_filter_by_status(request):
+    user = request.user
+    status_param = request.GET.get('status', '').lower()
+    jobs = Jobs.objects.filter(employer__user=user)
+
+    if status_param == 'active':
+        jobs = jobs.filter(is_active=True)
+
+    elif status_param == 'closed':
+        jobs = jobs.annotate(
+            current_applicants=Count('applications')
+        ).filter(current_applicants__gte=F('max_applicants'))
+    
+    elif status_param == 'expired':
+        today = timezone.localdate()
+        jobs = jobs.filter(deadline__lt=today)
+    
+    else:
+        return Response({"error": "Invalid status"}, status=400)
+
+    jobs = jobs.order_by('-created_at')
+    return Response({
+        "jobs": JobcompanySerializer(jobs, many=True).data
+    })
+
+#end job search in employer dashboard
+
+# #application filter by status
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def application_filter_by_status(request):
+#     user = request.user
+#     status_param = request.GET.get('status', '').lower()
+#     applications = Application.objects.filter(job__employer__user=user)
+
+#     if status_param == 'pending':
+#         applications = applications.filter(status='P')
+
+#     elif status_param == 'accepted':
+#         applications = applications.filter(status='H')
+    
+#     elif status_param == 'rejected':
+#         applications = applications.filter(status='RJ')
+    
+#     elif status_param == 'reviewed':
+#         applications = applications.filter(status='R')
+
+#     elif status_param == 'shortlist':
+#         applications = applications.filter(status='SL')
+    
+#     else:
+#         return Response({"error": "Invalid status"}, status=400)
+
+#     applications = applications.order_by('-applied_at')
+#     return Response({
+#         "applications": ApplicationListSerializer(applications, many=True).data
+#     })
+
+
+
+
 
 
 

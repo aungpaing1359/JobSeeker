@@ -17,6 +17,10 @@ class JobsSerializer(serializers.ModelSerializer):
         source="employer.business_name",
         read_only=True
     )
+    employer_logo = serializers.ImageField(
+        source="employer.logo",
+        read_only=True
+    )
     category = serializers.PrimaryKeyRelatedField(queryset=JobCategory.objects.all())
     category_name = serializers.CharField(source='category.name', read_only=True)
 
@@ -33,6 +37,7 @@ class JobsSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "employer_business_name",
+            "employer_logo", 
             "category",
             "category_name",
             "title",
