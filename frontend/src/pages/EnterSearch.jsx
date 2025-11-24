@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import jobseekerBg from "../assets/images/jobseekerbg.png";
 
-function EnterSearch() {
+function EnterSearch({ collapse }) {
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
   const navigate = useNavigate();
@@ -39,18 +39,22 @@ function EnterSearch() {
 
   return (
     <section
-      className="bg-cover bg-center bg-no-repeat py-8"
+      className={`bg-cover bg-center bg-no-repeat transition-all duration-500 overflow-hidden ${
+        collapse
+          ? "h-0 py-0 opacity-0"
+          : "h-[530px] max-2xl:h-[350px] max-xl:h-[320px] max-lg:h-[300px] py-8 opacity-100"
+      }`}
       style={{
         backgroundImage: `url(${jobseekerBg})`,
       }}
     >
-      <div className="w-full max-lg:h-[380px] h-[530px] flex items-center justify-center px-4">
+      <div className="w-full h-[530px] max-2xl:h-[350px] max-xl:h-[320px] max-lg:h-[300px] flex items-center justify-center px-4">
         {/* Glass Panel */}
-        <div className="max-lg:p-7 p-10 w-full container mt-28">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
+        <div className="max-lg:p-7 py-10 px-4 w-full container mt-28 max-md:mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 max-md:gap-3 w-full">
             {/* WHAT */}
             <div className="md:col-span-3 relative">
-              <p className="search-text-custom mb-2 text-xl font-semibold">
+              <p className="search-text-custom text-lg font-semibold max-md:hidden">
                 What
               </p>
 
@@ -60,13 +64,13 @@ function EnterSearch() {
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-4 max-md:h-[50px] h-[60px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
+                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
             </div>
 
             {/* WHERE */}
             <div className="md:col-span-2 relative">
-              <p className="search-text-custom mb-2 text-xl font-semibold">
+              <p className="search-text-custom text-lg font-semibold max-md:hidden">
                 Where
               </p>
 
@@ -76,7 +80,7 @@ function EnterSearch() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-4 max-md:h-[50px] h-[60px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
+                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
             </div>
 
@@ -84,9 +88,9 @@ function EnterSearch() {
             <div className="md:col-span-1 flex items-end">
               <button
                 onClick={handleSearch}
-                className="max-md:h-[50px] h-[60px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md"
+                className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md"
               >
-                Job search
+                Search
               </button>
             </div>
           </div>

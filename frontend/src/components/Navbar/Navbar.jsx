@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X, User, Bookmark, FileText, LogOut } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import logo from "../../assets/images/logo.png"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +25,14 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
           {/* Logo */}
           <NavLink to="/" className="text-2xl font-bold custom-blue-text">
-            Jobseeker
+            <img
+              src={logo}
+              alt="JobSeeker Logo"
+              className="h-13 object-contain"
+            />
           </NavLink>
 
           {/* Desktop Navigation */}

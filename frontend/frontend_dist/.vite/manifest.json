@@ -1,13 +1,14 @@
 {
   "index.html": {
-    "file": "assets/index-DRBbJbsH.js",
+    "file": "assets/index-ReW0sjuP.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "css": [
-      "assets/index-FPETb9s2.css"
+      "assets/index-VMvvc6eI.css"
     ],
     "assets": [
+      "assets/logo-BYZ73V04.png",
       "assets/jobseekerbg-UIsTa8TA.png",
       "assets/ajax-loader-BcnMEykj.gif",
       "assets/slick-BlzDm7g2.svg"
@@ -24,5 +25,9 @@
   "src/assets/images/jobseekerbg.png": {
     "file": "assets/jobseekerbg-UIsTa8TA.png",
     "src": "src/assets/images/jobseekerbg.png"
+  },
+  "src/assets/images/logo.png": {
+    "file": "assets/logo-BYZ73V04.png",
+    "src": "src/assets/images/logo.png"
   }
 }

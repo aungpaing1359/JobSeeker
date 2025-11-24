@@ -27,7 +27,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   // ==================== CSRF HELPER ====================
@@ -122,17 +122,21 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           `${API_URL}/accounts-jobseeker/jobseekerprofile/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         const prof =
           Array.isArray(profileRes.data) && profileRes.data.length > 0
             ? profileRes.data[0]
             : null;
+
         setProfile(prof);
 
         if (prof?.id) {
           const [skills, langs, edu, exp, resume] = await Promise.all([
             axios.get(
               `${API_URL}/accounts-jobseeker/skill/?profile=${prof.id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
             ),
             axios.get(
               `${API_URL}/accounts-jobseeker/language/?profile=${prof.id}`,
@@ -164,7 +168,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     };
 
     fetchProfileData();
-  }, []);
+  }, [token, user]);
 
   // ==================== APPLY MODAL HANDLER ====================
   const handleOpenModal = () => {
@@ -289,7 +293,9 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
       {/* Meta Info */}
       <div className="mt-4 space-y-2 text-gray-600 text-sm">
+        <p className="flex items-center gap-2"></p>
         <p className="flex items-center gap-2">
+          <MapPin size={16} /> {getLocationLabel(job.location || "Not Location")}
         </p>
         <p className="flex items-center gap-2">
           <Briefcase size={16} /> {job.category_name || "Not specified"}

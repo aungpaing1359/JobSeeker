@@ -143,7 +143,8 @@ export default function JobCard({ job }) {
         return;
       }
 
-      toast.error("Something went wrong!");
+      toast.error("Your profile is incomplete. Please finish it to continue saving jobs");
+      navigate("profile/me");
     }
   }
 

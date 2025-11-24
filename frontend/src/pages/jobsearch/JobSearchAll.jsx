@@ -15,8 +15,12 @@ const JobCard = ({ job, onClick }) => (
       <FaBookmark size={20} />
     </div>
     <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
-    <p className="text-sm text-gray-600">{job.employer_business_name|| "Unknown Company"}</p>
-    <p className="text-sm text-gray-500 mt-1">{getLocationLabel(job.location)}</p>
+    <p className="text-sm text-gray-600">
+      {job.employer || "Unknown Company"}
+    </p>
+    <p className="text-sm text-gray-500 mt-1">
+      {getLocationLabel(job.location)}
+    </p>
     <div
       className="text-sm text-gray-700 mt-3"
       dangerouslySetInnerHTML={{
@@ -45,6 +49,10 @@ const JobSearchAll = () => {
   const jobsPerPage = 15;
 
   const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.state]);
 
   // ✅ 1. API မှ job အကုန်လုံးကို fetch
   useEffect(() => {
@@ -93,9 +101,9 @@ const JobSearchAll = () => {
 
   return (
     <div>
-      <EnterSearch />
+      <EnterSearch collapse={isSearching} />
 
-      <div className="container mx-auto p-8">
+      <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">
             {isSearching ? "Search Results" : "All Available Jobs"}

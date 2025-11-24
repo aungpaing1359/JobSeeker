@@ -22,11 +22,11 @@ export default function JobSearch() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobId, setSelectedJobId] = useState(null);
 
-  // Modal open state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Fetch Jobs
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -58,17 +58,16 @@ export default function JobSearch() {
         setLoadingJobs(false);
       }
     };
+
     fetchJobs();
   }, [id]);
 
-  // Apply Now handler
+  // Apply button handler
   const handleApplyNow = () => {
-    if (loading) return; // still checking auth
+    if (loading) return;
     if (user) {
-      // If logged in, open modal
       setIsApplyModalOpen(true);
     } else {
-      // Not logged in -> redirect
       navigate("/sign-in");
     }
   };
@@ -77,15 +76,11 @@ export default function JobSearch() {
     const newState = !isMaximized;
     setIsMaximized(newState);
 
-    const searchParams = new URLSearchParams(location.search);
-    if (newState) {
-      searchParams.set("maximized", "true");
-    } else {
-      searchParams.delete("maximized");
-    }
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
+    const params = new URLSearchParams(location.search);
+    if (newState) params.set("maximized", "true");
+    else params.delete("maximized");
+
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
   };
 
   return (
@@ -93,7 +88,7 @@ export default function JobSearch() {
       {/* Hero Search */}
       <EnterSearch />
 
-      {/* Job Count and Filter */}
+      {/* Job Count */}
       {!isMaximized && (
         <div className="container mx-auto pt-8 px-4 grid md:grid-cols-3 gap-6">
           <div className="col-span-1 flex justify-between items-center">
@@ -107,11 +102,11 @@ export default function JobSearch() {
         </div>
       )}
 
-      {/* Job List and Detail View */}
+      {/* Job List + Detail */}
       <div className="container mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job List */}
         {!isMaximized && (
-          <div className="md:col-span-1 space-y-4 h-[800px] overflow-y-auto pr-3">
+          <div className="md:col-span-1 space-y-4 h-[750px] max-2xl:h-[600px] max-xl:h-[500px] max-lg:h-[450px] overflow-y-auto pr-3">
             {loadingJobs ? (
               <p className="text-gray-500 text-center">Loading jobs...</p>
             ) : jobs.length > 0 ? (
@@ -133,13 +128,17 @@ export default function JobSearch() {
                       <p className="text-sm text-gray-500">
                         {job.employer_business_name || "Unknown Company"}
                       </p>
-                      <p className="text-sm mt-1">{getLocationLabel(job.location)}</p>
+                      <p className="text-sm mt-1">
+                        {getLocationLabel(job.location)}
+                      </p>
                       <p className="text-xs text-gray-400 mt-2">
                         {job.deadline
                           ? `Deadline: ${job.deadline}`
                           : "No deadline"}
                       </p>
                     </div>
+
+                    {/* TEMP LOGO (you will replace this later) */}
                     <img
                       src={job.logo || "/logo.png"}
                       alt="logo"
@@ -167,7 +166,7 @@ export default function JobSearch() {
         <div
           className={`${
             isMaximized ? "md:col-span-3" : "md:col-span-2"
-          } p-4 h-[800px] overflow-auto`}
+          } p-4 h-[750px] max-2xl:h-[600px] max-xl:h-[500px] max-lg:h-[450px] overflow-auto`}
         >
           <JobDetailView
             job={selectedJob}
