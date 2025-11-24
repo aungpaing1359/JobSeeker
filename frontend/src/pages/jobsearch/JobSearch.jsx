@@ -141,7 +141,7 @@ export default function JobSearch() {
                       </p>
                     </div>
                     <img
-                      src={job.logo || "/logo.png"}
+                      src={job.employer_logo || "/logo.png"}
                       alt="logo"
                       className="w-10 h-10"
                     />
