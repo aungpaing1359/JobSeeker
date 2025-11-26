@@ -3,6 +3,26 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import jobseekerBg from "../assets/images/jobseekerbg.png";
+import { LOCATION_CHOICES } from "../utils/locationHelpers";
+
+// ------------------ Convert Label → Value ------------------
+function getLocationValue(userInput) {
+  if (!userInput) return "";
+
+  // 1. Exact match ("MRAUK-U" → { value: "MO" })
+  const match = LOCATION_CHOICES.find(
+    (item) => item.label.toLowerCase() === userInput.toLowerCase()
+  );
+
+  if (match) return match.value;
+
+  // 2. Partial match ("mrau" → "MRAUK-U" → "MO")
+  const partial = LOCATION_CHOICES.find((item) =>
+    item.label.toLowerCase().includes(userInput.toLowerCase())
+  );
+
+  return partial ? partial.value : "";
+}
 
 function EnterSearch({ collapse }) {
   const [keyword, setKeyword] = useState("");
@@ -17,9 +37,22 @@ function EnterSearch({ collapse }) {
       return;
     }
 
+    // FRONTEND mapping only (label → value)
+    const locValue = getLocationValue(location.trim());
+
+    if (location.trim() && !locValue) {
+      toast.error("No jobs found!", { icon: null });
+
+      navigate("/job-search/all", { state: { jobs: [] } });
+      return; // ❗ Prevent API call
+    }
+
     try {
       const res = await axios.get(`${API_URL}/job/search/`, {
-        params: { q: keyword.trim(), loc: location.trim() },
+        params: {
+          q: keyword.trim(),
+          loc: locValue,
+        },
       });
 
       const jobs = res.data?.results || [];
@@ -88,7 +121,7 @@ function EnterSearch({ collapse }) {
             <div className="md:col-span-1 flex items-end">
               <button
                 onClick={handleSearch}
-                className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md"
+                className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md cursor-pointer"
               >
                 Search
               </button>

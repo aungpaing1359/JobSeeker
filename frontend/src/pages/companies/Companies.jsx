@@ -87,7 +87,7 @@ const Companies = ({ collapse }) => {
       >
         <div className="container mx-auto px-4 w-full h-[300px]">
           <div className="h-full w-full flex flex-col justify-center items-start mt-28 max-2xl:mt-0">
-            <div>
+            <div className="search-text-custom">
               <h1 className="text-3xl font-bold mb-2">
                 Find jobs from companies near you.
               </h1>
@@ -105,7 +105,7 @@ const Companies = ({ collapse }) => {
                 />
               </div>
               <div className="max-sm:col-span-2 col-span-1 w-full">
-                <button className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md">
+                <button className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md cursor-pointer">
                   Search
                 </button>
               </div>

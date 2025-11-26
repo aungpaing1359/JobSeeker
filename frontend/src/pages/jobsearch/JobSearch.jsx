@@ -118,13 +118,13 @@ export default function JobSearch() {
                     setSelectedJobId(job.id);
                     navigate(`/job-search/${job.id}`);
                   }}
-                  className={`border rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-100 ${
+                  className={`company-bg-custom rounded-lg p-4 shadow-md cursor-pointer hover:shadow-lg ${
                     selectedJobId === job.id ? "bg-gray-200" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold">{job.title}</h3>
+                      <h1 className="font-semibold">{job.title}</h1>
                       <p className="text-sm text-gray-500">
                         {job.employer_business_name || "Unknown Company"}
                       </p>
