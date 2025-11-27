@@ -47,7 +47,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-100 py-8 max-2xl:py-6">
+    <footer className="bg-gray-100 py-6 max-2xl:py-4">
       <div className="container mx-auto px-4 text-sm gray-text-custom">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Looped navlink */}

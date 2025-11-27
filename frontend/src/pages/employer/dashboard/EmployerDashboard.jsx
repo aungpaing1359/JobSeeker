@@ -22,22 +22,27 @@ export const sidebarItems = [
 ];
 
 export default function EmployerDashboardLayout() {
-  const { employer, logout, resendEmail } = useEmployerAuth();
+  const { employer, authLoading, logout, resendEmail } = useEmployerAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(
-    employer ? !employer.is_verified : false
-  );
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
-  // Update local state whenever employer object changes (Sign In)
   useEffect(() => {
-    if (employer?.is_verified) {
-      setShowVerificationMessage(false);
-    } else {
-      setShowVerificationMessage(true);
+    if (employer) {
+      setShowVerificationMessage(!employer.is_verified);
     }
   }, [employer]);
+
+  console.log("EMPLOYER FROM CONTEXT:", employer);
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   const handleResendEmail = async () => {
     setResendLoading(true);

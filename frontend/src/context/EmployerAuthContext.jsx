@@ -16,7 +16,7 @@ export const EmployerAuthProvider = ({ children }) => {
     const saved = localStorage.getItem("employerUser");
     return saved ? JSON.parse(saved) : null;
   });
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Sync employer with localStorage
   useEffect(() => {
@@ -30,15 +30,20 @@ export const EmployerAuthProvider = ({ children }) => {
   // Fetch latest user data from backend
   useEffect(() => {
     const loadEmployer = async () => {
+      const saved = localStorage.getItem("employerUser");
+
+      if (!saved) {
+        setAuthLoading(false);
+        return;
+      }
+
       try {
-        if (employer) {
-          const data = await fetchCurrentEmployer();
-          setEmployer(data);
-        }
+        const data = await fetchCurrentEmployer();
+        setEmployer(data);
       } catch (err) {
         console.error("Failed to fetch employer:", err);
       } finally {
-        setLoading(false);
+        setAuthLoading(false);
       }
     };
 
@@ -85,6 +90,13 @@ export const EmployerAuthProvider = ({ children }) => {
     };
     setEmployer(userWithToken);
     localStorage.setItem("employerUser", JSON.stringify(userWithToken));
+    try {
+      const refreshed = await fetchCurrentEmployer();
+      setEmployer(refreshed);
+      localStorage.setItem("employerUser", JSON.stringify(refreshed));
+    } catch (err) {
+      console.error("Failed to refresh employer after login:", err);
+    }
     return userWithToken;
   };
 
@@ -105,10 +117,7 @@ export const EmployerAuthProvider = ({ children }) => {
   // Resend verification email
   const resendEmail = async () => {
     try {
-      // 1. email from logged-in employer
       let email = employer?.email;
-
-      // 2. fallback → email from register step (not logged in yet)
       if (!email) {
         email = localStorage.getItem("employer_preregister_email");
       }
@@ -130,7 +139,7 @@ export const EmployerAuthProvider = ({ children }) => {
     <EmployerAuthContext.Provider
       value={{
         employer,
-        loading,
+        authLoading,
         register,
         submitCompanyDetail,
         signin,

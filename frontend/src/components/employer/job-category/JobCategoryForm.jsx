@@ -70,7 +70,7 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
       if (err.response?.data?.name) {
         toast.error(err.response.data.name[0]); // serializer error message
       } else {
-        toast.error("Error saving category");
+        toast.error("Category name is the same");
       }
     } finally {
       setLoading(false);

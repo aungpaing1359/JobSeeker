@@ -106,7 +106,7 @@ export default function JobSearch() {
       <div className="container mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job List */}
         {!isMaximized && (
-          <div className="md:col-span-1 space-y-4 h-[750px] max-2xl:h-[600px] max-xl:h-[500px] max-lg:h-[450px] overflow-y-auto pr-3">
+          <div className="md:col-span-1 space-y-4 h-[700px] max-2xl:h-[550px] max-xl:h-[500px] max-lg:h-[450px] overflow-y-auto pr-3">
             {loadingJobs ? (
               <p className="text-gray-500 text-center">Loading jobs...</p>
             ) : jobs.length > 0 ? (
@@ -123,12 +123,18 @@ export default function JobSearch() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h1 className="font-semibold">{job.title}</h1>
+                    <div className="space-y-1">
+                      <h1 className="font-semibold">
+                        {job.title?.length > 20
+                          ? job.title.substring(0, 20) + "..."
+                          : job.title}
+                      </h1>
                       <p className="text-sm text-gray-500">
-                        {job.employer_business_name || "Unknown Company"}
+                        {job.employer_business_name?.length > 20
+                          ? job.employer_business_name.substring(0, 20) + "..."
+                          : job.employer_business_name || "Unknown Company"}
                       </p>
-                      <p className="text-sm mt-1">
+                      <p className="text-sm mt-1.5">
                         {getLocationLabel(job.location)}
                       </p>
                       <p className="text-xs text-gray-400 mt-2">

@@ -27,9 +27,15 @@ const JobCard = ({ job }) => {
           className="w-14 h-14 object-cover"
         />
       </div>
-      <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
+      <h3 className="text-lg font-semibold text-gray-800">
+        {job.title?.length > 15
+          ? job.title.substring(0, 15) + "..."
+          : job.title || "Unknown Title"}
+      </h3>
       <p className="text-sm text-gray-600">
-        {job.employer_business_name || "Unknown Company"}
+        {job.employer_business_name?.length > 20
+          ? job.employer_business_name.substring(0, 20) + "..."
+          : job.employer_business_name || "Unknown Company"}
       </p>
       <p className="text-sm text-gray-500 mt-1">
         {getLocationLabel(job.location)}
@@ -38,8 +44,8 @@ const JobCard = ({ job }) => {
         className="text-sm text-gray-700 mt-3"
         dangerouslySetInnerHTML={{
           __html:
-            job.description?.length > 25
-              ? job.description.slice(0, 25) + "..."
+            job.description?.length > 30
+              ? job.description.slice(0, 30) + "..."
               : job.description || "No description available",
         }}
       ></div>

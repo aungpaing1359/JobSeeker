@@ -46,15 +46,26 @@ export default function JobCard({ job }) {
       <div className="flex items-start justify-between">
         {/* LEFT — Text Info */}
         <div className="flex-1 pr-3">
-          <h3 className="font-bold text-2xl gray-text-custom">{job.title}</h3>
+          <h3 className="font-bold text-xl gray-text-custom">
+            {job.title?.length > 15
+              ? job.title.substring(0, 15) + "..."
+              : job.title}
+          </h3>
 
           <p className="text-sm gray-text-custom mt-1">
-            {job.category_name || "Not specified"}
+            {job.category_name?.length > 25
+              ? job.category_name.substring(0, 25) + "..."
+              : job.category_name || "Not specified"}
           </p>
 
-          <p className="text-lg font-semibold gray-text-custom mt-1">
-            {job.employer_business_name || "Unknown Company"}
-          </p>
+          <h5
+            className="font-semibold gray-text-custom mt-1"
+            style={{ fontSize: "15px" }}
+          >
+            {job.employer_business_name?.length > 15
+              ? job.employer_business_name.substring(0, 15) + "..."
+              : job.employer_business_name || "Unknown Company"}
+          </h5>
         </div>
 
         {/* RIGHT — Company Logo */}
@@ -86,8 +97,8 @@ export default function JobCard({ job }) {
           <span
             dangerouslySetInnerHTML={{
               __html: job.description
-                ? job.description.length > 25
-                  ? job.description.slice(0, 25) + "..."
+                ? job.description.length > 35
+                  ? job.description.slice(0, 35) + "..."
                   : job.description
                 : "No description available.",
             }}

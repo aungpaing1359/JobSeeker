@@ -152,7 +152,7 @@ export default function JobForm({ jobId }) {
 
     try {
       if (jobId) {
-        // ⭐ Check for changes
+        // Check for changes
         if (JSON.stringify(formData) === JSON.stringify(initialData)) {
           toast("No changes to update.", { icon: "⚠️" });
           setLoading(false);

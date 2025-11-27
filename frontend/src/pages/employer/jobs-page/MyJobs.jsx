@@ -109,7 +109,6 @@ export default function MyJobs() {
     return matchesSearch && matchesStatus;
   });
 
-
   // ⭐ 2 — Pagination logic AFTER filteredJobs exists
   const indexLast = currentPage * itemsPerPage;
   const indexFirst = indexLast - itemsPerPage;
@@ -186,18 +185,22 @@ export default function MyJobs() {
                   key={job.id}
                   className="border-t hover:bg-gray-50 transition-colors"
                 >
-                  <td className="p-3 text-gray-800">{job.title || "N/A"}</td>
+                  <td className="p-3 text-gray-800">
+                    {job.title?.length > 20
+                      ? job.title.substring(0, 20) + "..."
+                      : job.title || "N/A"}
+                  </td>
                   <td className="p-3 text-gray-600">
-                    {job.category_name || "N/A"}
+                    {job.category_name?.length > 20
+                      ? job.category_name.substring(0, 20) + "..."
+                      : job.category_name || "N/A"}
                   </td>
                   <td className="p-3 text-gray-600">
                     {job.created_at
                       ? new Date(job.created_at).toLocaleDateString()
                       : "N/A"}
                   </td>
-                  <td className="p-3 text-gray-600">
-                    {getJobStatus(job)}
-                  </td>
+                  <td className="p-3 text-gray-600">{getJobStatus(job)}</td>
                   <td className="p-3 space-x-3">
                     <button
                       onClick={() => handleDetail(job.id)}
