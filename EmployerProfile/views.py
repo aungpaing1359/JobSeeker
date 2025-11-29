@@ -77,9 +77,7 @@ def register_employer(request, role):
             {"error": "Your session has expired. Please start registration again."},
             status=400
         )
-    # ---------------------------------------------------------
     #Friendly User Exists Check
-    # ---------------------------------------------------------
     if User.objects.filter(email=email).exists():
         return Response(
             {
@@ -89,10 +87,8 @@ def register_employer(request, role):
             status=409
         )
 
-    # ---------------------------------------------------------
     #EmployerProfile Exists Check
     # (must check via user__email, not contact_email)
-    # ---------------------------------------------------------
     if EmployerProfile.objects.filter(user__email=email).exists():
         return Response(
             {
@@ -102,9 +98,7 @@ def register_employer(request, role):
             status=409
         )
 
-    # ---------------------------------------------------------
     #Create User safely
-    # ---------------------------------------------------------
     user = User.objects.create(
         email=email,
         role=role,
@@ -114,9 +108,7 @@ def register_employer(request, role):
     user.set_password(raw_password)
     user.save()
 
-    # ---------------------------------------------------------
     #Create Employer Profile
-    # ---------------------------------------------------------
     profile_data = serializer.validated_data["profile"]
     logo = serializer.validated_data.get("logo")
     employer_profile = EmployerProfile.objects.create(
@@ -323,33 +315,33 @@ def company_search(request):
         "companies":companies_s
     })
 
-#job search in employer dashboard
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def job_filter_by_status(request):
-    user = request.user
-    status_param = request.GET.get('status', '').lower()
-    jobs = Jobs.objects.filter(employer__user=user)
+# #job search in employer dashboard
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def job_filter_by_status(request):
+#     user = request.user
+#     status_param = request.GET.get('status', '').lower()
+#     jobs = Jobs.objects.filter(employer__user=user)
 
-    if status_param == 'active':
-        jobs = jobs.filter(is_active=True)
+#     if status_param == 'active':
+#         jobs = jobs.filter(is_active=True)
 
-    elif status_param == 'closed':
-        jobs = jobs.annotate(
-            current_applicants=Count('applications')
-        ).filter(current_applicants__gte=F('max_applicants'))
+#     elif status_param == 'closed':
+#         jobs = jobs.annotate(
+#             current_applicants=Count('applications')
+#         ).filter(current_applicants__gte=F('max_applicants'))
     
-    elif status_param == 'expired':
-        today = timezone.localdate()
-        jobs = jobs.filter(deadline__lt=today)
+#     elif status_param == 'expired':
+#         today = timezone.localdate()
+#         jobs = jobs.filter(deadline__lt=today)
     
-    else:
-        return Response({"error": "Invalid status"}, status=400)
+#     else:
+#         return Response({"error": "Invalid status"}, status=400)
 
-    jobs = jobs.order_by('-created_at')
-    return Response({
-        "jobs": JobcompanySerializer(jobs, many=True).data
-    })
+#     jobs = jobs.order_by('-created_at')
+#     return Response({
+#         "jobs": JobcompanySerializer(jobs, many=True).data
+#     })
 
 #end job search in employer dashboard
 

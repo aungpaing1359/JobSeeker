@@ -1,11 +1,11 @@
-<<<<<<< HEAD
+
 
 *.py[cod]
 =======
 # ---- Python ----
 __pycache__/
 *.pyc
->>>>>>> d5235f4d34befedb1c14d661cbb712c7518f58b1
+
 *.pyo
 *.pyd
 
@@ -21,13 +21,6 @@ node_modules/
 dist/
 .build/
 .cache/
-
-<<<<<<< HEAD
-# Editor
-.vscode/*
-!.vscode/extensions.json
-.idea
-=======
 # ---- IDE/Env ----
 .env
 .vscode/
@@ -36,4 +29,4 @@ dist/
 .mypy_cache/
 .eggs/
 *.egg-info/
->>>>>>> d5235f4d34befedb1c14d661cbb712c7518f58b1
+

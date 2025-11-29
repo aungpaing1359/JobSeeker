@@ -13,15 +13,20 @@ import {
   deleteAllNotifications,
 } from "../utils/api/notificationAPI";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../hooks/useAuth";   // ✅ Use your real auth hook
 
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
+  const { user } = useAuth();                 // 🔥 REAL user source
+
   const [notifications, setNotifications] = useState([]);
   const [counts, setCounts] = useState({ total: 0, read: 0, unread: 0 });
   const [loading, setLoading] = useState(false);
 
   const loadNotifications = useCallback(async () => {
+    if (!user?.id) return;                    // ⛔ Prevent API calls before user loads
+
     setLoading(true);
     try {
       const data = await fetchNotifications();
@@ -29,15 +34,19 @@ export const NotificationProvider = ({ children }) => {
       setCounts(data.counts);
     } catch (err) {
       console.error("Failed to load notifications:", err);
-      toast.error("Failed to load notifications.");
+
+      // Avoid showing error during refresh
+      if (user?.id) toast.error("Failed to load notifications.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+    if (user?.id) {
+      loadNotifications();
+    }
+  }, [user?.id, loadNotifications]);
 
   const handleMarkRead = async (id) => {
     try {
@@ -59,47 +68,19 @@ export const NotificationProvider = ({ children }) => {
 
   const handleDelete = async (id) => {
     try {
-      const notif = notifications.find((n) => n.id === id);
-      const notifName = notif?.message || "Notification";
-
       await deleteNotification(id);
-
-      toast.success(`"${notifName}" deleted.`);
       loadNotifications();
     } catch (err) {
-      console.error("Delete failed:", err);
       toast.error("Failed to delete notification.");
     }
   };
 
   const handleDeleteAll = async () => {
     try {
-      const res = await deleteAllNotifications();
-      const deletedCount = res?.deleted_count || 0;
-      const deletedItems = res?.deleted_items || [];
-
-      if (deletedCount > 0) {
-        const names = deletedItems
-          .map((item) => `• ${item.message}`)
-          .join("\n");
-        toast.success(`Deleted ${deletedCount} notifications:\n${names}`);
-      } else {
-        toast.info("ℹ️ No read notifications to clear.");
-      }
-
+      await deleteAllNotifications();
       loadNotifications();
     } catch (err) {
-      if (err.response) {
-        const errorMsg =
-          err.response.data?.error ||
-          err.response.data?.message ||
-          err.response.data?.detail ||
-          "You must read all notifications before clearing.";
-        toast.error(errorMsg);
-      } else {
-        console.error("Delete All failed:", err);
-        toast.error("Failed to clear notification.");
-      }
+      toast.error("Failed to clear notifications.");
     }
   };
 

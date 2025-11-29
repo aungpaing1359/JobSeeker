@@ -24,94 +24,139 @@ User = get_user_model()
 @permission_classes([AllowAny])
 @ratelimit(key='ip', rate='5/m', block=False, method='POST')
 def signin_jobseeker(request, role):
-    # Check if rate limited
+    # Rate limit check
     if getattr(request, 'limited', False):
-        return Response({"error": "Too many attempts, please wait one minute before trying again."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        return Response(
+            {"error": "Too many attempts, please wait one minute before trying again."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
 
     serializer = JobSeekerSignInSerializer(data=request.data)
     if not serializer.is_valid():
-        # ✅ Always return when invalid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
+
     email = serializer.validated_data.get('email')
     if not email:
         return Response({"error": "Please enter your email."},
                         status=status.HTTP_400_BAD_REQUEST)
-
-    # ✅ Create or get the user
+    
+    # Create or get the user
     user, created = CustomUser.objects.get_or_create(
         email=email.lower(),
         defaults={
             "role": role,
-            "is_active": True,  
+            "is_active": True,
         }
     )
-    response_data = JobSeekerSignInSerializer(user).data
     if not user.is_active:
-        return Response({"error": "Your account is not active. Please contact support."},
-                        status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            {"error": "Your account is not active. Please contact support."},
+            status=status.HTTP_403_FORBIDDEN
+        )
 
-    # ✅ Generate + send code (wrap to avoid NoneType due to exceptions)
+    # Send OTP
     try:
-        code = send_verification_code(email)
-        print(code)   # <-- your function
-    except Exception:
-        return Response({"error": "Failed to send verification code."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        code = send_verification_code(user)
+        print("OTP:", code)
+    except Exception as e:
+        print("Email Error:", e)
+        return Response(
+            {"error": "Failed to send verification code."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-    # ✅ Save to session with timestamp
+    # Save OTP session
     request.session['verification_code'] = code
-    request.session['email'] = email
+    request.session['email'] = user.email
     request.session['user_id'] = str(user.id)
     request.session['otp_created_at'] = timezone.now().isoformat()
-    msg = ("Account created and verification code sent to "
-           if created else "Verification code sent to ") + email
-
+    message = (
+        "Account created and verification code sent to "
+        if created else
+        "Verification code sent to "
+    ) + user.email
     return Response(
-        {"message": msg, "user": {"id": str(user.id), "email": user.email, "role": user.role,"username": user.email.split('@')[0]}},
+        {
+            "message": message,
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "role": user.role,
+                "username": user.email.split('@')[0]
+            }
+        },
         status=status.HTTP_200_OK
     )
+
 # job-seeker-signin-end
 
 #job-seeker-email-verify 
 @api_view(['POST'])
 @ratelimit(key='ip', rate='5/m', block=False, method='POST')
 def otp_verify_jobseeker(request):
-    # Check if rate limited
+    """
+    Verifies jobseeker email using OTP stored in session.
+    Automatically logs user in after successful verification.
+    """
+
+    # 1. Rate limit check
     if getattr(request, 'limited', False):
-        return Response({"detail": "Too many verification attempts. Please wait one minute before trying again."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
-    input_code = request.data.get('code')
-    code = request.session.get('verification_code')
-    print(code)
+        return Response(
+            {"detail": "Too many attempts. Try again in 1 minute."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    # 2. Get OTP and session values
+    input_code = str(request.data.get('code', '')).strip()
+    session_code = str(request.session.get('verification_code', '')).strip()
     user_id = request.session.get('user_id')
-    if input_code ==code and user_id:
-        try:
-            user = User.objects.get(id=user_id)
-            user.is_verified=True
-            user.save(update_fields=['is_verified'])
-            # Set backend for login
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            request.session.pop('verification_code', None)
-            request.session.pop('user_id', None)
-            request.session.modified = True
-            return Response(
-                {
-                    "message": "Email verified successfully!",
-                    "session_key": request.session.session_key,
-                    
-                    },
-                status=status.HTTP_200_OK
-            )
-        except User.DoesNotExist:
-            return Response(
-                {"error": "User not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    else:
+
+    # Debug (optional)
+    print("Submitted:", input_code, "Stored:", session_code, "UserID:", user_id)
+
+    # 3. Check session existence
+    if not session_code or not user_id:
+        return Response(
+            {"error": "Verification session expired. Please request a new code."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # 4. Validate OTP
+    if input_code != session_code:
         return Response(
             {"error": "Invalid verification code."},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    # 5. Verify user and activate
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "User not found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # 6. Mark user as verified
+    user.is_verified = True
+    user.save(update_fields=['is_verified'])
+
+    # 7. Auto login
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+    # 8. Cleanup session
+    request.session.pop('verification_code', None)
+    request.session.pop('user_id', None)
+    request.session.modified = True
+
+    return Response(
+        {
+            "message": "Email verified successfully!",
+            "session_key": request.session.session_key,
+        },
+        status=status.HTTP_200_OK
+    )
+
 # end job-seeker-email-verify
 
 @api_view(['POST'])

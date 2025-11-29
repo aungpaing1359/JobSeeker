@@ -1,13 +1,20 @@
 # applications/views.py
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
+import datetime
 from rest_framework import status
 from django.shortcuts import get_object_or_404  # see below
 from django.db import IntegrityError, transaction
 from .models import Jobs,JobseekerProfile
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from .models import *
+from Application.models import *
+from Notification.models import *
 from Jobs.models import *
 from .serializers import *
 #hello wrold
@@ -257,9 +264,8 @@ def hired_applications(request):
 @permission_classes([IsAuthenticated])
 def update_application_status(request, app_id):
     """
-    Update a single application status by its ID.
-    Example:  POST /api/v1/applications/5/update-status/
-              Body: { "new_status": "shortlist" }
+    Employer updates application status.
+    Sends notification + HTML email to jobseeker
     """
     employer = getattr(request.user, "employerprofile", None)
     if not employer:
@@ -267,9 +273,14 @@ def update_application_status(request, app_id):
             {"error": "Only employers can perform this action."},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+    # Get application
     app = get_object_or_404(Application, id=app_id, job__employer=employer)
-    new_status = request.data.get("new_status")
-    # hellor Map readable names → codes (optional, if you use short codes)
+
+    # Extract status
+    new_status = request.data.get("new_status", "")
+
+    # Map human → codes
     STATUS_MAP = {
         "pending": "P",
         "review": "R",
@@ -278,20 +289,106 @@ def update_application_status(request, app_id):
         "hired": "H",
     }
     new_status = STATUS_MAP.get(str(new_status).lower(), new_status)
+
+    # Validate
     valid_statuses = [choice[0] for choice in Application.STATUS_CHOICES]
     if new_status not in valid_statuses:
         return Response(
             {"error": "Invalid status value.", "valid_statuses": valid_statuses},
             status=status.HTTP_400_BAD_REQUEST,
         )
+    
+    # Allowed workflow transitions
+    ALLOWED_STATUS_FLOW = {
+        "P":  ["R"],
+        "R":  ["SL", "RJ"],
+        "SL": ["H", "RJ"],
+        "H":  [],
+        "RJ": []
+    }
 
+    current_status = app.status
+
+    #  Prevent backward or invalid transitions
+    if new_status not in ALLOWED_STATUS_FLOW[current_status]:
+        return Response(
+            {
+                "error": f"Cannot move application from '{app.get_status_display()}' "
+                         f"to '{dict(Application.STATUS_CHOICES).get(new_status)}'.",
+                "allowed_next": ALLOWED_STATUS_FLOW[current_status]
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Update
     app.status = new_status
     app.save()
+
+    # Create in-app notification
+    Notification.objects.create(
+        user=app.job_seeker_profile.user,
+        message=(
+            f"Your application for '{app.job.title}' has been updated to "
+            f"'{app.get_status_display()}'."
+        ),
+        type="application_update",
+        content_type=ContentType.objects.get_for_model(app),
+        object_id=app.id,
+    )
+
+    #SEND EMAIL (ENGLISH ONLY)
+
+    jobseeker = app.job_seeker_profile.user
+    recipient = jobseeker.email
+
+    if recipient:
+        status_label = app.get_status_display()
+        status_class = STATUS_MAP.get(status_label, "pending")
+        job_title = app.job.title
+        username = app.job_seeker_profile.full_name or jobseeker.email.split("@")[0]
+
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://127.0.0.1:8000")
+        application_link = f"{frontend_url}/job-search/applications/{app.id}"
+
+
+        subject = f"Your application status updated to '{status_label}' for {job_title}"
+
+        # Plain-text version
+        text_content = (
+            f"Hello {username},\n\n"
+            f"Your application for the position '{job_title}' has been updated.\n"
+            f"New status: {status_label}\n\n"
+            f"View your application here:\n{application_link}\n\n"
+            f"Thank you for using Arakkha Job Connect."
+        )
+
+        # Render HTML from template file
+        html_content = render_to_string(
+        "emails/application_status_update.html",
+        {
+            "username": username,
+            "job_title": job_title,
+            "status_label": status_label,
+            "status_class": status_class, 
+            "application_link": application_link,
+            "year":datetime.now().year,
+            
+        },
+    )
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@arakkha-job-connect.com"),
+            to=[recipient],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
+
     return Response(
         {
             "success": True,
-            "id": app.id,
-            "new_status": app.status,
+            "new_status": new_status,
             "message": f"Application {app.id} updated to '{new_status}'."
         },
         status=status.HTTP_200_OK,
@@ -304,6 +401,30 @@ def recent_applications(request):
     return Response({
         "s_recent_apps":s_recent_apps
     })
+
+# #update application notification by status
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def application_notification_update_status(request,app_id):
+#     user=request.user
+#     app=get_object_or_404(Application,id=app_id,user=user)
+#     status_param=request.data.get("status","read").lower() #read or unread
+
+#     valid_statuses = ["H", "RJ"]
+#     if status_param not in valid_statuses:
+#         return Response(
+#             {"error": "Invalid status. Use 'H' for Hired or 'RJ' for Rejected."},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )   
+#     app.status=status_param 
+#     app.save(update_fields=["status"])
+    
+#     Notification.objects.create(
+#         user=app.job_seeker_profile.user,
+#         message=f"Your application for '{app.job.title}' has been updated to '{app.get_status_display()}'.",
+#         object_id=app.id,
+#         content_type=ContentType.objects.get_for_model(app)
+#         )
 
 
 

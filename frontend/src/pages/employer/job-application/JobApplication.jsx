@@ -151,7 +151,8 @@ export default function JobApplication() {
     }
   };
 
-  // ✅ Update status
+  // 
+  // ✅ Update status (with user-friendly error)
   const handleAction = async (newStatus, appId) => {
     const csrftoken = getCookie("csrftoken");
     setOpenMenuId(null);
@@ -163,6 +164,7 @@ export default function JobApplication() {
       Shortlist: "SL",
       Hired: "H",
     };
+
     const code = statusMap[newStatus];
 
     try {
@@ -178,31 +180,44 @@ export default function JobApplication() {
         }
       );
 
+      // SUCCESS MESSAGE
       toast.success(`Status updated to ${newStatus}!`);
 
-      // 1️⃣ Update applications list (UI table)
+      // Update table UI
       setApplications((prev) =>
         prev.map((a) => (a.id === appId ? { ...a, status: code } : a))
       );
 
-      // 2️⃣ Update Card Counts (Live Update)
+      // Update summary cards
       setCounts((prev) => {
         const oldStatus = applications.find((a) => a.id === appId)?.status;
-
         if (!oldStatus) return prev;
 
         const updated = { ...prev };
 
+        // decrease old status
         updated[oldStatus] = Math.max(0, updated[oldStatus] - 1);
+
+        // increase new status
         updated[code] = (updated[code] || 0) + 1;
 
         return updated;
       });
     } catch (error) {
       console.error("❌ Status update failed:", error);
-      toast.error("Failed to update status.");
+
+      //Show human-friendly Django message
+      const msg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to update status.";
+
+      toast.error(msg, {
+        icon: "ℹ️",
+      });
     }
   };
+
 
   // ✅ Delete
   const handleDelete = async (appId) => {
@@ -264,9 +279,8 @@ export default function JobApplication() {
           <button
             key={i}
             onClick={() => handleCardClick(card)}
-            className={`bg-white shadow-sm p-4 rounded-xl flex flex-col items-center justify-center text-center border border-gray-100 hover:shadow-md hover:scale-[1.02] transition-all ${
-              activeStatus === card.title ? "ring-2 ring-blue-300" : ""
-            }`}
+            className={`bg-white shadow-sm p-4 rounded-xl flex flex-col items-center justify-center text-center border border-gray-100 hover:shadow-md hover:scale-[1.02] transition-all ${activeStatus === card.title ? "ring-2 ring-blue-300" : ""
+              }`}
           >
             <div className={`${card.color} mb-2`}>{card.icon}</div>
             <p className={`${card.color} text-sm font-medium`}>{card.title}</p>
@@ -320,6 +334,7 @@ export default function JobApplication() {
                 <th className="py-3 px-4 text-sm font-semibold">Name</th>
                 <th className="py-3 px-4 text-sm font-semibold">Email</th>
                 <th className="py-3 px-4 text-sm font-semibold">Job Title</th>
+                <th className="py-3 px-4 text-sm font-semibold">Status</th>
                 <th className="py-3 px-4 text-sm font-semibold">Date</th>
                 <th className="py-3 px-4 text-sm font-semibold">Action</th>
               </tr>
@@ -338,6 +353,7 @@ export default function JobApplication() {
                     {app.jobseeker_email || "N/A"}
                   </td>
                   <td className="py-3 px-4 text-sm">{app.job?.title}</td>
+                  <td className="py-3 px-4 text-sm">{app.status_display}</td>
                   <td className="py-3 px-4 text-sm">
                     {new Date(app.applied_at).toLocaleDateString()}
                   </td>
