@@ -30,22 +30,20 @@ export default function EmployerDashboardLayout() {
     employer ? !employer.is_verified : false
   );
 
-  // ✅ Update local state whenever employer object changes (Sign In)
+  // Update local state whenever employer object changes (Sign In)
   useEffect(() => {
     if (employer?.is_verified) {
-      setShowVerificationMessage(false); // verified => hide message
+      setShowVerificationMessage(false);
     } else {
-      setShowVerificationMessage(true); // not verified => show message
+      setShowVerificationMessage(true);
     }
   }, [employer]);
 
   const handleResendEmail = async () => {
     setResendLoading(true);
     try {
-      await resendEmail(); // send verification email
-      setShowVerificationMessage(true); // keep message showing while waiting
-      // auto-hide message after 3 seconds
-      setTimeout(() => setShowVerificationMessage(false), 3000);
+      await resendEmail();
+      setShowVerificationMessage(true);
     } catch (err) {
       console.error(err);
     } finally {
@@ -74,13 +72,24 @@ export default function EmployerDashboardLayout() {
             return (
               <NavLink
                 key={item.route}
-                to={`/employer/dashboard/${
-                  item.route === "dashboard" ? "" : item.route
-                }`}
+                to={
+                  emailNotVerified
+                    ? "#" // Disable navigation
+                    : `/employer/dashboard/${
+                        item.route === "dashboard" ? "" : item.route
+                      }`
+                }
+                onClick={(e) => {
+                  if (emailNotVerified) {
+                    e.preventDefault(); // Stop clicking
+                  }
+                }}
                 end={item.route === "dashboard"}
                 className={({ isActive }) =>
-                  `flex items-center p-2 rounded ${
-                    isActive
+                  `flex items-center p-2 rounded transition ${
+                    emailNotVerified
+                      ? "opacity-40 cursor-not-allowed" // 🔒 Disabled UI
+                      : isActive
                       ? "bg-blue-100 text-blue-700 font-semibold"
                       : "hover:bg-gray-100"
                   }`
@@ -146,19 +155,29 @@ export default function EmployerDashboardLayout() {
         <main className="bg-sky-50 min-h-screen pt-25 p-6">
           {/* verification alert */}
           {emailNotVerified && (
-            <div className="flex justify-between items-center p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 mb-4">
-              <span>Please verify your email to access the dashboard.</span>
-              <button
-                onClick={handleResendEmail}
-                disabled={resendLoading}
-                className="ml-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {resendLoading ? "Sending..." : "Resend Email"}
-              </button>
+            <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 mb-4 rounded">
+              <div className="flex justify-between items-center">
+                <span>Please verify your email to access the dashboard.</span>
+
+                <button
+                  onClick={handleResendEmail}
+                  disabled={resendLoading}
+                  className="ml-4 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {resendLoading ? "Sending..." : "Resend Email"}
+                </button>
+              </div>
             </div>
           )}
 
-          <Outlet />
+          {/* Protect dashboard routes */}
+          {emailNotVerified ? (
+            <div className="text-center text-gray-600 mt-10">
+              <p>Please verify your email to continue.</p>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>

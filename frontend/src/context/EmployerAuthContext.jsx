@@ -1,5 +1,13 @@
 import { createContext, useState, useEffect } from "react";
-import { registerEmployer,registerEmployerDetail, signinEmployer, fetchCurrentEmployer, employerLogout, resendVerificationEmail } from "../utils/api/employerAPI";
+import {
+  registerEmployer,
+  registerEmployerDetail,
+  signinEmployer,
+  fetchCurrentEmployer,
+  employerLogout,
+  resendVerificationEmail,
+} from "../utils/api/employerAPI";
+import { toast } from "react-hot-toast";
 
 export const EmployerAuthContext = createContext();
 
@@ -41,23 +49,30 @@ export const EmployerAuthProvider = ({ children }) => {
   const register = async (email, password) => {
     try {
       const data = await registerEmployer(email, password);
-      const newUser = { email: data.email, password, is_verified: false };
-      setEmployer(newUser);
+
+      const newUser = {
+        email: data.email,
+        is_verified: false,
+      };
+
+      // save to localStorage even before login
+      localStorage.setItem("employer_preregister_email", data.email);
+
       return newUser;
     } catch (err) {
       throw err;
     }
   };
 
-   // ✅ Submit company detail
+  // ✅ Submit company detail
   const submitCompanyDetail = async (formData) => {
     const data = await registerEmployerDetail(formData);
-    const updatedEmployer = { ...employer, ...formData, };
+    const updatedEmployer = { ...employer, ...formData };
     setEmployer(updatedEmployer);
     return updatedEmployer;
   };
 
-   // ✅ Signin with token + CSRF
+  // ✅ Signin with token + CSRF
   const signin = async ({ email, password }) => {
     const data = await signinEmployer({ email, password });
     const userWithToken = {
@@ -87,21 +102,42 @@ export const EmployerAuthProvider = ({ children }) => {
     }
   };
 
-   // Resend verification email
+  // Resend verification email
   const resendEmail = async () => {
     try {
-      if (employer?.email) {
-        await resendVerificationEmail(employer.email);
-        alert("Verification email resent!");
+      // 1. email from logged-in employer
+      let email = employer?.email;
+
+      // 2. fallback → email from register step (not logged in yet)
+      if (!email) {
+        email = localStorage.getItem("employer_preregister_email");
       }
+
+      if (!email) {
+        toast.error("Email not found in system.");
+        return;
+      }
+
+      const res = await resendVerificationEmail(email);
+
+      toast.success(res?.message || "Verification email sent!");
     } catch (err) {
-      console.error("Failed to resend email:", err);
-      alert("Failed to resend verification email.");
+      toast.error("Failed to resend email.");
     }
   };
 
   return (
-    <EmployerAuthContext.Provider value={{ employer, loading, register, submitCompanyDetail, signin, logout, resendEmail, }}>
+    <EmployerAuthContext.Provider
+      value={{
+        employer,
+        loading,
+        register,
+        submitCompanyDetail,
+        signin,
+        logout,
+        resendEmail,
+      }}
+    >
       {children}
     </EmployerAuthContext.Provider>
   );

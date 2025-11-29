@@ -9,14 +9,16 @@ export default function EducationList({
 }) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Education Data
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Fetch Education Data
   useEffect(() => {
     if (!profileId) return;
 
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/education/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {
@@ -49,24 +51,30 @@ export default function EducationList({
             className="flex justify-between items-start border-b pb-2"
           >
             <div>
-              <p className="font-medium">{edu.school_name}</p>
+              <p className="font-medium">School Name: {edu.school_name}</p>
               <p className="text-gray-500 text-sm">
-                {edu.degree} - {edu.field_of_study}
+                Degree: {edu.degree} - {edu.field_of_study}
+              </p>
+              <p className="text-gray-500 text-sm">
+                Field Of Study: {edu.field_of_study}
               </p>
               <p className="text-gray-400 text-sm">
-                {edu.start_year} - {edu.is_current ? "Present" : edu.end_year}
+                Work Time: {edu.start_year} - {edu.is_current ? "Present" : edu.end_year}
               </p>
               {edu.gpa && (
                 <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
               )}
+              {edu.location && (
+                <p className="text-sm text-gray-500">{edu.location}</p>
+              )}
               {edu.description && (
                 <p className="text-sm text-gray-500 italic mt-1">
-                  {edu.description}
+                  Description: {edu.description}
                 </p>
               )}
             </div>
 
-            {/* ✏️ Edit Button */}
+            {/* Edit Button */}
             <button
               onClick={() => onEdit(edu)}
               className="text-blue-600 hover:text-blue-800 text-sm"

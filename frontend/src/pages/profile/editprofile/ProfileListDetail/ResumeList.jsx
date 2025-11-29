@@ -8,7 +8,9 @@ import {
   Trash2,
   Image as ImageIcon,
   X,
+  FileTextIcon,
 } from "lucide-react";
+import {toast} from "react-hot-toast";
 
 export default function ResumeList({
   profileId,
@@ -17,15 +19,17 @@ export default function ResumeList({
   onEdit,
 }) {
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(null); // for modal preview
+  const [preview, setPreview] = useState(null);
 
-  // ✅ Fetch resume list (initial load)
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Fetch resume list (initial load)
   useEffect(() => {
     if (!profileId) return;
     setLoading(true);
     axios
       .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/?profile=${profileId}`,
+        `${API_URL}/accounts-jobseeker/resume/?profile=${profileId}`,
         { withCredentials: true }
       )
       .then((res) => {
@@ -53,11 +57,11 @@ export default function ResumeList({
     return cookieValue;
   }
 
-  // ✅ Set Default Resume
+  // Set Default Resume
   const handleSetDefault = async (id) => {
     try {
       await axios.put(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/${id}/`,
+        `${API_URL}/accounts-jobseeker/resume/${id}/`,
         { is_default: true },
         { withCredentials: true }
       );
@@ -66,11 +70,11 @@ export default function ResumeList({
       );
     } catch (err) {
       console.error("Failed to set default:", err);
-      alert("❌ Failed to set default resume.");
+      toast.error("Failed to set default resume.");
     }
   };
 
-  // ✅ Delete Resume
+  // Delete Resume
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this resume?")) return;
 
@@ -82,7 +86,7 @@ export default function ResumeList({
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/accounts-jobseeker/resume/${id}/`,
+        `${API_URL}/accounts-jobseeker/resume/${id}/`,
         {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
@@ -95,7 +99,7 @@ export default function ResumeList({
       setResumeList((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("❌ Delete failed: Unauthorized or missing token.");
+      toast.error("Delete failed: Unauthorized or missing token.");
     }
   };
 
@@ -131,7 +135,7 @@ export default function ResumeList({
                     : "border-gray-200 hover:bg-gray-50"
                 }`}
               >
-                {/* ✅ Left side: preview + info */}
+                {/* Left side: preview + info */}
                 <div className="flex items-start gap-4">
                   {isImage ? (
                     <img
@@ -151,6 +155,7 @@ export default function ResumeList({
 
                   <div>
                     <p className="font-medium text-gray-800 text-lg flex items-center gap-2">
+                      <FileTextIcon size={18} className="text-blue-600" />
                       {resume.title}
                       {resume.is_default && (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
@@ -177,7 +182,7 @@ export default function ResumeList({
                   </div>
                 </div>
 
-                {/* ✅ Right side: actions with icons */}
+                {/* Right side: actions with icons */}
                 <div className="flex flex-col gap-2 items-end">
                   <button
                     onClick={() => onEdit(resume)}
@@ -211,7 +216,7 @@ export default function ResumeList({
         </ul>
       )}
 
-      {/* ✅ Image Preview Modal */}
+      {/* Image Preview Modal */}
       {preview && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="relative bg-white rounded-lg shadow-lg p-3">

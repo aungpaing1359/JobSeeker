@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function LanguageList({ profileId, languageList, setLanguageList, onEdit }) {
+export default function LanguageList({
+  profileId,
+  languageList,
+  setLanguageList,
+  onEdit,
+}) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Language Data
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Fetch Language Data
   useEffect(() => {
     if (!profileId) return;
 
     setLoading(true);
     axios
-      .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${profileId}`,
-        { withCredentials: true }
-      )
+      .get(`${API_URL}/accounts-jobseeker/language/?profile=${profileId}`, {
+        withCredentials: true,
+      })
       .then((res) => {
         setLanguageList(res.data);
         setLoading(false);
@@ -25,7 +31,9 @@ export default function LanguageList({ profileId, languageList, setLanguageList,
   }, [profileId, setLanguageList]);
 
   if (loading) {
-    return <div className="text-gray-500 text-sm italic">Loading languages...</div>;
+    return (
+      <div className="text-gray-500 text-sm italic">Loading languages...</div>
+    );
   }
 
   if (!languageList || languageList.length === 0) {
@@ -42,7 +50,7 @@ export default function LanguageList({ profileId, languageList, setLanguageList,
             className="flex justify-between items-center border-b pb-2"
           >
             <div>
-              <p className="font-medium">{lang.name}</p>
+              <p className="font-medium">Language Name: {lang.name}</p>
               <p className="text-gray-500 text-sm">
                 Proficiency: {lang.proficiency}
               </p>

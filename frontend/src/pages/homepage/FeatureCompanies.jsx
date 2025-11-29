@@ -11,7 +11,7 @@ const NextArrow = ({ onClick, show }) => {
   return (
     <div
       onClick={onClick}
-      className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border shadow-md rounded-full p-2 cursor-pointer hover:bg-gray-100"
+      className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-[#1A82DE] text-[#1A82DEEB] shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1A82DEEB] hover:text-white duration-300"
     >
       <ChevronRight size={20} />
     </div>
@@ -23,7 +23,7 @@ const PrevArrow = ({ onClick, show }) => {
   return (
     <div
       onClick={onClick}
-      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border shadow-md rounded-full p-2 cursor-pointer hover:bg-gray-100"
+      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border-[#1A82DE] text-[#1A82DEEB] border shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1A82DEEB] hover:text-white duration-300"
     >
       <ChevronLeft size={20} />
     </div>
@@ -33,42 +33,59 @@ const PrevArrow = ({ onClick, show }) => {
 export default function FeaturedCompanies() {
   const navigate = useNavigate();
   const sliderRef = useRef(null);
+
   const [companies, setCompanies] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(5);
 
+  // ⭐ Added — fix refresh: wait rendering until width detected
+  const [isReady, setIsReady] = useState(false);
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // ⭐ Fetch API
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/accounts-employer/company/")
-      .then((res) => {
-        console.log("Company API Response:", res.data);
-        const data = res.data.companies || []; // 👈 correct key
-        setCompanies(data);
-      })
-      .catch((err) => {
-        console.error("Error fetching companies:", err);
-      });
+      .get(`${API_URL}/accounts-employer/company/`)
+      .then((res) => setCompanies(res.data.companies || []))
+      .catch((err) => console.error("Error fetching companies:", err));
   }, []);
+
+  // ⭐ FIX refresh issue: detect screen width BEFORE showing slider
+  useEffect(() => {
+    function updateSlides() {
+      const width = window.innerWidth;
+
+      if (width < 480) setSlidesToShow(1);
+      else if (width < 640) setSlidesToShow(2);
+      else if (width < 1024) setSlidesToShow(3);
+      else if (width < 1280) setSlidesToShow(4);
+      else setSlidesToShow(5);
+    }
+
+    updateSlides();       // run before showing slider
+    setIsReady(true);     // allow slider to render after width detection
+
+    window.addEventListener("resize", updateSlides);
+    return () => window.removeEventListener("resize", updateSlides);
+  }, []);
+
+  if (!isReady) return null; // prevent wrong first render
 
   const settings = {
     dots: true,
     infinite: false,
     speed: 500,
-    slidesToShow: 5,
+    slidesToShow,
     slidesToScroll: 1,
     beforeChange: (oldIndex, newIndex) => setCurrentSlide(newIndex),
-    responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 4 } },
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 640, settings: { slidesToShow: 2 } },
-      { breakpoint: 420, settings: { slidesToShow: 1 } },
-    ],
   };
 
   const lastSlideIndex = companies.length - slidesToShow;
 
   return (
     <div className="relative px-4 py-4">
+
       <PrevArrow
         onClick={() => sliderRef.current.slickPrev()}
         show={currentSlide !== 0}
@@ -79,20 +96,21 @@ export default function FeaturedCompanies() {
           <div key={i} className="px-3">
             <div
               onClick={() => navigate(`/companies/${company.id}`)}
-              className="border rounded-lg shadow-md text-center py-4 bg-gray-100 flex flex-col gap-[10px] items-center justify-center border-[#EDEDED] opacity-100 cursor-pointer"
+              className="border company-border-custom rounded-3xl shadow-md text-center py-4 company-bg-custom flex flex-col gap-[10px] items-center justify-center cursor-pointer"
             >
               <img
                 src={company.logo || "/default-logo.png"}
                 alt={company.business_name}
-                className="h-12 mx-auto mb-4 object-contain gray-text-custom"
+                className="h-12 mb-1.5 mx-auto object-contain"
               />
-              <h3 className="font-semibold gray-text-custom py-2 text-lg">
+
+              <h3 className="font-semibold text-lg">
                 {company.business_name}
               </h3>
-              <p className="text-sm gray-text-custom mb-3">
-                {company.industry || "No industry info"}
-              </p>
-              <button className="px-4 py-1 rounded-md bg-[#E6F4FE] custom-blue-text">
+
+              <p className="text-sm mb-1">{company.industry || "No industry info"}</p>
+
+              <button className="px-10 py-1.5 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB]">
                 {company.job_count || 0} jobs
               </button>
             </div>
@@ -104,6 +122,7 @@ export default function FeaturedCompanies() {
         onClick={() => sliderRef.current.slickNext()}
         show={currentSlide < lastSlideIndex}
       />
+
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getJobs, deleteJob } from "../../../utils/api/jobAPI";
 import { useNavigate } from "react-router-dom";
 import JobDeleteModal from "../../../components/employer/jobs/JobDeleteModal";
+import Pagination from "../../../components/common/Pagination";
 
 // Get CSRF Token
 function getCookie(name) {
@@ -23,11 +24,18 @@ const csrftoken = getCookie("csrftoken");
 export default function MyJobs() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
 
+  // ⭐ Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  // Load data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,6 +55,7 @@ export default function MyJobs() {
 
   const handleDelete = async (id) => {
     if (!id) return;
+
     try {
       await deleteJob(id, csrftoken);
       setJobs((prev) => prev.filter((job) => job.id !== id));
@@ -58,20 +67,59 @@ export default function MyJobs() {
     }
   };
 
-  const handleDetail = (id) => navigate(`/employer/dashboard/my-jobs/${id}/detail`);
-  const handleEdit = (job) => navigate(`/employer/dashboard/my-jobs/${job.id}/edit`);
+  const handleDetail = (id) =>
+    navigate(`/employer/dashboard/my-jobs/${id}/detail`);
 
-  // Filtered jobs by search and status
+  const handleEdit = (job) =>
+    navigate(`/employer/dashboard/my-jobs/${job.id}/edit`);
+
+  // ⭐ Compute job status
+  function getJobStatus(job) {
+    const today = new Date();
+
+    // Expired (deadline passed)
+    if (job.deadline && new Date(job.deadline) < today) {
+      return "Expired";
+    }
+
+    // Closed (is_active = false)
+    if (!job.is_active) {
+      return "Closed";
+    }
+
+    // Active
+    return "Active";
+  }
+
+  // ⭐ 1 — Filter jobs BEFORE pagination
   const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = job.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase();
+
+    // Search by title OR category name
+    const matchesSearch =
+      job.title?.toLowerCase().includes(search) ||
+      job.category_name?.toLowerCase().includes(search);
+
+    const jobStatus = getJobStatus(job);
+
     const matchesStatus =
       statusFilter === "All Status" ||
-      job.status?.toLowerCase() === statusFilter.toLowerCase();
+      jobStatus.toLowerCase() === statusFilter.toLowerCase();
+
     return matchesSearch && matchesStatus;
   });
 
+
+  // ⭐ 2 — Pagination logic AFTER filteredJobs exists
+  const indexLast = currentPage * itemsPerPage;
+  const indexFirst = indexLast - itemsPerPage;
+  const currentJobs = filteredJobs.slice(indexFirst, indexLast);
+
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+
   return (
     <div className="px-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-lg font-semibold text-gray-700">Post Jobs</h1>
         <button
@@ -88,18 +136,25 @@ export default function MyJobs() {
           type="text"
           placeholder="Search"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="flex-1 bg-white border rounded-md p-3 shadow-sm focus:outline-none"
         />
+
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full md:w-48 bg-white border rounded-md p-3 shadow-sm"
         >
           <option>All Status</option>
           <option>Active</option>
           <option>Closed</option>
-          <option>Pending</option>
+          <option>Expired</option>
         </select>
       </div>
 
@@ -109,25 +164,39 @@ export default function MyJobs() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-gray-700 font-semibold text-sm">Title</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Job Function</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Post Date</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Status</th>
-              <th className="p-3 text-gray-700 font-semibold text-sm">Action</th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">
+                Job Category
+              </th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">
+                Post Date
+              </th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">
+                Status
+              </th>
+              <th className="p-3 text-gray-700 font-semibold text-sm">
+                Action
+              </th>
             </tr>
           </thead>
+
           <tbody>
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <tr key={job.id} className="border-t hover:bg-gray-50 transition-colors">
+            {currentJobs.length > 0 ? (
+              currentJobs.map((job) => (
+                <tr
+                  key={job.id}
+                  className="border-t hover:bg-gray-50 transition-colors"
+                >
                   <td className="p-3 text-gray-800">{job.title || "N/A"}</td>
-                  <td className="p-3 text-gray-600">{job.category_name || "N/A"}</td>
+                  <td className="p-3 text-gray-600">
+                    {job.category_name || "N/A"}
+                  </td>
                   <td className="p-3 text-gray-600">
                     {job.created_at
                       ? new Date(job.created_at).toLocaleDateString()
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-600">
-                    {job.status || "Status"}
+                    {getJobStatus(job)}
                   </td>
                   <td className="p-3 space-x-3">
                     <button
@@ -162,13 +231,12 @@ export default function MyJobs() {
         </table>
       </div>
 
-      {/* Pagination UI only */}
-      <div className="flex justify-end items-center mt-6 space-x-2 text-sm text-gray-600">
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">1</button>
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">2</button>
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">3</button>
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">Next &gt;</button>
-      </div>
+      {/* Pagination Component */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       {/* Delete Modal */}
       <JobDeleteModal
@@ -181,4 +249,3 @@ export default function MyJobs() {
     </div>
   );
 }
-

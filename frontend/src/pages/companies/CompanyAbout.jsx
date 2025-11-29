@@ -10,6 +10,8 @@ import {
   Users,
   Briefcase,
 } from "lucide-react";
+import { getLocationLabel } from "../../utils/locationHelpers";
+
 
 export default function CompanyAbout() {
   const { id } = useParams();
@@ -17,12 +19,13 @@ export default function CompanyAbout() {
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchCompany = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/accounts-employer/job/company/${id}/`
+          `${API_URL}/accounts-employer/job/company/${id}/`
         );
         const companyData = res.data.company_s[0];
         const jobsData = res.data.jobs_in_com_s;
@@ -54,7 +57,7 @@ export default function CompanyAbout() {
       <div className="relative w-full h-64 md:h-80 bg-gradient-to-r from-blue-700 to-indigo-600 flex flex-col justify-center items-center text-white">
         <img
           src={
-            company.logo ? `http://127.0.0.1:8000${company.logo}` : "/logo.png"
+            company.logo ? `${API_URL}${company.logo}` : "/logo.png"
           }
           alt="Company Logo"
           className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
@@ -77,15 +80,16 @@ export default function CompanyAbout() {
         <h2 className="text-2xl font-bold mb-5">About Company</h2>
 
         <div className="relative">
-          {/* ✅ Right — Info Card (Float right like image) */}
+          {/* Right Info Card */}
           <aside className="float-right w-full md:w-1/3 bg-gray-50 rounded-xl shadow-sm p-6 space-y-4 border border-gray-200 ml-6 mb-4">
-            
             <div>
               <User className="inline-block w-5 h-5 text-blue-600 mr-2" />
               <span className="font-semibold">Full Name</span>
-              <p>{company.first_name} {company.last_name}</p>
+              <p>
+                {company.first_name} {company.last_name}
+              </p>
             </div>
-            
+
             <div>
               <Mail className="inline-block w-5 h-5 text-blue-600 mr-2" />
               <span className="font-semibold">Email</span>
@@ -123,10 +127,14 @@ export default function CompanyAbout() {
             </div>
           </aside>
 
-          {/* ✅ Left — Description (Text wraps automatically) */}
-          <div className="text-gray-700 leading-relaxed">
+          {/* Left Description with HTML support */}
+          <div className="text-gray-700 leading-relaxed prose max-w-none">
             {company.description ? (
-              <p className="whitespace-pre-line">{company.description}</p>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: company.description,
+                }}
+              />
             ) : (
               <p className="text-gray-500 italic">No description provided.</p>
             )}
@@ -151,7 +159,7 @@ export default function CompanyAbout() {
                 <h4 className="text-lg font-semibold text-gray-800 mb-1">
                   {job.title}
                 </h4>
-                <p className="text-gray-600 text-sm mb-2">{job.location}</p>
+                <p className="text-gray-600 text-sm mb-2">{getLocationLabel(job.location)}</p>
                 <p className="text-gray-600 text-sm">
                   💰 <strong>{job.salary || "Negotiable"}</strong>
                 </p>

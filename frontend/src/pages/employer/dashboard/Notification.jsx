@@ -10,10 +10,10 @@ export default function Notification() {
   const [filter, setFilter] = useState("all");
   const notifRef = useRef(null);
 
-  // ✅ unread count
+  // unread count
   const unreadCount = notifications?.filter((n) => !n.is_read)?.length || 0;
 
-  // ✅ Outside click → close popup
+  // Outside click → close popup
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -37,12 +37,12 @@ export default function Notification() {
   const filteredNotifications = notifications.filter((n) => {
     if (filter === "unread") return !n.is_read;
     if (filter === "read") return n.is_read;
-    return true; // all
+    return true;
   });
 
   return (
     <div className="relative" ref={notifRef}>
-      {/* 🔔 Bell icon */}
+      {/* Bell icon */}
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="relative p-2 rounded-full hover:bg-gray-200"
@@ -55,7 +55,7 @@ export default function Notification() {
         )}
       </button>
 
-      {/* 📬 Notification Popup */}
+      {/* Notification Popup */}
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg z-20 max-h-96 overflow-y-auto">
           <div className="flex justify-between items-center px-4 py-2 border-b">
@@ -126,7 +126,7 @@ export default function Notification() {
                   </p>
                 </div>
 
-                {/* 🗑 Delete button */}
+                {/* Delete button */}
                 <button
                   onClick={() => {
                     if (!n.is_read) {

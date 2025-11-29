@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function LanguageModal({
   isOpen,
@@ -13,9 +14,10 @@ export default function LanguageModal({
     name: "",
     proficiency: "Beginner",
   });
-  const [loading, setLoading] = useState(false);
 
-  // ✅ CSRF Helper
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // CSRF Helper
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -31,7 +33,7 @@ export default function LanguageModal({
     return cookieValue;
   }
 
-  // ✅ When editing, prefill data
+  // When editing, prefill data
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -48,7 +50,7 @@ export default function LanguageModal({
 
   if (!isOpen) return null;
 
-  // ✅ Input change handler
+  // Input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -57,24 +59,23 @@ export default function LanguageModal({
     }));
   };
 
-  // ✅ Submit form
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
 
     if (!profileId) {
-      alert("❌ Profile not found. Cannot save language.");
+      toast.error("Profile not found. Cannot save language.");
       return;
     }
 
-    setLoading(true);
     try {
       let response;
       if (editData) {
         // Update existing
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/language/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/language/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -87,7 +88,7 @@ export default function LanguageModal({
       } else {
         // Create new
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/language/",
+          `${API_URL}/accounts-jobseeker/language/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -100,17 +101,15 @@ export default function LanguageModal({
       }
 
       onSuccess(response.data);
-      alert("✅ Language saved successfully!");
+      toast.success(editData ? "Language updated successfully" : "Language saved successfully");
       onClose();
     } catch (error) {
       console.error("❌ Failed to save language:", error.response?.data || error);
-      alert(
+      toast.error(
         `Failed to save language.\n${
           error.response?.data?.detail || "Check your token or form data."
         }`
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -175,9 +174,8 @@ export default function LanguageModal({
             <button
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
-              disabled={loading}
             >
-              {loading ? "Updating..." : "Update"}
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"

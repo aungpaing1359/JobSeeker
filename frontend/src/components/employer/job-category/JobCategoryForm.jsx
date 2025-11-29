@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function JobCategoryForm({ onSuccess, categoryId }) {
   const [categoryName, setCategoryName] = useState("");
+  const [error, setError] = useState(""); // 💥 frontend error message
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
-  // Edit အတွက် detail load
+  // Edit detail load
   useEffect(() => {
     if (categoryId) {
       axios
-        .get(`http://127.0.0.1:8000/job/job-categories/detail/${categoryId}/`)
+        .get(`${API_URL}/job/job-categories/detail/${categoryId}/`)
         .then((res) => setCategoryName(res.data.name))
         .catch((err) => console.error("Error fetching detail:", err));
     }
@@ -20,6 +22,14 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    // 🚨 frontend validation
+    if (!categoryName.trim()) {
+      setError("Category name is required");
+      return;
+    }
+
     setLoading(true);
 
     const csrfToken = document.cookie
@@ -29,42 +39,39 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
 
     try {
       if (categoryId) {
-        // Update
         await axios.put(
-          `http://127.0.0.1:8000/job/job-categories/update/${categoryId}/`,
+          `${API_URL}/job/job-categories/update/${categoryId}/`,
           { name: categoryName },
           {
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-            },
+            headers: { "X-CSRFToken": csrfToken },
             withCredentials: true,
           }
         );
-        toast.success("✅ Category updated!");
+        toast.success("Category updated!");
       } else {
-        // Create
         await axios.post(
-          "http://127.0.0.1:8000/job/job-categories/create/",
+          `${API_URL}/job/job-categories/create/`,
           { name: categoryName },
           {
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-            },
+            headers: { "X-CSRFToken": csrfToken },
             withCredentials: true,
           }
         );
-        toast.success("✅ Category created!");
+        toast.success("Category created!");
       }
+
       setCategoryName("");
       onSuccess && onSuccess();
-
       navigate("/employer/dashboard/job-category");
-
     } catch (err) {
       console.error("Error saving:", err);
-      toast.error("❌ Error saving category");
+
+      // 🚨 backend duplicate error handling
+      if (err.response?.data?.name) {
+        toast.error(err.response.data.name[0]); // serializer error message
+      } else {
+        toast.error("Error saving category");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,13 +82,25 @@ export default function JobCategoryForm({ onSuccess, categoryId }) {
       <h2 className="text-xl font-bold mb-4">
         {categoryId ? "Edit Category" : "Add Category"}
       </h2>
+
+      {/* 🚨 frontend error message */}
+      {error && (
+        <p className="text-red-600 text-sm mb-1 font-medium">{error}</p>
+      )}
+
       <input
         type="text"
         value={categoryName}
-        onChange={(e) => setCategoryName(e.target.value)}
-        className="border rounded-md px-4 py-2 w-full mb-4"
+        onChange={(e) => {
+          setCategoryName(e.target.value);
+          setError(""); // typing လုပ်ရင် error clear
+        }}
+        className={`border rounded-md px-4 py-2 w-full mb-4 ${
+          error ? "border-red-500" : "border-gray-300"
+        }`}
         placeholder="Category name"
       />
+
       <button
         type="submit"
         disabled={loading}

@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function ExperienceList({ profileId, experienceList, setExperienceList, onEdit }) {
+export default function ExperienceList({
+  profileId,
+  experienceList,
+  setExperienceList,
+  onEdit,
+}) {
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch Experience Data
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Fetch Experience Data
   useEffect(() => {
     if (!profileId) return;
 
     setLoading(true);
     axios
-      .get(
-        `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${profileId}`,
-        { withCredentials: true }
-      )
+      .get(`${API_URL}/accounts-jobseeker/experience/?profile=${profileId}`, {
+        withCredentials: true,
+      })
       .then((res) => {
         setExperienceList(res.data);
         setLoading(false);
@@ -44,19 +50,27 @@ export default function ExperienceList({ profileId, experienceList, setExperienc
             className="flex justify-between items-center border-b pb-2"
           >
             <div>
-              <p className="font-medium">{exp.job_title}</p>
-              <p className="text-gray-500 text-sm">
-                {exp.company_name} - {exp.position}
-              </p>
+              <p className="font-medium">Job Title: {exp.job_title}</p>
+              {exp.company_name && (
+                <p className="text-gray-500 text-sm">
+                  Company Name: {exp.company_name}
+                </p>
+              )}
+              {exp.position && (
+                <p className="text-gray-500 text-sm">
+                  Position: {exp.position}
+                </p>
+              )}
               <p className="text-gray-400 text-sm">
-                {exp.start_date} - {exp.is_current ? "Present" : exp.end_date}
+                Work Time: {exp.start_date} -{" "}
+                {exp.is_current ? "Present" : exp.end_date}
               </p>
               {exp.location && (
-                <p className="text-sm text-gray-500">📍 {exp.location}</p>
+                <p className="text-sm text-gray-500">Location: {exp.location}</p>
               )}
               {exp.description && (
                 <p className="text-sm text-gray-500 italic mt-1">
-                  {exp.description}
+                  Description: {exp.description}
                 </p>
               )}
             </div>

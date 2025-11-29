@@ -6,9 +6,11 @@ export default function JobCategoryDetail() {
   const { id } = useParams();
   const [category, setCategory] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/job/job-categories/detail/${id}/`)
+      .get(`${API_URL}/job/job-categories/detail/${id}/`)
       .then((res) => setCategory(res.data))
       .catch((err) => console.error("Error fetching detail:", err));
   }, [id]);

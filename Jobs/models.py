@@ -10,17 +10,25 @@ class JobCategory(models.Model):
         default=uuid.uuid4,    # Auto-generate UUID v4
         editable=False         # User လက်နဲ့ မပြင်နိုင်အောင် lock
     )
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     updated_at = models.DateTimeField(auto_now=True,blank=True,null=True)
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE,blank=True,null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "name"],
+                name="unique_category_per_user"
+            )
+        ]
 
     def __str__(self):
         return self.name
 
 #manager job
 class JobsManager(models.Manager):  
-    
+     
     def quick_search_by_city(self, city_name):
         qs=self.get_queryset()
         if city_name:

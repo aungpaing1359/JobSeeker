@@ -65,11 +65,13 @@ export default function ProfileMe() {
 
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchEducations = async () => {
     if (!profile.id) return;
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/accounts-jobseeker/education/?profile=${profile.id}`,
+        `${API_URL}/accounts-jobseeker/education/?profile=${profile.id}`,
         { withCredentials: true }
       );
       setEducationList(res.data);
@@ -82,7 +84,7 @@ export default function ProfileMe() {
     if (!profile.id) return;
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/accounts-jobseeker/experience/?profile=${profile.id}`,
+        `${API_URL}/accounts-jobseeker/experience/?profile=${profile.id}`,
         { withCredentials: true }
       );
       setExperienceList(res.data);
@@ -95,7 +97,7 @@ export default function ProfileMe() {
     if (!profile.id) return;
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/accounts-jobseeker/language/?profile=${profile.id}`,
+        `${API_URL}/accounts-jobseeker/language/?profile=${profile.id}`,
         { withCredentials: true }
       );
       setLanguageList(res.data);
@@ -108,7 +110,7 @@ export default function ProfileMe() {
     if (!profile.id) return;
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/accounts-jobseeker/skill/?profile=${profile.id}`,
+        `${API_URL}/accounts-jobseeker/skill/?profile=${profile.id}`,
         { withCredentials: true }
       );
       setSkillList(res.data);
@@ -141,12 +143,9 @@ export default function ProfileMe() {
       navigate("/sign-in", { replace: true });
     } else {
       axios
-        .get(
-          `${
-            import.meta.env.VITE_API_URL
-          }/accounts-jobseeker/jobseekerprofile/`,
-          { withCredentials: true }
-        )
+        .get(`${API_URL}/accounts-jobseeker/jobseekerprofile/`, {
+          withCredentials: true,
+        })
         .then((res) => {
           const profileData =
             Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : {};
@@ -178,7 +177,7 @@ export default function ProfileMe() {
     try {
       const csrfToken = getCookie("csrftoken");
       const res = await axios.put(
-        `${import.meta.env.VITE_API_URL}/accounts-jobseeker/jobseekerprofile/${
+        `${API_URL}/accounts-jobseeker/jobseekerprofile/${
           profile.id
         }/`,
         formData,
@@ -272,7 +271,7 @@ export default function ProfileMe() {
                 <span>{profile.email || "Your Email"}</span>
               </div>
             </div>
-          </div>         
+          </div>
 
           {/* ✅ 2. Profile Info (Now Left-Aligned / Normal) */}
           <div className="flex flex-col text-[#ffffffb0] order-2 md:order-2">

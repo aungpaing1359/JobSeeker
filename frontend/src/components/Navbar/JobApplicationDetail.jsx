@@ -1,31 +1,15 @@
-// src/pages/JobApplicationDetail.jsx
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useJobApply } from "../../context/JobApplyContext";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function JobApplicationDetail() {
-  const { id } = useParams(); // application id
-  const [applicationDetail, setApplicationDetail] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { getApplicationDetail, applicationDetail, loading } = useJobApply();
 
   useEffect(() => {
-    async function fetchApplicationDetail() {
-      try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/application/application/apply/job/detail/${id}/`,
-          { withCredentials: true }
-        );
-        console.log("API Response:", response.data);
-        setApplicationDetail(response.data.application_detail);
-      } catch (error) {
-        console.error("Failed to load job application detail:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchApplicationDetail();
+    if (id) getApplicationDetail(id);
   }, [id]);
 
   if (loading)
@@ -44,20 +28,16 @@ export default function JobApplicationDetail() {
         ← Back
       </button>
 
-      {/* ✅ Job Information */}
       <h1 className="text-2xl font-semibold mb-2">{job?.title}</h1>
       <p className="text-gray-600">{job?.employer}</p>
       <p className="text-gray-500 text-sm mb-3">
-        {job?.location} • {job?.job_type}
+        {getLocationLabel(job?.location)} • {job?.job_type}
       </p>
 
-      {/* ✅ Applied Date */}
       <p className="text-sm text-gray-600 mt-1">
-        Applied at:{" "}
-        {applied_at ? new Date(applied_at).toLocaleString() : "—"}
+        Applied at: {applied_at ? new Date(applied_at).toLocaleString() : "—"}
       </p>
 
-      {/* ✅ Job Details */}
       <div className="bg-gray-50 p-5 rounded-lg border mt-4">
         <p className="text-gray-700 mb-2">
           <strong>Category:</strong> {job?.category_name}
@@ -67,9 +47,7 @@ export default function JobApplicationDetail() {
         </p>
         <p className="text-gray-700 mb-2">
           <strong>Deadline:</strong>{" "}
-          {job?.deadline
-            ? new Date(job.deadline).toLocaleDateString()
-            : "—"}
+          {job?.deadline ? new Date(job.deadline).toLocaleDateString() : "—"}
         </p>
         <p className="text-gray-700 mt-4 whitespace-pre-wrap">
           {job?.description}

@@ -49,21 +49,5 @@ def cache_old_status(sender, instance, **kwargs):
         instance._old_status = getattr(old, "status", None)
     except Application.DoesNotExist:
         instance._old_status = None
-
-
+        
 # -------- Application status changed -> notify jobseeker --------
-@receiver(post_save, sender=Application)
-def notify_on_application_status_change(sender, instance, created, **kwargs):
-    if created:
-        return  # handled above
-    old_status = getattr(instance, "_old_status", None)
-    new_status = getattr(instance, "status", None)
-    if old_status != new_status:
-        jobseeker_user = instance.jobseeker.user
-        transaction.on_commit(lambda: Notification.objects.create(
-            user=jobseeker_user,
-            message=f"Your application status changed: {old_status} → {new_status}.",
-            type="application_update",
-            content_type=ContentType.objects.get_for_model(Application),
-            object_id=instance.id,
-        ))

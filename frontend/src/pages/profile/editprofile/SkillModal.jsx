@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function SkillModal({
   isOpen,
@@ -14,7 +15,9 @@ export default function SkillModal({
     proficiency_level: 1,
   });
 
-  // ✅ Cookie getter (for CSRF)
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Cookie getter (for CSRF)
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -30,7 +33,7 @@ export default function SkillModal({
     return cookieValue;
   }
 
-  // ✅ If editData exists, fill form
+  // If editData exists, fill form
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -59,14 +62,14 @@ export default function SkillModal({
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
-    if (!profileId) return alert("Profile not found.");
+    if (!profileId) return toast.error("Profile not found.");
 
     try {
       let response;
       if (editData) {
-        // ✅ Update existing skill
+        // Update existing skill
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/skill/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/skill/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -77,9 +80,9 @@ export default function SkillModal({
           }
         );
       } else {
-        // ✅ Create new skill
+        // Create new skill
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/skill/",
+          `${API_URL}/accounts-jobseeker/skill/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -92,13 +95,13 @@ export default function SkillModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        alert("Skill updated successfully!");
+        toast.success(editData ? "Skill updated successfully" : "Skill saved successfully");
         onSuccess?.(response.data);
         onClose();
       }
     } catch (err) {
       console.error("Error saving skill:", err);
-      alert("Failed to save skill. Check your form data.");
+      toast.error("Failed to save skill. Check your form data.");
     }
   };
 
@@ -163,7 +166,7 @@ export default function SkillModal({
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
-              Update
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"

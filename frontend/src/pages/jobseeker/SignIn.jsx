@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaFacebook } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/userAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState(""); // validation error state
+  const [error, setError] = useState("");
   const { loading, message, signIn } = useAuth();
   const navigate = useNavigate();
 
-  const allowedDomains = ["gmail.com", "outlook.com"]; // ✅ allowed domains
+  const allowedDomains = ["gmail.com", "outlook.com"];
 
   const validateEmail = (email) => {
     // basic email format check
@@ -49,10 +49,10 @@ const SignIn = () => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "Poppins, sans-serif" }}>
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <NavLink to="/" className="text-2xl font-bold text-blue-600">
+          <NavLink to="/" className="text-2xl font-bold custom-blue-text">
             Jobseeker
           </NavLink>
         </div>
@@ -60,7 +60,7 @@ const SignIn = () => {
 
       <main className="flex-grow flex justify-center items-center px-4">
         <div className="bg-blue-50 rounded-lg py-15 px-8 w-full max-w-xl shadow-md">
-          <p className="text-center text-sm mb-1">
+          <p className="text-center text-md mb-1">
             Are you looking for an{" "}
             <Link
               to="/employer/sign-in"
@@ -87,20 +87,20 @@ const SignIn = () => {
               }
             }}
             placeholder="Email Address"
-            className={`w-full mb-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+            className={`w-full mb-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
               error
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-600"
             }`}
           />
 
-          {/* ✅ Error message only appears after clicking sign in */}
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {/* Error message only appears after clicking sign in */}
+          {error && <p className="text-red-500 text-md mb-4">{error}</p>}
 
           <button
             onClick={handleSignIn}
             disabled={loading}
-            className={`w-full py-3 rounded-lg text-lg font-medium transition ${
+            className={`w-full mt-4 py-3 rounded-lg text-lg font-medium transition ${
               loading
                 ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
                 : "bg-blue-600 text-white hover:bg-blue-700"
@@ -110,7 +110,7 @@ const SignIn = () => {
           </button>
 
           {/* Social Buttons */}
-          <div className="flex items-center my-6 text-sm text-gray-600">
+          <div className="flex items-center my-6 text-md text-gray-600">
             <hr className="flex-grow border-gray-300" />
             <span className="mx-3 whitespace-nowrap">
               Or another continue With
@@ -118,7 +118,7 @@ const SignIn = () => {
             <hr className="flex-grow border-gray-300" />
           </div>
 
-          <button className="w-full mb-3 flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 hover:bg-gray-100 transition-colors shadow-sm">
+          <button className="w-full mb-3 flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-3 hover:bg-gray-100 transition-colors shadow-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -148,21 +148,16 @@ const SignIn = () => {
             </span>
           </button>
 
-          <button className="w-full flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 hover:bg-gray-100 transition-colors shadow-sm">
+          <button className="w-full flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-3 hover:bg-gray-100 transition-colors shadow-sm">
             <FaFacebook size={20} color="#1877F2" />
             <span className="font-medium text-gray-700">
               Continue with Facebook
             </span>
           </button>
-
-          <p className="mt-6 text-center text-sm text-gray-700">
-            Already have{" "}
-            <span className="text-gray-900 font-semibold">your</span> account?{" "}
-          </p>
         </div>
       </main>
 
-      <footer className="h-12 flex items-center justify-center border-t border-gray-200 text-sm text-gray-500">
+      <footer className="h-12 flex items-center justify-center border-t border-gray-200 text-md text-gray-500">
         © 2023 Copyright: Jobstreet .com
       </footer>
     </div>

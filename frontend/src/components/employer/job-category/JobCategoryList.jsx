@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Pagination from "../../common/Pagination"; // 👉 path ကိုလိုအပ်ရာပြင်ပါ
 
 export default function JobCategoryList({ categories, onDelete }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  // ⭐ Pagination logic
+  const indexLast = currentPage * itemsPerPage;
+  const indexFirst = indexLast - itemsPerPage;
+  const currentItems = categories.slice(indexFirst, indexLast);
+
+  const totalPages = Math.ceil(categories.length / itemsPerPage);
+
   return (
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">Category List</h2>
+
       <ul className="space-y-2">
-        {categories.length > 0 ? (
-          categories.map((cat) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((cat) => (
             <li
               key={cat.id}
               className="px-4 py-2 border rounded-md shadow-sm flex justify-between items-center"
@@ -39,6 +51,13 @@ export default function JobCategoryList({ categories, onDelete }) {
           <p className="text-gray-500">No categories found</p>
         )}
       </ul>
+
+      {/* ⭐ Pagination Component */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
     </div>
   );
 }

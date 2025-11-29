@@ -1,6 +1,5 @@
 # Accounts/models.py
 from django.db import models
-
 import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
@@ -31,8 +30,7 @@ class CustomUserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 #end of custom user manager
 
-class CustomUser(AbstractUser):
-                            
+class CustomUser(AbstractUser):                          
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = None # completely remove username
     email = models.EmailField(unique=True)
@@ -44,7 +42,7 @@ class CustomUser(AbstractUser):
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []  # no username required
     objects = CustomUserManager() # specify the custom manager

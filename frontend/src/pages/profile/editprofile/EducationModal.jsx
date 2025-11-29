@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function EducationModal({
   isOpen,
   onClose,
   profileId,
   profileName,
-  editData, // <-- edit mode အတွက်
-  onSuccess, // <-- POST / PUT ပြီးနောက် refresh လုပ်ဖို့
+  editData,
+  onSuccess,
 }) {
   const [formData, setFormData] = useState({
     school_name: "",
@@ -20,6 +21,8 @@ export default function EducationModal({
     location: "",
     is_current: false,
   });
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Cookie getter
   function getCookie(name) {
@@ -37,7 +40,7 @@ export default function EducationModal({
     return cookieValue;
   }
 
-  // editData ရှိရင် form ထဲပြန်ဖြည့်
+  // editData
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -80,14 +83,14 @@ export default function EducationModal({
   const handleSave = async (formData) => {
     try {
       const res = await axios.post(
-        `http://127.0.0.1:8000/accounts-jobseeker/education/`,
+        `${API_URL}/accounts-jobseeker/education/`,
         formData,
         { withCredentials: true }
       );
 
       // Success callback
       if (onSuccess) {
-        // onSuccess ကို refresh လုပ်စရာမလိုပဲ new data return
+        
         onSuccess(res.data);
       }
       onClose();
@@ -100,13 +103,13 @@ export default function EducationModal({
     e.preventDefault();
 
     const csrftoken = getCookie("csrftoken");
-    if (!profileId) return alert("Profile not found.");
+    if (!profileId) return toast.error("Profile not found.");
 
     try {
       let response;
       if (editData) {
         response = await axios.put(
-          `http://127.0.0.1:8000/accounts-jobseeker/education/${editData.id}/`,
+          `${API_URL}/accounts-jobseeker/education/${editData.id}/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -118,7 +121,7 @@ export default function EducationModal({
         );
       } else {
         response = await axios.post(
-          "http://127.0.0.1:8000/accounts-jobseeker/education/",
+          `${API_URL}/accounts-jobseeker/education/`,
           { ...formData, profile: profileId },
           {
             headers: {
@@ -131,13 +134,13 @@ export default function EducationModal({
       }
 
       if (response.status === 200 || response.status === 201) {
-        alert(editData ? "Education updated!" : "Education added!");
-        onSuccess?.(response.data); // ← refresh လိုစရာမလိုဘဲ data update
+        toast.success(editData ? "Education updated successfully" : "Education saved successfully");
+        onSuccess?.(response.data);
         onClose();
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to save education. Check your form data.");
+      toast.error("Failed to save education. Check your form data.");
     }
   };
 

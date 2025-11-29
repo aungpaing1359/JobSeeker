@@ -18,7 +18,7 @@ export default function EditJob() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Choices arrays (Python → JS)
+  // job-type arrays
   const JOB_TYPE_CHOICES = [
     { value: "FULL", label: "Full-time" },
     { value: "PART", label: "Part-time" },
@@ -26,24 +26,25 @@ export default function EditJob() {
     { value: "REMOTE", label: "Remote" },
   ];
 
+  // Location arrays
   const LOCATION_CHOICES = [
-    { value: "MO", label: "MRAUK-U" },
-    { value: "MB", label: "MINBRAR" },
-    { value: "SIT", label: "SITTWE" },
-    { value: "RD", label: "RETHEEDAUNG" },
-    { value: "MD", label: "MAUNGDAW" },
-    { value: "KP", label: "KYAWTPYHU" },
-    { value: "TD", label: "THANDWE" },
-    { value: "TG", label: "TOUNGUP" },
-    { value: "AN", label: "ANN" },
-    { value: "PNG", label: "PONNAGYUN" },
-    { value: "KT", label: "KYAUKTAW" },
-    { value: "RM", label: "RAMREE" },
-    { value: "MA", label: "MANAUNG" },
-    { value: "GW", label: "GWA" },
-    { value: "PT", label: "PAUKTAW" },
-    { value: "BTD", label: "BUTHIDAUNG" },
-    { value: "MB", label: "MYEBON" },
+    { value: "MRAUK-U", label: "MRAUK-U" },
+    { value: "MINBRAR", label: "MINBRAR" },
+    { value: "SITTWE", label: "SITTWE" },
+    { value: "RETHEEDAUNG", label: "RETHEEDAUNG" },
+    { value: "MAUNGDAW", label: "MAUNGDAW" },
+    { value: "KYAWTPYHU", label: "KYAWTPYHU" },
+    { value: "THANDWE", label: "THANDWE" },
+    { value: "TOUNGUP", label: "TOUNGUP" },
+    { value: "ANN", label: "ANN" },
+    { value: "PONNAGYUN", label: "PONNAGYUN" },
+    { value: "KYAUKTAW", label: "KYAUKTAW" },
+    { value: "RAMREE", label: "RAMREE" },
+    { value: "MANAUNG", label: "MANAUNG" },
+    { value: "GWA", label: "GWA" },
+    { value: "PAUKTAW", label: "PAUKTAW" },
+    { value: "BUTHIDAUNG", label: "BUTHIDAUNG" },
+    { value: "MYEBON", label: "MYEBON" },
   ];
 
   const PRIORITY_CHOICES = [
@@ -63,7 +64,7 @@ export default function EditJob() {
         setCategories(catRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
-        toast.error("❌ Failed to load job or categories");
+        toast.error("Failed to load job or categories");
       } finally {
         setLoading(false);
       }
@@ -83,16 +84,16 @@ export default function EditJob() {
     e.preventDefault();
     try {
       await updateJob(id, job);
-      toast.success("✅ Job updated successfully");
+      toast.success("Job updated successfully");
       navigate("/employer/dashboard/my-jobs");
     } catch (err) {
       console.error("Error updating job:", err.response?.data || err);
-      toast.error("❌ Failed to update job");
+      toast.error("Failed to update job");
     }
   };
 
   // description quillModuls
-  // ✅ Full toolbar configuration
+  // Full toolbar configuration
   const quillModules = {
     toolbar: [
       [{ font: [] }, { size: [] }],
@@ -122,7 +123,7 @@ export default function EditJob() {
     "strike",
     "color",
     "background",
-    "list", // ✅ keep only 'list', remove 'bullet'
+    "list",
     "indent",
     "align",
     "blockquote",

@@ -3,15 +3,17 @@ import axios from "axios";
 import JobCategoryForm from "../../../components/employer/job-category/JobCategoryForm";
 import JobCategoryList from "../../../components/employer/job-category/JobCategoryList";
 import JobCategoryDeleteModal from "../../../components/employer/job-category/JobCategoryDeleteModal";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 export default function JobCategoryListPage() {
   const [categories, setCategories] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/job/job-categories/");
+      const res = await axios.get(`${API_URL}/job/job-categories/`);
       console.log(res.data);
       setCategories(res.data);
     } catch (err) {
@@ -29,7 +31,7 @@ export default function JobCategoryListPage() {
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/job/job-categories/delete/${id}/`,
+        `${API_URL}/job/job-categories/delete/${id}/`,
         { headers: { "X-CSRFToken": csrfToken }, withCredentials: true }
       );
       toast.success("✅ Category deleted!");
@@ -48,7 +50,10 @@ export default function JobCategoryListPage() {
   return (
     <div className="p-6">
       <JobCategoryForm onSuccess={fetchCategories} />
-      <JobCategoryList categories={categories} onDelete={(id) => setDeleteId(id)} />
+      <JobCategoryList
+        categories={categories}
+        onDelete={(id) => setDeleteId(id)}
+      />
 
       <JobCategoryDeleteModal
         isOpen={!!deleteId}

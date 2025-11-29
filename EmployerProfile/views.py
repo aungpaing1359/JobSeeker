@@ -14,9 +14,11 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q,F
 import json
 from .serializers import *
+from Jobs.serializers import *
+from Application.serializers import ApplicationListSerializer
 #models
 from Jobs.models import Jobs
 from Application.models import Application
@@ -48,97 +50,122 @@ def preregister_employer(request):
 # Complete registration (collect profile info)
 
 
-# register employerprofile
 @api_view(["POST"])
-@parser_classes([ MultiPartParser, FormParser])
+@parser_classes([MultiPartParser, FormParser])
 def register_employer(request, role):
     data = request.data.copy()
-    # profile ကို dict ပြောင်း
+    # --- Parse profile JSON ---
     profile_str = data.get("profile")
     if profile_str:
         try:
             profile_data = json.loads(profile_str)
         except json.JSONDecodeError:
-            return Response({"profile": ["Invalid JSON"]}, status=400)
+            return Response({"profile": ["Invalid JSON format."]}, status=400)
     else:
         profile_data = {}
     logo_file = request.FILES.get("logo")
-    serializer = EmployerRegisterSerializer(data={"profile": profile_data, "logo": logo_file})
-    if not serializer.is_valid():
-        print(serializer.errors)  # 🔍 check which field fail
-    if serializer.is_valid(raise_exception=True):
-        profile_data = serializer.validated_data["profile"]
-        logo= serializer.validated_data.get("logo")
-        # email & password from session (pre-register step)
-        email = request.session.get("user_email")
-        raw_password = request.session.get("user_password")
-        if not email or not raw_password:
-            return Response(
-                {"error": "Session expired. Please pre-register again."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        username = email.split("@")[0]
-        # create user
-        user = User.objects.create(
-            email=email,
-            role=role,
-            password=make_password(raw_password),
-            is_active=False,
-            is_verified=False
+    serializer = EmployerRegisterSerializer(
+        data={"profile": profile_data, "logo": logo_file}
+    )
+    serializer.is_valid(raise_exception=True)
+    # Fetch from session
+    email = request.session.get("user_email")
+    raw_password = request.session.get("user_password")
+
+    if not email or not raw_password:
+        return Response(
+            {"error": "Your session has expired. Please start registration again."},
+            status=400
         )
-        user.set_password(raw_password)   # <-- correct way
-        user.save()
-        # create employer profile
-        employer_profile = EmployerProfile.objects.create(user=user, **profile_data,logo=logo)
-        # log them in (session)
-        login(request, user)
-        # send verification email
-        send_verification_email(request, user)
-        request.session["pending_activation"] = True
-        # prepare response data
-        response_data = {
-           "profile": {
-                "message": "Employer registered successfully. Verification email sent.",
+    # ---------------------------------------------------------
+    #Friendly User Exists Check
+    # ---------------------------------------------------------
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {
+                "error": "This email is already registered. Try logging in instead.",
+                "code": "EMAIL_EXISTS",
+            },
+            status=409
+        )
+
+    # ---------------------------------------------------------
+    #EmployerProfile Exists Check
+    # (must check via user__email, not contact_email)
+    # ---------------------------------------------------------
+    if EmployerProfile.objects.filter(user__email=email).exists():
+        return Response(
+            {
+                "error": "An employer profile already exists for this email.",
+                "code": "PROFILE_EXISTS",
+            },
+            status=409
+        )
+
+    # ---------------------------------------------------------
+    #Create User safely
+    # ---------------------------------------------------------
+    user = User.objects.create(
+        email=email,
+        role=role,
+        is_active=False,
+        is_verified=False,
+    )
+    user.set_password(raw_password)
+    user.save()
+
+    # ---------------------------------------------------------
+    #Create Employer Profile
+    # ---------------------------------------------------------
+    profile_data = serializer.validated_data["profile"]
+    logo = serializer.validated_data.get("logo")
+    employer_profile = EmployerProfile.objects.create(
+        user=user, logo=logo, **profile_data
+    )
+
+    # Login + send email
+    login(request, user)
+    send_verification_email(request, user)
+    request.session["pending_activation"] = True
+    return Response(
+        {
+            "message": "Employer registered successfully. Verification email sent.",
+            "profile": {
                 "id": str(employer_profile.id),
-                "first_name": employer_profile.first_name,
-                "last_name": employer_profile.last_name,
                 "business_name": employer_profile.business_name,
                 "city": employer_profile.city,
-                "phone":employer_profile.phone,
-                "size":employer_profile.size,
-                "website":employer_profile.website,
-                "industry":employer_profile.industry,
-                "logo": request.build_absolute_uri(employer_profile.logo.url) 
-                        if employer_profile.logo and employer_profile.logo.name else None,
-                "founded_year":employer_profile.founded_year,
-                "contact_email":employer_profile.contact_email,
-            }
-        }
-    
-    return Response(response_data, status=status.HTTP_201_CREATED)
+                "phone": employer_profile.phone,
+                "logo": (
+                    request.build_absolute_uri(employer_profile.logo.url)
+                    if employer_profile.logo else None
+                ),
+            },
+        },
+        status=201
+    )
 # end register employerprofile
 
 #sign in employer
+@ratelimit(key='ip', rate='5/m', block=False)
 @api_view(["POST"])
-@ratelimit(key='ip', rate='5/m', block=False, method='POST')
 def login_employer(request):
-    # Check if rate limited with custom message
     if getattr(request, 'limited', False):
-        response = Response({
-            "detail": "Too many employer login attempts. Please wait one minute before trying again."
-        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
-        # Add retry-after header for better rate limit handling
+        response = Response(
+            {"detail": "Too many employer login attempts. Please wait one minute."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
         response['Retry-After'] = '60'
         return response
     email = request.data.get("email")
     password = request.data.get("password")
     user = authenticate(request, email=email, password=password)
     if user is not None:
-        if not user.is_verified:   # check your custom flag
-            return Response({"detail": "Please verify your email first."}, status=status.HTTP_403_FORBIDDEN)
-        login(request, user)  # ✅ sets sessionid cookie
-        return Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-    return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_verified:
+            return Response({"detail": "Please verify your email first."}, status=403)
+        login(request, user)
+        return Response({"detail": "Login successful"}, status=200)
+    return Response({"detail": "Invalid credentials"}, status=400)
+
 #end sign in employer
 
 #sign out employer
@@ -170,9 +197,17 @@ def emailverify_employer(request, uidb64, token):
 #end email verify
 
 #resend verification email
+@ratelimit(key='ip', rate='2/m', block=False)
 @api_view(["POST"])
 @permission_classes([AllowAny])  # not logged in — fine
 def resend_verification(request):
+    if getattr(request, 'limited', False):
+        response = Response(
+            {"detail": "Too many resend attempts. Please wait one minute."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+        response['Retry-After'] = '60'
+        return response    
     email = (request.session.get("user_email") or "").strip()
     if not email:
         email = (request.data.get("email") or "").strip()
@@ -277,6 +312,81 @@ def jobs_in_company(request,com_id):
     company_s=CompanySerializer(company,many=True).data
     return Response({"company_s":company_s,"jobs_in_com_s":jobs_in_com_s})
 #end
+
+#company serach
+@api_view(['GET'])
+def company_search(request):
+    query=request.GET.get('q','')
+    companies=EmployerProfile.objects.filter(business_name__icontains=query)
+    companies_s=CompanySerializer(companies,many=True).data
+    return Response({
+        "companies":companies_s
+    })
+
+#job search in employer dashboard
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def job_filter_by_status(request):
+    user = request.user
+    status_param = request.GET.get('status', '').lower()
+    jobs = Jobs.objects.filter(employer__user=user)
+
+    if status_param == 'active':
+        jobs = jobs.filter(is_active=True)
+
+    elif status_param == 'closed':
+        jobs = jobs.annotate(
+            current_applicants=Count('applications')
+        ).filter(current_applicants__gte=F('max_applicants'))
+    
+    elif status_param == 'expired':
+        today = timezone.localdate()
+        jobs = jobs.filter(deadline__lt=today)
+    
+    else:
+        return Response({"error": "Invalid status"}, status=400)
+
+    jobs = jobs.order_by('-created_at')
+    return Response({
+        "jobs": JobcompanySerializer(jobs, many=True).data
+    })
+
+#end job search in employer dashboard
+
+# #application filter by status
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def application_filter_by_status(request):
+#     user = request.user
+#     status_param = request.GET.get('status', '').lower()
+#     applications = Application.objects.filter(job__employer__user=user)
+
+#     if status_param == 'pending':
+#         applications = applications.filter(status='P')
+
+#     elif status_param == 'accepted':
+#         applications = applications.filter(status='H')
+    
+#     elif status_param == 'rejected':
+#         applications = applications.filter(status='RJ')
+    
+#     elif status_param == 'reviewed':
+#         applications = applications.filter(status='R')
+
+#     elif status_param == 'shortlist':
+#         applications = applications.filter(status='SL')
+    
+#     else:
+#         return Response({"error": "Invalid status"}, status=400)
+
+#     applications = applications.order_by('-applied_at')
+#     return Response({
+#         "applications": ApplicationListSerializer(applications, many=True).data
+#     })
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
+import {toast} from "react-hot-toast";
 
 export default function EmployerCompanyDetail() {
   const location = useLocation();
@@ -50,12 +51,12 @@ export default function EmployerCompanyDetail() {
       // Submit formData
       await submitCompanyDetail(formData);
 
-      alert("Account created successfully!");
+      toast.success("Account created successfully!");
       navigate("/employer/dashboard");
     } catch (err) {
       console.error("Error 👉", err.response.data);
       console.log("Status:", err.response.status);
-      alert("Failed: " + JSON.stringify(err.message || err));
+      toast.error("Failed: " + JSON.stringify(err.message || err));
     } finally {
       setLoading(false);
     }

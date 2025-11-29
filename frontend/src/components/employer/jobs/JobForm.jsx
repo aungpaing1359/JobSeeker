@@ -11,6 +11,11 @@ export default function JobForm({ jobId }) {
   const navigate = useNavigate();
   const { employer } = useEmployerAuth();
   const [categories, setCategories] = useState([]);
+  const [initialData, setInitialData] = useState(null); // ⭐ Store original data
+  const [loading, setLoading] = useState(false);
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     title: "",
     employer: "",
@@ -24,8 +29,6 @@ export default function JobForm({ jobId }) {
     max_applicants: "",
     priority: "NORMAL",
   });
-  const [employerName, setEmployerName] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const JOB_TYPE_CHOICES = [
     { value: "FULL", label: "Full-time" },
@@ -60,47 +63,48 @@ export default function JobForm({ jobId }) {
     { value: "URGENT", label: "Urgent" },
   ];
 
+  // Pre-fill employer
   useEffect(() => {
     if (employer) {
       setFormData((prev) => ({ ...prev, employer: employer.id }));
-      setEmployerName(employer.company_name || employer.name || employer.email);
     }
   }, [employer]);
 
+  // Load job detail if editing
   useEffect(() => {
-    if (jobId) {
-      getJobDetail(jobId).then((res) => {
-        const data = res.data;
-        setFormData({
-          title: data.title || "",
-          employer: data.employer?.id || employer?.id || "",
-          job_type: data.job_type || "",
-          location: data.location || "",
-          salary: data.salary || "",
-          deadline: data.deadline || "",
-          description: data.description || "",
-          category: data.category || "",
-          is_active: data.is_active ?? true,
-          max_applicants: data.max_applicants || "",
-          priority: data.priority || "NORMAL",
-        });
-        setEmployerName(
-          data.employer?.company_name ||
-            data.employer?.name ||
-            data.employer ||
-            "Unknown Employer"
-        );
-      });
-    }
-  }, [jobId, employer]);
+    if (!jobId) return;
 
+    getJobDetail(jobId).then((res) => {
+      const data = res.data;
+
+      const loaded = {
+        title: data.title || "",
+        employer: data.employer?.id || employer?.id || "",
+        job_type: data.job_type || "",
+        location: data.location || "",
+        salary: data.salary || "",
+        deadline: data.deadline || "",
+        description: data.description || "",
+        category: data.category || "",
+        is_active: data.is_active ?? true,
+        max_applicants: data.max_applicants || "",
+        priority: data.priority || "NORMAL",
+      };
+
+      setFormData(loaded);
+      setInitialData(loaded); // ⭐ Save original
+    });
+  }, [jobId]);
+
+  // Load categories
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/job/job-categories/")
+      .get(`${API_URL}/job/job-categories/`)
       .then((res) => setCategories(res.data))
-      .catch((err) => console.error("Category fetch error:", err));
+      .catch(() => toast.error("Failed to load categories"));
   }, []);
 
+  // Handle input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -109,28 +113,69 @@ export default function JobForm({ jobId }) {
     }));
   };
 
+  // Validate form
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      toast.error("Job title is required", { icon: "⚠️" });
+      return false;
+    }
+    if (!formData.job_type) {
+      toast.error("Please select job type", { icon: "⚠️" });
+      return false;
+    }
+    if (!formData.category) {
+      toast.error("Please select a category", { icon: "⚠️" });
+      return false;
+    }
+    if (!formData.location) {
+      toast.error("Please select location", { icon: "⚠️" });
+      return false;
+    }
+    if (!formData.deadline) {
+      toast.error("Please choose a deadline", { icon: "⚠️" });
+      return false;
+    }
+    if (!formData.description.trim()) {
+      toast.error("Please add a job description", { icon: "⚠️" });
+      return false;
+    }
+    return true;
+  };
+
+  // Submit job
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     setLoading(true);
+
     try {
       if (jobId) {
+        // ⭐ Check for changes
+        if (JSON.stringify(formData) === JSON.stringify(initialData)) {
+          toast("No changes to update.", { icon: "⚠️" });
+          setLoading(false);
+          return;
+        }
+
         await updateJob(jobId, formData);
-        toast.success("✅ Job updated successfully!");
+        toast.success("Job updated successfully! 🎉");
       } else {
         await createJob(formData);
-        toast.success("✅ Job created successfully!");
+        toast.success("Job created successfully! 🎉");
       }
+
       navigate("/employer/dashboard/my-jobs");
     } catch (err) {
       console.error(err);
-      toast.error("❌ Error saving job");
+      toast.error("Something went wrong while saving.", { icon: "❌" });
     } finally {
       setLoading(false);
     }
   };
 
-  // description quillModuls
-  // ✅ Full toolbar configuration
+  // Quill Editor settings
   const quillModules = {
     toolbar: [
       [{ font: [] }, { size: [] }],
@@ -160,7 +205,7 @@ export default function JobForm({ jobId }) {
     "strike",
     "color",
     "background",
-    "list", // ✅ keep only 'list', remove 'bullet'
+    "list",
     "indent",
     "align",
     "blockquote",
@@ -174,99 +219,59 @@ export default function JobForm({ jobId }) {
     <div>
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-800 text-lg"
-          >
-            ←
-          </button>
-          <h1 className="text-lg font-semibold text-gray-700">
-            {jobId ? "Edit Job Post" : "Create Job Post"}
-          </h1>
-        </div>
+        <h1 className="text-lg font-semibold text-gray-700">
+          {jobId ? "Edit Job Post" : "Create Job Post"}
+        </h1>
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
         >
           {loading ? "Saving..." : jobId ? "Update Job" : "Add Job Post"}
         </button>
       </div>
 
-      {/* Search & Filter */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search"
-          className="flex-1 bg-white border rounded-md p-3 shadow-sm focus:outline-none"
-        />
-        <select className="w-full md:w-48 bg-white border rounded-md p-3 shadow-sm">
-          <option>All Status</option>
-          <option>Active</option>
-          <option>Closed</option>
-        </select>
-      </div>
+      {/* FORM */}
+      <form onSubmit={handleSubmit} className="bg-white shadow-md p-6 rounded-lg space-y-6">
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-lg p-6 space-y-6 mx-auto"
-      >
-        {/* Employer Info */}
-        <div className="bg-gray-50 p-4 rounded-lg border">
-          <p className="text-sm text-gray-600">Posted By</p>
-          <p className="text-lg font-semibold text-gray-800 mt-1">
-            {employerName || "No employer set"}
-          </p>
-        </div>
-
-        {/* Job Title */}
+        {/* Title */}
         <div>
-          <label className="block text-gray-700 font-medium mb-1">
-            Job Title
-          </label>
+          <label className="block font-medium">Job Title</label>
           <input
             type="text"
             name="title"
+            className="w-full border p-3 rounded-md"
             value={formData.title}
             onChange={handleChange}
-            className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
         </div>
 
         {/* Job Type + Category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Job Type
-            </label>
+            <label className="block font-medium">Job Type</label>
             <select
               name="job_type"
+              className="w-full border p-3 rounded-md"
               value={formData.job_type}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             >
               <option value="">-- Select Job Type --</option>
-              {JOB_TYPE_CHOICES.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              {JOB_TYPE_CHOICES.map((j) => (
+                <option key={j.value} value={j.value}>
+                  {j.label}
                 </option>
               ))}
             </select>
           </div>
+
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Category
-            </label>
+            <label className="block font-medium">Category</label>
             <select
               name="category"
+              className="w-full border p-3 rounded-md"
               value={formData.category}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             >
               <option value="">-- Select Category --</option>
               {categories.map((cat) => (
@@ -279,107 +284,64 @@ export default function JobForm({ jobId }) {
         </div>
 
         {/* Location + Salary */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Location
-            </label>
+            <label className="block font-medium">Location</label>
             <select
               name="location"
+              className="w-full border p-3 rounded-md"
               value={formData.location}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             >
               <option value="">-- Select Location --</option>
-              {LOCATION_CHOICES.map((loc) => (
-                <option key={loc.value} value={loc.value}>
-                  {loc.label}
+              {LOCATION_CHOICES.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
                 </option>
               ))}
             </select>
           </div>
+
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Salary Range
-            </label>
+            <label className="block font-medium">Salary</label>
             <input
               type="number"
               name="salary"
+              className="w-full border p-3 rounded-md"
               value={formData.salary}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter salary"
             />
           </div>
         </div>
 
-        {/* Max Applicants + Deadline */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Max applicants + Deadline */}
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Maximum Applicants
-            </label>
+            <label className="block font-medium">Maximum Applicants</label>
             <input
               type="number"
               name="max_applicants"
+              className="w-full border p-3 rounded-md"
               value={formData.max_applicants}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter max applicants"
             />
           </div>
+
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Post Date (Deadline)
-            </label>
+            <label className="block font-medium">Deadline</label>
             <input
               type="date"
               name="deadline"
+              className="w-full border p-3 rounded-md"
               value={formData.deadline}
               onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-        </div>
-
-        {/* Priority + Active */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Priority
-            </label>
-            <select
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {PRIORITY_CHOICES.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-3 mt-7">
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={formData.is_active}
-              onChange={handleChange}
-              className="h-5 w-5 text-blue-600"
-            />
-            <label className="text-gray-700 font-medium">Active</label>
           </div>
         </div>
 
         {/* Description */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Job Description
-          </label>
-
+        <div>
+          <label className="block font-medium">Job Description</label>
           <ReactQuill
             theme="snow"
             value={formData.description}
@@ -388,12 +350,11 @@ export default function JobForm({ jobId }) {
             }
             modules={quillModules}
             formats={quillFormats}
-            placeholder="Write detailed job description here..."
-            className="bg-white rounded-lg border border-gray-300 min-h-[200px] mb-10"
+            className="bg-white rounded-md border min-h-[200px]"
           />
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <div className="flex justify-end pt-4">
           <button
             type="submit"

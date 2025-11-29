@@ -1,8 +1,7 @@
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes, throttle_classes,parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import ScopedRateThrottle
@@ -28,7 +27,7 @@ def signin_jobseeker(request, role):
     # Check if rate limited
     if getattr(request, 'limited', False):
         return Response({"error": "Too many attempts, please wait one minute before trying again."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
- 
+
     serializer = JobSeekerSignInSerializer(data=request.data)
     if not serializer.is_valid():
         # ✅ Always return when invalid
@@ -165,7 +164,6 @@ def sigout_jobseeker(request):
 @permission_classes([AllowAny])
 def current_user(request):
     u = request.user
-
     # if user not logged in or doesn't exist, return default safe response
     if not u or u.is_anonymous:
         return Response({
@@ -184,6 +182,7 @@ def current_user(request):
         "is_verified": getattr(u, "is_verified", False),
         "username": u.email.split("@")[0] if u.email else None,
     }, status=200)
+
 #start jobseekerprofile
 # Create + Read (List)
 @api_view(['GET', 'POST'])
@@ -231,8 +230,13 @@ def jobseekerprofile_update(request, jp_id):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def skill_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        skills = Skill.objects.filter(profile__user=request.user)
+        if profile_id:
+            skills = Skill.objects.filter(profile_id=profile_id)
+        else:
+            skills = Skill.objects.filter(profile__user=request.user)
         serializer = SkillSerializar(skills, many=True)
         return Response(serializer.data)
 
@@ -276,8 +280,13 @@ def skill_detail(request, s_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def education_list(request):
+    profile_id = request.query_params.get("profile") 
+    
     if request.method == 'GET':   # READ all
-        educations = Education.objects.filter(profile__user=request.user)
+        if profile_id:
+            educations = Education.objects.filter(profile_id=profile_id)
+        else:
+            educations = Education.objects.filter(profile__user=request.user)
         serializer = EducationSerializer(educations, many=True)
         return Response(serializer.data)
 
@@ -323,8 +332,13 @@ def education_detail(request, e_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def experience_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        experiences = Experience.objects.filter(profile__user=request.user)
+        if profile_id:
+            experiences = Experience.objects.filter(profile_id=profile_id)
+        else:
+            experiences = Experience.objects.filter(profile__user=request.user)
         serializer = ExperienceSerializer(experiences, many=True)
         return Response(serializer.data)
 
@@ -369,8 +383,13 @@ def experience_detail(request, ex_id):
 # Create + Read (List)
 @api_view(['GET', 'POST'])
 def language_list(request):
+    profile_id = request.query_params.get("profile")
+
     if request.method == 'GET':   # READ all
-        languages = Language.objects.filter(profile__user=request.user)
+        if profile_id:
+            languages = Language.objects.filter(profile_id=profile_id)
+        else:
+            languages = Language.objects.filter(profile__user=request.user)
         serializer = LanguageSerializar(languages, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':   # CREATE
@@ -434,7 +453,7 @@ def resume_list(request):
 # Read (Single) + Update + Delete
 @api_view(['GET', 'PUT', 'DELETE'])
 @parser_classes([MultiPartParser, FormParser, JSONParser]) 
-def resume_detail(request, r_id):
+def resume_detail(request,r_id):
     try:
         resume = Resume.objects.get(id=r_id)
     except Resume.DoesNotExist:

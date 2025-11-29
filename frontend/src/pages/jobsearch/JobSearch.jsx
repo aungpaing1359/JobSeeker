@@ -3,8 +3,9 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EnterSearch from "../EnterSearch";
 import JobDetailView from "./JobDetailView";
-import { useAuth } from "../../hooks/userAuth";
-import ApplyModal from "../../components/Navbar/ApplyModal"; // <-- Fix this import path if needed
+import { useAuth } from "../../hooks/useAuth";
+import ApplyModal from "../../components/Navbar/ApplyModal";
+import { getLocationLabel } from "../../utils/locationHelpers";
 
 export default function JobSearch() {
   const navigate = useNavigate();
@@ -24,12 +25,14 @@ export default function JobSearch() {
   // Modal open state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const token = localStorage.getItem("access");
 
-        const res = await axios.get("http://127.0.0.1:8000/job/jobs/", {
+        const res = await axios.get(`${API_URL}/job/jobs/`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: token ? `Bearer ${token}` : "",
@@ -58,14 +61,14 @@ export default function JobSearch() {
     fetchJobs();
   }, [id]);
 
-  // ✅ Apply Now handler
+  // Apply Now handler
   const handleApplyNow = () => {
     if (loading) return; // still checking auth
     if (user) {
-      // ✅ If logged in, open modal
+      // If logged in, open modal
       setIsApplyModalOpen(true);
     } else {
-      // ❌ Not logged in -> redirect
+      // Not logged in -> redirect
       navigate("/sign-in");
     }
   };
@@ -128,9 +131,9 @@ export default function JobSearch() {
                     <div>
                       <h3 className="font-semibold">{job.title}</h3>
                       <p className="text-sm text-gray-500">
-                        {job.employer || "Unknown Company"}
+                        {job.employer_business_name || "Unknown Company"}
                       </p>
-                      <p className="text-sm mt-1">{job.location}</p>
+                      <p className="text-sm mt-1">{getLocationLabel(job.location)}</p>
                       <p className="text-xs text-gray-400 mt-2">
                         {job.deadline
                           ? `Deadline: ${job.deadline}`
@@ -138,7 +141,7 @@ export default function JobSearch() {
                       </p>
                     </div>
                     <img
-                      src={job.logo || "/logo.png"}
+                      src={job.employer_logo || "/logo.png"}
                       alt="logo"
                       className="w-10 h-10"
                     />
@@ -175,10 +178,10 @@ export default function JobSearch() {
         </div>
       </div>
 
-      {/* ✅ Apply Modal */}
+      {/* Apply Modal */}
       {isApplyModalOpen && (
         <ApplyModal
-          isOpen={isApplyModalOpen} // ✅ Add this line
+          isOpen={isApplyModalOpen}
           job={selectedJob}
           onClose={() => setIsApplyModalOpen(false)}
         />

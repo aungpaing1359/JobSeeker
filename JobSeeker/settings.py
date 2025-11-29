@@ -26,7 +26,22 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', True)
 
-ALLOWED_HOSTS = ['*', '.railway.app']
+ALLOWED_HOSTS = ['*', '.railway.app','192.168.130.155']
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://192.168.130.155:5173",   # your phone/laptop React
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://192.168.130.155:5173",
+    "http://192.168.130.155:8000",
+]
 
 
 # Application definition
@@ -211,7 +226,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "jobseeker_resend": "1/minute",
+        "otp": "5/minute",
     },
 }
 

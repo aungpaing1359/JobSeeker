@@ -15,10 +15,12 @@ class ResumeSerializer(serializers.ModelSerializer):
 
 class ApplicationListSerializer(serializers.ModelSerializer):
     job = JobsSerializer(read_only=True)
+    jobseeker_name = serializers.CharField(source="job_seeker_profile.full_name", read_only=True)
+    jobseeker_email = serializers.CharField(source="job_seeker_profile.user.email", read_only=True)
     
     class Meta:
         model=Application
-        fields="__all__"
+        fields = ["id", "job_seeker_profile","jobseeker_email","jobseeker_name", "job", "status", "applied_at","cover_letter_text"]
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
     job = JobsSerializer(read_only=True)

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {toast} from "react-hot-toast";
 
 export default function ExperienceModal({ isOpen, onClose, profileId, profileName, editData, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -13,7 +14,9 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
     description: "",
   });
 
-  // ✅ preload edit data
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // preload edit data
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -71,14 +74,14 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
 
     const csrftoken = getCookie("csrftoken");
     if (!profileId) {
-      alert("Profile not found!");
+      toast.error("Profile not found!");
       return;
     }
 
     try {
       const url = formData.id
-        ? `http://127.0.0.1:8000/accounts-jobseeker/experience/${formData.id}/`
-        : "http://127.0.0.1:8000/accounts-jobseeker/experience/";
+        ? `${API_URL}/accounts-jobseeker/experience/${formData.id}/`
+        : `${API_URL}/accounts-jobseeker/experience/`;
       const method = formData.id ? "put" : "post";
 
       const res = await axios({
@@ -94,9 +97,10 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
 
       onSuccess(res.data);
       onClose();
+      toast.success(editData ? "Education updated successfully" : "Education saved successfully")
     } catch (err) {
       console.error("Error saving experience:", err.response?.data || err);
-      alert("Failed to update experience.");
+      toast.error("Failed to update experience.");
     }
   };
 
@@ -222,7 +226,7 @@ export default function ExperienceModal({ isOpen, onClose, profileId, profileNam
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
-              Update
+              {editData ? "Update" : "Save"}
             </button>
             <button
               type="button"
