@@ -58,7 +58,6 @@ export default function Footer() {
                 <ul className="space-y-2">
                   {section.links.map((link, idx) => {
                     const toPath = section.path?.[idx] || "#";
-                    // Only wrap "Contact Us" link with <Link>
                     return (
                       <li key={idx}>
                         {toPath !== "#" ? (
@@ -76,7 +75,7 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* Only show social icons in Contact section */}
+              {/* Looped navlink */}
               {section.title === "Contact" && (
                 <div className="mt-4 sm:mt-6 flex space-x-4">
                   {socialLinks.map((social, index) => (

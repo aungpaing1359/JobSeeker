@@ -1,9 +1,10 @@
-// src/pages/JobApplications.jsx
 import { useJobApply } from "../../context/JobApplyContext";
 import { FileText, Trash2, Briefcase, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function JobApplications() {
+  usePageTitle("Applied Jobs");
   const { applications, loading, message, removeApplication } = useJobApply();
   const navigate = useNavigate();
 
@@ -14,12 +15,14 @@ export default function JobApplications() {
       <div className="container mx-auto px-6 py-10 flex-grow">
         <h2 className="text-xl font-semibold mb-3">Job Applications</h2>
 
+        {/* Success message */}
         {message && (
           <div className="bg-green-100 text-green-700 px-4 py-2 rounded mb-4">
             {message}
           </div>
         )}
 
+        {/* Show empty state or applications */}
         {applications.length === 0 ? (
           <EmptyState />
         ) : (
@@ -34,6 +37,7 @@ export default function JobApplications() {
   );
 }
 
+// Empty state Function
 function EmptyState() {
   return (
     <div className="text-center py-20">
@@ -50,6 +54,7 @@ function EmptyState() {
   );
 }
 
+// ApplicationGrid Function
 function ApplicationGrid({ applications, onDelete, navigate }) {
   return (
     <div
@@ -73,6 +78,7 @@ function ApplicationGrid({ applications, onDelete, navigate }) {
   );
 }
 
+// ApplicationCard Function
 function ApplicationCard({ app, index, total, onDelete, navigate }) {
   return (
     <div
@@ -80,6 +86,7 @@ function ApplicationCard({ app, index, total, onDelete, navigate }) {
         total % 2 === 1 && index === total - 1 ? "sm:col-span-2" : ""
       }`}
     >
+      {/* Delete button */}
       <button
         onClick={() => onDelete(app.id)}
         className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white rounded-full p-2"
@@ -87,20 +94,26 @@ function ApplicationCard({ app, index, total, onDelete, navigate }) {
         <Trash2 size={16} />
       </button>
 
+      {/* Job title */}
       <h3 className="text-[16px] font-semibold flex items-center gap-2">
         <Briefcase size={18} className="text-[#D2691E]" />
         {app.job?.title || "Untitled Job"}
       </h3>
 
+      {/* Employer */}
       <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
         <Building2 size={16} className="text-gray-500" />
-        {app.job?.employer || "Unknown Company"}
+        {app.job?.employer_business_name?.length > 15
+          ? app.job?.employer_business_name.substring(0, 15) + "..."
+          : app.job?.employer_business_name || "Unknown Company"}
       </p>
 
+      {/* Applied date */}
       <p className="text-sm text-gray-600 mt-1">
         Applied at: {new Date(app.applied_at).toLocaleString()}
       </p>
 
+      {/* Action buttons */}
       <div className="flex items-center gap-3 mt-4">
         <button
           className="mt-2 bg-[#D2691E] hover:bg-[#b45717] text-white text-sm font-medium py-2 px-5 rounded-md"

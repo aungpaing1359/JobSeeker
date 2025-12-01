@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 // CSRF token function
 function getCookie(name) {
@@ -19,6 +19,7 @@ function getCookie(name) {
 }
 
 export default function EmployerProfileForm() {
+  // input formdata
   const [formData, setFormData] = useState({
     image: null,
     firstName: "",
@@ -91,13 +92,14 @@ export default function EmployerProfileForm() {
   // Submit updated profile
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // employer ID is loaded
     if (!employerId) {
       toast.error("Employer ID not loaded yet. Please wait.");
       return;
     }
 
     try {
+      // Prepare form data
       const form = new FormData();
       form.append("first_name", formData.firstName);
       form.append("last_name", formData.lastName);
@@ -109,8 +111,10 @@ export default function EmployerProfileForm() {
         form.append("logo", formData.image);
       }
 
+      // variables csrfToken
       const csrfToken = getCookie("csrftoken");
 
+      // update profile
       const response = await axios.put(
         `${API_URL}/accounts-employer/employer/profile-update/${employerId}/`,
         form,

@@ -14,13 +14,16 @@ import {
 } from "../utils/api/notificationAPI";
 import { toast } from "react-hot-toast";
 
+// Create a context for notifications
 const NotificationContext = createContext();
-
+// Notification Provider component
 export const NotificationProvider = ({ children }) => {
+  // State to hold notifications and counts
   const [notifications, setNotifications] = useState([]);
   const [counts, setCounts] = useState({ total: 0, read: 0, unread: 0 });
   const [loading, setLoading] = useState(false);
 
+  // Function to load notifications from notificationAPI
   const loadNotifications = useCallback(async () => {
     setLoading(true);
     try {
@@ -35,10 +38,12 @@ export const NotificationProvider = ({ children }) => {
     }
   }, []);
 
+  // Load notifications on mount
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
 
+   // one notification read
   const handleMarkRead = async (id) => {
     try {
       await markAsRead(id);
@@ -48,6 +53,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+   // one notification unread
   const handleMarkUnread = async (id) => {
     try {
       await markAsUnread(id);
@@ -57,6 +63,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Delete a single notification
   const handleDelete = async (id) => {
     try {
       const notif = notifications.find((n) => n.id === id);
@@ -72,6 +79,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  // Delete all read notifications
   const handleDeleteAll = async () => {
     try {
       const res = await deleteAllNotifications();

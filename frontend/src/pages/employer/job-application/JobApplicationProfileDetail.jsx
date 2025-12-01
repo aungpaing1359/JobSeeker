@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, Mail, Phone, Clock, MapPin } from "lucide-react";
+import usePageTitle from "../../../hooks/usePageTitle";
 
 export default function JobApplicationProfileDetail() {
   const { id } = useParams(); // app_id
@@ -15,7 +16,11 @@ export default function JobApplicationProfileDetail() {
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Vite API_URL
   const API_URL = import.meta.env.VITE_API_URL;
+
+  const seekerName = jobseeker?.full_name || "Job Application Profile";
+  usePageTitle(`${seekerName} | JobSeeker`);
 
   // Fetch All Data
   useEffect(() => {
@@ -105,6 +110,7 @@ export default function JobApplicationProfileDetail() {
       {/* Top Info */}
       <div className="bg-white shadow-sm rounded-xl p-6 flex flex-col md:flex-row gap-6">
         <div className="flex-shrink-0 text-center">
+          {/* jobseeker img */}
           <img
             src={
               seeker.profile_picture ||
@@ -119,6 +125,7 @@ export default function JobApplicationProfileDetail() {
           </p>
         </div>
 
+            {/* job info (title, description, salary, location) */}
         <div className="flex-grow">
           <h3 className="text-xl font-semibold text-gray-800">{job.title}</h3>
           <ul className="list-disc ml-6 text-gray-700 text-sm mt-2">
@@ -131,6 +138,7 @@ export default function JobApplicationProfileDetail() {
             <li>{job.location || "No location"}</li>
           </ul>
 
+              {/* jobseeker grid (email, phone, applied_at, location) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <Mail size={16} /> {seeker.email || "—"}

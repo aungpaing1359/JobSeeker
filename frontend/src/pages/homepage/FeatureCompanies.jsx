@@ -11,7 +11,7 @@ const NextArrow = ({ onClick, show }) => {
   return (
     <div
       onClick={onClick}
-      className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-[#1A82DE] text-[#1A82DEEB] shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1A82DEEB] hover:text-white duration-300"
+      className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-[#1e88e5] text-[#1e88e5] shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1e88e5] hover:text-white duration-300"
     >
       <ChevronRight size={20} />
     </div>
@@ -23,7 +23,7 @@ const PrevArrow = ({ onClick, show }) => {
   return (
     <div
       onClick={onClick}
-      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border-[#1A82DE] text-[#1A82DEEB] border shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1A82DEEB] hover:text-white duration-300"
+      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border-[#1e88e5] text-[#1e88e5] border shadow-md rounded-full p-2 cursor-pointer hover:bg-[#1e88e5] hover:text-white duration-300"
     >
       <ChevronLeft size={20} />
     </div>
@@ -38,12 +38,12 @@ export default function FeaturedCompanies() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(5);
 
-  // ⭐ Added — fix refresh: wait rendering until width detected
+  // Added — fix refresh: wait rendering until width detected
   const [isReady, setIsReady] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // ⭐ Fetch API
+  // Fetch API
   useEffect(() => {
     axios
       .get(`${API_URL}/accounts-employer/company/`)
@@ -51,7 +51,7 @@ export default function FeaturedCompanies() {
       .catch((err) => console.error("Error fetching companies:", err));
   }, []);
 
-  // ⭐ FIX refresh issue: detect screen width BEFORE showing slider
+  // FIX refresh issue: detect screen width BEFORE showing slider
   useEffect(() => {
     function updateSlides() {
       const width = window.innerWidth;
@@ -63,8 +63,8 @@ export default function FeaturedCompanies() {
       else setSlidesToShow(5);
     }
 
-    updateSlides();       // run before showing slider
-    setIsReady(true);     // allow slider to render after width detection
+    updateSlides(); // run before showing slider
+    setIsReady(true); // allow slider to render after width detection
 
     window.addEventListener("resize", updateSlides);
     return () => window.removeEventListener("resize", updateSlides);
@@ -85,32 +85,41 @@ export default function FeaturedCompanies() {
 
   return (
     <div className="relative px-4 py-4">
-
+      {/* Prev Arrow */}
       <PrevArrow
         onClick={() => sliderRef.current.slickPrev()}
         show={currentSlide !== 0}
       />
 
+      {/* Slider Companies */}
       <Slider ref={sliderRef} {...settings}>
         {companies.map((company, i) => (
           <div key={i} className="px-3">
             <div
               onClick={() => navigate(`/companies/${company.id}`)}
-              className="border company-border-custom rounded-3xl shadow-md text-center py-4 company-bg-custom flex flex-col gap-[10px] items-center justify-center cursor-pointer"
+              className="border company-border-custom rounded-3xl shadow-md text-center py-4 bg-white flex flex-col gap-[10px] items-center justify-center cursor-pointer"
             >
               <img
                 src={company.logo || "/default-logo.png"}
-                alt={company.business_name}
+                alt={
+                  company.business_name.length > 12
+                    ? company.business_name.substring(0, 12) + "..."
+                    : company.business_name
+                }
                 className="h-12 mb-1.5 mx-auto object-contain"
               />
 
               <h3 className="font-semibold text-lg">
-                {company.business_name}
+                {company.business_name?.length > 12
+                  ? company.business_name.substring(0, 12) + "..."
+                  : company.business_name || "Unknow Company"}
               </h3>
 
-              <p className="text-sm mb-1">{company.industry || "No industry info"}</p>
+              <p className="text-sm mb-1">
+                {company.industry || "No industry info"}
+              </p>
 
-              <button className="px-10 py-1.5 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB] cursor-pointer hover:font-bold">
+              <button className="px-10 py-1.5 border rounded-xl bg-white feacture-company-color cursor-pointer hover:font-medium">
                 {company.job_count || 0} jobs
               </button>
             </div>
@@ -118,11 +127,11 @@ export default function FeaturedCompanies() {
         ))}
       </Slider>
 
+      {/* Next Arrow */}
       <NextArrow
         onClick={() => sliderRef.current.slickNext()}
         show={currentSlide < lastSlideIndex}
       />
-
     </div>
   );
 }

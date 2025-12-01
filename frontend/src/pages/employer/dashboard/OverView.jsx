@@ -3,6 +3,7 @@ import axios from "axios";
 import { AlertTriangle, Briefcase, CheckCircle, FileText } from "lucide-react";
 
 export default function Overview() {
+  // Initialize the state for dashboard statistics
   const [stats, setStates] = useState([
     {
       title: "Total Job",
@@ -25,11 +26,14 @@ export default function Overview() {
     { title: "Expired Jobs", value: 100, icon: <AlertTriangle /> },
   ]);
 
+  // Vite API_URL
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Fetch dashboard statistics from API when component mounts
   useEffect(() => {
     const fatchData = async () => {
       try {
+        // Make GET request to employer dashboard endpoint
         const res = await axios.get(
           `${API_URL}/accounts-employer/employer/dashboard/`,
           {
@@ -37,6 +41,7 @@ export default function Overview() {
           }
         );
 
+        // Update the stats state with real data from API
         setStates([
           {
             title: "Total Job",

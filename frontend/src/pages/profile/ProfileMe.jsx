@@ -17,7 +17,9 @@ import ExperienceList from "./editprofile/ProfileListDetail/ExperienceList";
 import LanguageList from "./editprofile/ProfileListDetail/LanguageList";
 import SkillList from "./editprofile/ProfileListDetail/SkillList";
 import ResumeList from "./editprofile/ProfileListDetail/ResumeList";
+import usePageTitle from "../../hooks/usePageTitle";
 
+// CSRF token function
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -34,6 +36,8 @@ function getCookie(name) {
 }
 
 export default function ProfileMe() {
+  // Page Title
+  usePageTitle("Profile");
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -65,8 +69,10 @@ export default function ProfileMe() {
 
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
+  // Vite API_URL
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Fetch education list
   const fetchEducations = async () => {
     if (!profile.id) return;
     try {
@@ -80,6 +86,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Fetch experience list
   const fetchExperiences = async () => {
     if (!profile.id) return;
     try {
@@ -93,6 +100,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Fetch language list
   const fetchLanguages = async () => {
     if (!profile.id) return;
     try {
@@ -106,6 +114,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Fetch skill list
   const fetchSkills = async () => {
     if (!profile.id) return;
     try {
@@ -119,6 +128,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Edit handlers
   const handleEditEducation = (edu) => {
     setEditData(edu);
     setIsEducationOpen(true);
@@ -136,6 +146,7 @@ export default function ProfileMe() {
     setIsSkillModalOpen(true);
   };
 
+  // Load profile on mount
   useEffect(() => {
     if (loading) return;
 
@@ -158,6 +169,7 @@ export default function ProfileMe() {
     }
   }, [user, loading, navigate]);
 
+  // Load all info when profile is ready
   useEffect(() => {
     if (profile.id) {
       fetchEducations();
@@ -167,6 +179,7 @@ export default function ProfileMe() {
     }
   }, [profile]);
 
+  // Upload profile picture
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -184,7 +197,7 @@ export default function ProfileMe() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "X-CSRFToken": csrfToken, // 🧩 include CSRF token
+            "X-CSRFToken": csrfToken,
           },
           withCredentials: true,
         }
@@ -198,6 +211,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Check profile completeness
   const checkProfileCompleteness = () => {
     const missingFields = [];
 
@@ -216,6 +230,7 @@ export default function ProfileMe() {
     return missingFields;
   };
 
+  // Update profile status message
   const handleProfileUpdateMessage = () => {
     const missing = checkProfileCompleteness();
 
@@ -232,6 +247,7 @@ export default function ProfileMe() {
     }
   };
 
+  // Auto-check when data changes
   useEffect(() => {
     if (profile.id) handleProfileUpdateMessage();
   }, [
@@ -245,10 +261,10 @@ export default function ProfileMe() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 🌟 Hero Section */}
+      {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-[#002366] to-[#003AB3] text-white py-10 rounded-b-2xl shadow-lg overflow-hidden">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 items-center h-[300px]">
-          {/* ✅ 1. Social Links (Left Side) */}
+        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 items-center md:h-[300px]">
+          {/* Social Links (Left Side) */}
           <div className="space-y-3 items-start order-1 md:order-1">
             <h1 className="text-3xl md:text-4xl font-bold">
               {profile.full_name || "Full Name"}
@@ -273,7 +289,7 @@ export default function ProfileMe() {
             </div>
           </div>
 
-          {/* ✅ 2. Profile Info (Now Left-Aligned / Normal) */}
+          {/* Profile Info (Now Left-Aligned / Normal) */}
           <div className="flex flex-col text-[#ffffffb0] order-2 md:order-2">
             <div className="flex items-start gap-2 w-full">
               <CiGlobe />
@@ -310,7 +326,7 @@ export default function ProfileMe() {
             </div>
           </div>
 
-          {/* ✅ 3. Profile Picture (Right Side) */}
+          {/* Profile Picture (Right Side) */}
           <div className="flex justify-center md:justify-end relative group order-3 md:order-3">
             <Menu as="div" className="relative inline-block">
               {({ open }) => (
@@ -331,7 +347,7 @@ export default function ProfileMe() {
                     />
                   </Menu.Button>
 
-                  <Menu.Items className="absolute z-10 mt-2 w-32 right-0 bg-white border border-gray-200 rounded-lg shadow-lg focus:outline-none">
+                  <Menu.Items className="md:absolute z-10 md:mt-2 w-32 right-0 bg-white border border-gray-200 rounded-lg shadow-lg focus:outline-none">
                     <div className="py-1">
                       <Menu.Item>
                         {({ active }) => (
@@ -406,8 +422,8 @@ export default function ProfileMe() {
         </div>
       )}
 
-      {/* 🧩 Main Section */}
-      <section className="container mx-auto px-4 py-12 flex flex-col md:flex-row gap-6">
+      {/* Main Section */}
+      <section className="container mx-auto px-4 py-12 flex flex-col lg:flex-row gap-6">
         <div className="flex-1 space-y-8">
           {/* Summary */}
           <div>
@@ -426,7 +442,7 @@ export default function ProfileMe() {
             </div>
           </div>
 
-          {/* ✅ Education */}
+          {/* Education */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Education</h2>
@@ -448,7 +464,7 @@ export default function ProfileMe() {
             />
           </div>
 
-          {/* ✅ Experience */}
+          {/* Experience */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Experience</h2>
@@ -470,7 +486,7 @@ export default function ProfileMe() {
             />
           </div>
 
-          {/* ✅ Language */}
+          {/* Language */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Languages</h2>
@@ -492,7 +508,7 @@ export default function ProfileMe() {
             />
           </div>
 
-          {/* ✅ Skill Section */}
+          {/* Skill Section */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Skills</h2>
@@ -516,7 +532,7 @@ export default function ProfileMe() {
         </div>
 
         {/* Resume Panel */}
-        <div className="w-full md:w-2/5 bg-blue-50 rounded-lg p-6 shadow-inner">
+        <div className="w-full lg:w-2/5 bg-blue-50 rounded-lg p-6 shadow-inner">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-blue-900">Resume</h2>
             <button
@@ -542,7 +558,7 @@ export default function ProfileMe() {
         </div>
       </section>
 
-      {/* 🪟 Modals */}
+      {/* Modals */}
       <EditSummaryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

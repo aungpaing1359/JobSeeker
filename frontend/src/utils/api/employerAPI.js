@@ -1,6 +1,7 @@
 import axios from "axios";
 import { EMPLOYER_API } from "../constants/employerConstants";
 
+  // CSRF token function
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -16,6 +17,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
+// Vit API_URL
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Register employer

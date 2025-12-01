@@ -1,9 +1,11 @@
 import React from "react";
 
 export default function JobCategoryDeleteModal({ isOpen, onClose, onConfirm }) {
+   // Hide modal when not open
   if (!isOpen) return null;
 
   return (
+    //  Modal backdrop
     <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4 text-red-600">Confirm Delete</h2>

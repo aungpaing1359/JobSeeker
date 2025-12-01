@@ -1,5 +1,3 @@
-// src/utils/locationHelpers.js
-
 export const LOCATION_CHOICES = [
   { value: "MO", label: "MRAUK-U" },
   { value: "MB", label: "MINBRAR" },

@@ -5,7 +5,8 @@ export default function Pagination({
   totalPages,
   onPageChange,
 }) {
-  if (!totalPages || totalPages <= 1) return null; // No pagination if only 1 page
+  // Skip rendering if pagination is not needed (0 or 1 page)
+  if (!totalPages || totalPages <= 1) return null;
 
   return (
     <div className="flex justify-center mt-6 gap-2 select-none">

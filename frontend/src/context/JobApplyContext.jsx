@@ -7,13 +7,13 @@ import {
   fetchApplicationDetail,
   fetchSavedJobs,
 } from "../utils/api/jobapplyAPI";
-import { useAuth } from "../hooks/useAuth";   // ⭐ ADD THIS
+import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
 
 const JobApplyContext = createContext();
 
 export const JobApplyProvider = ({ children }) => {
-  const { user } = useAuth(); // ⭐ GET USER & PROFILE
+  const { user } = useAuth(); 
   const {
     applyJob: applyJobAPI,
     handleSaveJob,
@@ -27,27 +27,23 @@ export const JobApplyProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
 
-  // ================================
   //  FIXED LOAD EFFECT
-  // ================================
   useEffect(() => {
-    // ⭐ user still loading → do nothing
+    // user still loading → do nothing
     if (user === undefined) return;
 
-    // ⭐ user is logged out → skip everything
+    // user is logged out → skip everything
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // ⭐ Profile exists → load normally
+    // Profile exists → load normally
     loadApplications();
     loadSavedJobs();
   }, [user]);
 
-  // ================================
   // Load Applications
-  // ================================
   const loadApplications = async () => {
     try {
       setLoading(true);
@@ -58,9 +54,7 @@ export const JobApplyProvider = ({ children }) => {
     }
   };
 
-  // ================================
   // Load Saved Jobs  (FIXED)
-  // ================================
   const loadSavedJobs = async () => {
     try {
       const res = await fetchSavedJobs();
@@ -77,20 +71,16 @@ export const JobApplyProvider = ({ children }) => {
 
     } catch (error) {
 
-      // ⭐ FIX: Skip 404 silently (no profile yet)
+      //  FIX: Skip 404
       if (error.response?.status === 404) {
         console.log("No profile → skipping saved jobs");
         return;
       }
-
-      // ⭐ Skip network / auth errors silently
       console.log("Error loading saved jobs:", error);
     }
   };
 
-  // ================================
   // Get Application Detail
-  // ================================
   const getApplicationDetail = async (id) => {
     setLoading(true);
     try {
@@ -104,16 +94,12 @@ export const JobApplyProvider = ({ children }) => {
     }
   };
 
-  // ================================
   // Add New Application
-  // ================================
   const addApplication = (app) => {
     setApplications((prev) => [app, ...prev]);
   };
 
-  // ================================
   // Apply Job
-  // ================================
   const applyJob = async (job, coverLetter, onSuccess) => {
     await applyJobAPI(job, coverLetter, () => {
       addApplication({
@@ -138,9 +124,7 @@ export const JobApplyProvider = ({ children }) => {
     });
   };
 
-  // ================================
   // Remove Application
-  // ================================
   const removeApplication = async (id) => {
     await deleteApplyJob(id);
     setApplications((prev) => prev.filter((a) => a.id !== id));
@@ -148,9 +132,7 @@ export const JobApplyProvider = ({ children }) => {
     setTimeout(() => setMessage(null), 2000);
   };
 
-  // ================================
   // Remove Saved Job
-  // ================================
   const unsaveJob = async (savedJobId) => {
     try {
       await handleRemoveSavedJob(savedJobId, () => {

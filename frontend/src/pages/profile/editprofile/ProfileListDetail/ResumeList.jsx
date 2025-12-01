@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Eye,
-  Edit,
-  Star,
-  Trash2,
-  Image as ImageIcon,
-  X,
-} from "lucide-react";
-import {toast} from "react-hot-toast";
+import { Eye, Edit, Star, Trash2, Image as ImageIcon, X } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 export default function ResumeList({
   profileId,
@@ -26,10 +19,9 @@ export default function ResumeList({
     if (!profileId) return;
     setLoading(true);
     axios
-      .get(
-        `${API_URL}/accounts-jobseeker/resume/?profile=${profileId}`,
-        { withCredentials: true }
-      )
+      .get(`${API_URL}/accounts-jobseeker/resume/?profile=${profileId}`, {
+        withCredentials: true,
+      })
       .then((res) => {
         setResumeList(res.data);
         setLoading(false);
@@ -83,16 +75,13 @@ export default function ResumeList({
       ?.split("=")[1];
 
     try {
-      await axios.delete(
-        `${API_URL}/accounts-jobseeker/resume/${id}/`,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-            "X-CSRFToken": csrftoken,
-          },
-          withCredentials: true,
-        }
-      );
+      await axios.delete(`${API_URL}/accounts-jobseeker/resume/${id}/`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "X-CSRFToken": csrftoken,
+        },
+        withCredentials: true,
+      });
 
       setResumeList((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
@@ -126,7 +115,7 @@ export default function ResumeList({
             return (
               <li
                 key={resume.id}
-                className={`flex justify-between items-start border p-4 rounded-lg transition-all duration-200 ${
+                className={`flex justify-between items-start border p-4 rounded-lg transition-all duration-200 gap-2 ${
                   resume.is_default
                     ? "border-green-400 bg-green-50"
                     : "border-gray-200 hover:bg-gray-50"
@@ -150,22 +139,32 @@ export default function ResumeList({
                     </div>
                   )}
 
-                  <div>
-                    <p className="font-medium text-gray-800 text-lg flex items-center gap-2">
-                      {resume.title}
+                  <div className="flex flex-col min-w-0 w-full">
+                    <div className="min-w-0 w-full">
+                      {/* TITLE */}
+                      <span
+                        className="font-medium text-gray-800 text-base break-words whitespace-pre-wrap min-w-0 w-full block
+      "
+                        style={{ wordBreak: "break-word" }}
+                      >
+                        {resume.title}
+                      </span>
+
+                      {/* DEFAULT BADGE */}
                       {resume.is_default && (
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full whitespace-nowrap">
                           Default
                         </span>
                       )}
-                    </p>
+                    </div>
 
+                    {/* VIEW FILE */}
                     {!isImage && (
                       <a
                         href={resume.file}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm underline"
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm underline mt-1"
                       >
                         <Eye className="w-4 h-4" />
                         View File

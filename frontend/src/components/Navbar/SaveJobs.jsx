@@ -5,11 +5,13 @@ import { useAuth } from "../../hooks/useAuth";
 import { useJobApply } from "../../context/JobApplyContext";
 import ApplyModal from "../../components/Navbar/ApplyModal";
 import { toast } from "react-hot-toast";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function SaveJobs() {
+  usePageTitle("Saved Jobs");
   const navigate = useNavigate();
   const { token } = useAuth();
-  const { savedJobs, unsaveJob, loading, applyJob } = useJobApply();
+  const { savedJobs, unsaveJob, loading } = useJobApply();
 
   const [selectedJob, setSelectedJob] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +20,7 @@ export default function SaveJobs() {
     console.log("🟢 Saved Jobs Updated:", savedJobs);
   }, [savedJobs]);
 
-  // 🟢 Open Apply Modal
+  // Open Apply Modal
   const handleApplyNow = (job) => {
     if (!token) {
       toast.error("Please log in to apply for this job.");
@@ -35,7 +37,7 @@ export default function SaveJobs() {
     setIsModalOpen(true);
   };
 
-  // 🗑️ Unsave job
+  // Unsave job
   const handleDelete = async (jobId) => {
     await unsaveJob(jobId);
   };
@@ -73,15 +75,15 @@ export default function SaveJobs() {
                     isLastOdd ? "md:col-span-2" : ""
                   }`}
                 >
-                  {/* 🗑️ Unsave Job */}
+                  {/* Unsave Job */}
                   <button
-                    onClick={() => handleDelete(item.id)} // ✅ NOT job.id
+                    onClick={() => handleDelete(item.id)}
                     className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white rounded-full p-2"
                   >
                     <Trash2 size={16} />
                   </button>
 
-                  {/* Job Info */}
+                  {/* Job Info (title, category name, employer name) */}
                   <h3 className="text-[16px] font-semibold flex items-center gap-2">
                     <Briefcase size={18} className="text-[#D2691E]" />
                     {job.title || "Untitled Job"}
@@ -94,7 +96,7 @@ export default function SaveJobs() {
 
                   <p className="text-sm font-medium mt-1 flex items-center gap-2">
                     <Building2 size={16} className="text-gray-500" />
-                    {job.employer || "Unknown Company"}
+                    {job.employer_business_name || "Unknown Company"}
                   </p>
 
                   {/* Buttons */}
@@ -105,7 +107,7 @@ export default function SaveJobs() {
                       className={`mt-2 ${
                         job.isApplied || job.is_applied
                           ? "bg-green-600 cursor-not-allowed"
-                          : "bg-[#D2691E] hover:bg-[#b45717]"
+                          : "bg-blue-600 hover:bg-blue-700"
                       } text-white text-sm font-medium py-2 px-5 rounded-md`}
                     >
                       {job.isApplied || job.is_applied
@@ -127,7 +129,7 @@ export default function SaveJobs() {
         )}
       </div>
 
-      {/* ✅ Apply Modal */}
+      {/* Apply Modal */}
       {selectedJob && (
         <ApplyModal
           isOpen={isModalOpen}

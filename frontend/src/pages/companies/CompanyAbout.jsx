@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getLocationLabel } from "../../utils/locationHelpers";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function CompanyAbout() {
   const { id } = useParams();
@@ -11,6 +12,9 @@ export default function CompanyAbout() {
   const [loading, setLoading] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL;
 
+  usePageTitle(company?.business_name || "Company Name");
+
+  // Company About (API) id
   useEffect(() => {
     const fetchCompany = async () => {
       try {
@@ -119,7 +123,9 @@ export default function CompanyAbout() {
                 className="bg-white border border-gray-200 p-5 rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer"
               >
                 <h4 className="text-lg font-semibold text-gray-800 mb-1">
-                  {job.title}
+                  {job.title?.length > 15
+                    ? job.title.substring(0, 15) + "..."
+                    : job.title || "No Title"}
                 </h4>
                 <p className="text-gray-600 text-sm mb-2">
                   {getLocationLabel(job.location)}

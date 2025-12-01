@@ -5,8 +5,10 @@ import EnterSearch from "../EnterSearch";
 import FeaturedCompanies from "./FeatureCompanies";
 import JobCard from "./JobCard";
 import QuickSearchSection from "./QuickSearchSection";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function Home() {
+  usePageTitle("Home");
   const navigateCompany = useNavigate();
   const navigateJobs = useNavigate();
   const [jobs, setJobs] = useState([]);
@@ -17,7 +19,6 @@ export default function Home() {
     axios
       .get(`${API_URL}/job/jobs/`)
       .then((res) => {
-        console.log("Job API Response:", res.data);
         const data = res.data.jobs || [];
         setJobs(data);
       })
@@ -40,7 +41,7 @@ export default function Home() {
 
         <FeaturedCompanies />
 
-        <div className="py-4 text-start">
+        <div className="py-4 max-[483px]:pt-10 text-start">
           <button
             onClick={() => navigateCompany("/companies")}
             className="px-2 py-1 border rounded-md cursor-pointer transition custom-blue-text custom-blue-border hover-blue hover:bg-gray-200"

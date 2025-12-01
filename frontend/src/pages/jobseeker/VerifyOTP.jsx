@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import logo from "../../assets/images/logo.png";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const VerifyOTP = () => {
+  usePageTitle("VerifyOTP");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const { loading, message, verifyOTP, resendOTP } = useAuth();
@@ -19,9 +21,7 @@ const VerifyOTP = () => {
   const [attempts, setAttempts] = useState(0);
   const [lockTimer, setLockTimer] = useState(0);
 
-  // -----------------------------------------
   // Restore timers from localStorage on load
-  // -----------------------------------------
   useEffect(() => {
     const savedResendEnd = localStorage.getItem("resend_end");
     const savedLockEnd = localStorage.getItem("lock_end");
@@ -57,9 +57,7 @@ const VerifyOTP = () => {
     }
   }, []);
 
-  // -----------------------------------------
   // OTP Input Logic
-  // -----------------------------------------
   const handleChange = (value, index) => {
     if (value.length > 1) return;
     if (value && !/^\d$/.test(value)) return;
@@ -92,9 +90,7 @@ const VerifyOTP = () => {
     }
   };
 
-  // -----------------------------------------
   // Verify Button Logic
-  // -----------------------------------------
   const handleVerifyClick = async () => {
     if (lockTimer > 0) {
       setError(`Too many attempts. Try again in ${lockTimer}s`);
@@ -145,9 +141,7 @@ const VerifyOTP = () => {
     }
   };
 
-  // -----------------------------------------
   // Resend OTP Logic
-  // -----------------------------------------
   const handleResend = async () => {
     if (resendTimer > 0 || lockTimer > 0) return;
 
@@ -167,9 +161,7 @@ const VerifyOTP = () => {
     setResendLoading(false);
   };
 
-  // -----------------------------------------
   // RESEND TIMER COUNTDOWN
-  // -----------------------------------------
   useEffect(() => {
     if (resendTimer <= 0) return;
 
@@ -190,9 +182,7 @@ const VerifyOTP = () => {
     }
   }, [resendTimer]);
 
-  // -----------------------------------------
   // LOCK TIMER COUNTDOWN
-  // -----------------------------------------
   useEffect(() => {
     if (lockTimer <= 0) return;
 
@@ -212,9 +202,7 @@ const VerifyOTP = () => {
     }
   }, [lockTimer]);
 
-  // -----------------------------------------
   // Hide error auto
-  // -----------------------------------------
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(""), 4000);
@@ -227,9 +215,7 @@ const VerifyOTP = () => {
     if (code.every((d) => d !== "")) handleVerifyClick();
   }, [code]);
 
-  // -----------------------------------------
   // UI Rendering
-  // -----------------------------------------
   return (
     <div
       className="min-h-screen bg-white flex flex-col font-inter"

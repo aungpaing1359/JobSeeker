@@ -1,4 +1,3 @@
-// src/constants/apiEndpoints.js
 export const JOBS_ENDPOINT = "/job/jobs/";
 export const JOB_CREATE = "/job/jobs/create/";
 export const JOB_DETAIL = (id) => `/job/jobs/detail/${id}/`;

@@ -1,22 +1,29 @@
-// src/api/notificationAPI.js
 import axios from "axios";
-// import { NOTIFICATION_ENDPOINTS } from "../constants/notificationConstants";
 import { NOTIFICATION_ENDPOINTS } from "../constants/notificationConstants";
 
-export const getCSRFToken = () => {
-  const cookieValue = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("csrftoken"))
-    ?.split("=")[1];
-  return cookieValue || "";
-};
+// CSRF token function
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrfToken = () => getCookie("csrftoken");
 
 // Notifications List
 export const fetchNotifications = async () => {
   const res = await axios.get(NOTIFICATION_ENDPOINTS.LIST, {
     withCredentials: true,
     headers: {
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": csrfToken(),
     },
   });
   return res.data;
@@ -30,7 +37,7 @@ export const markAsRead = async (id) => {
     {
       withCredentials: true,
       headers: {
-        "X-CSRFToken": getCSRFToken(),
+        "X-CSRFToken": csrfToken(),
       },
     }
   );
@@ -45,7 +52,7 @@ export const markAsUnread = async (id) => {
     {
       withCredentials: true,
       headers: {
-        "X-CSRFToken": getCSRFToken(),
+        "X-CSRFToken": csrfToken(),
       },
     }
   );
@@ -57,7 +64,7 @@ export const deleteNotification = async (id) => {
   const res = await axios.delete(NOTIFICATION_ENDPOINTS.DELETE_ONE(id), {
     withCredentials: true,
     headers: {
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": csrfToken(),
     },
   });
   return res.data;
@@ -68,7 +75,7 @@ export const deleteAllNotifications = async () => {
   const res = await axios.delete(NOTIFICATION_ENDPOINTS.DELETE_ALL, {
     withCredentials: true,
     headers: {
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": csrfToken(),
     },
   });
   return res.data;

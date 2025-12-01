@@ -69,7 +69,7 @@ export const EmployerAuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Submit company detail
+  // Submit company detail
   const submitCompanyDetail = async (formData) => {
     const data = await registerEmployerDetail(formData);
     const updatedEmployer = { ...employer, ...formData };
@@ -77,7 +77,7 @@ export const EmployerAuthProvider = ({ children }) => {
     return updatedEmployer;
   };
 
-  // ✅ Signin with token + CSRF
+  // Signin with token + CSRF
   const signin = async ({ email, password }) => {
     const data = await signinEmployer({ email, password });
     const userWithToken = {

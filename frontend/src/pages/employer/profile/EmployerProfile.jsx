@@ -14,11 +14,12 @@ import {
   AlignLeft,
 } from "lucide-react";
 
-// ✅ Rich Text Editor
+// Rich Text Editor
 import ReactQuill, { Quill } from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import usePageTitle from "../../../hooks/usePageTitle";
 
-// ✅ Register toolbar formats (to make font / size / align / header work)
+// Register toolbar formats (to make font / size / align / header work)
 const Font = Quill.import("formats/font");
 Font.whitelist = ["sans-serif", "serif", "monospace", "inter", "roboto"];
 Quill.register(Font, true);
@@ -43,7 +44,29 @@ export default function EmployerProfilePage() {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // ✅ HTML-safe truncate function (keep bold/italic formatting)
+  usePageTitle(
+    `${profile?.first_name || ""} ${
+      profile?.last_name || ""
+    } | Employer Profile`
+  );
+
+  // CSRF token function
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // HTML-safe truncate function (keep bold/italic formatting)
   const truncateHTML = (html, maxLength) => {
     if (!html) return "";
     const clean = html.replace(/\s+/g, " ");
@@ -54,15 +77,10 @@ export default function EmployerProfilePage() {
     return div.innerHTML + "...";
   };
 
-  const getCSRFToken = () => {
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("csrftoken="))
-      ?.split("=")[1];
-    return cookieValue;
-  };
+  // variables csrfToken
+  const csrfToken = getCookie("csrftoken");
 
-  // ✅ Fetch profile data
+  // Fetch profile data
   const fetchProfile = async () => {
     const token = localStorage.getItem("access");
     try {
@@ -72,7 +90,7 @@ export default function EmployerProfilePage() {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-CSRFToken": getCSRFToken(),
+            "X-CSRFToken": csrfToken,
           },
         }
       );
@@ -92,7 +110,7 @@ export default function EmployerProfilePage() {
     fetchProfile();
   }, []);
 
-  // ✅ Avatar upload
+  // Avatar upload
   const handleAvatarClick = () => setShowUploadButton(true);
   const handleUploadClick = () => fileInputRef.current.click();
 
@@ -109,7 +127,7 @@ export default function EmployerProfilePage() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-CSRFToken": getCSRFToken(),
+            "X-CSRFToken": csrfToken,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -121,11 +139,10 @@ export default function EmployerProfilePage() {
     }
   };
 
-  // ✅ Save description
+  // Save description
   const handleDescriptionSave = async () => {
     if (!profile?.id) return;
     const token = localStorage.getItem("access");
-    const csrfToken = getCSRFToken();
     const formData = new FormData();
     formData.append("description", description);
     try {
@@ -149,7 +166,7 @@ export default function EmployerProfilePage() {
 
   if (!profile) return <p className="p-6 text-gray-600">Loading...</p>;
 
-  // ✅ Toolbar setup
+  // Toolbar setup
   const quillModules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -239,7 +256,7 @@ export default function EmployerProfilePage() {
 
         <section className="relative rounded-xl shadow-md p-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* ✅ Avatar */}
+            {/* Avatar */}
             <div
               className="relative w-28 h-28 flex items-center justify-center"
               onClick={handleAvatarClick}
@@ -281,7 +298,7 @@ export default function EmployerProfilePage() {
               />
             </div>
 
-            {/* ✅ Info Section */}
+            {/* Info Section */}
             <div className="flex-1 w-full">
               <h2 className="text-2xl font-semibold text-gray-800">
                 {profile.first_name} {profile.last_name}
@@ -300,7 +317,7 @@ export default function EmployerProfilePage() {
 
               <hr className="my-5" />
 
-              {/* ✅ Info Fields */}
+              {/* Info Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {profileFields.map((f, i) => (
                   <div
@@ -314,7 +331,7 @@ export default function EmployerProfilePage() {
                 ))}
               </div>
 
-              {/* ✅ Description */}
+              {/* Description */}
               <div className="mt-12">
                 <h3 className="flex items-center justify-between gap-2 text-lg font-semibold text-gray-800 mb-2">
                   <span className="flex items-center gap-2">
@@ -335,6 +352,7 @@ export default function EmployerProfilePage() {
                   )}
                 </h3>
 
+                {/* employer edit mode */}
                 {editMode ? (
                   <div className="space-y-3">
                     <ReactQuill
@@ -347,12 +365,14 @@ export default function EmployerProfilePage() {
                       className="bg-white rounded-lg border border-gray-300 min-h-[200px] mb-10"
                     />
                     <div className="flex gap-3">
+                      {/* save button */}
                       <button
                         onClick={handleDescriptionSave}
                         className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
                       >
                         Save
                       </button>
+                      {/* cancle button */}
                       <button
                         onClick={() => setEditMode(false)}
                         className="px-4 py-2 border border-gray-400 text-gray-600 text-sm rounded-md hover:bg-gray-100 transition"
@@ -384,6 +404,7 @@ export default function EmployerProfilePage() {
                     )}
 
                     {shouldTruncate && (
+                      // see less and see more button
                       <button
                         onClick={() => setExpanded(!expanded)}
                         className="text-blue-600 text-sm mt-2 hover:underline"
@@ -397,7 +418,7 @@ export default function EmployerProfilePage() {
             </div>
           </div>
 
-          {/* ✅ Edit Icon */}
+          {/* Edit Icon */}
           <div
             onClick={() =>
               navigate("/employer/dashboard/profile/edit", {

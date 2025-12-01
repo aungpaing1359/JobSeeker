@@ -11,11 +11,14 @@ export default function JobForm({ jobId }) {
   const navigate = useNavigate();
   const { employer } = useEmployerAuth();
   const [categories, setCategories] = useState([]);
-  const [initialData, setInitialData] = useState(null); // ⭐ Store original data
+  const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
+  // API base URL
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // FormData
   const [formData, setFormData] = useState({
     title: "",
     employer: "",
@@ -30,6 +33,7 @@ export default function JobForm({ jobId }) {
     priority: "NORMAL",
   });
 
+  // JOB_TYPE_CHOICES
   const JOB_TYPE_CHOICES = [
     { value: "FULL", label: "Full-time" },
     { value: "PART", label: "Part-time" },
@@ -37,6 +41,7 @@ export default function JobForm({ jobId }) {
     { value: "REMOTE", label: "Remote" },
   ];
 
+  // LOCATION_CHOICES
   const LOCATION_CHOICES = [
     { value: "MO", label: "MRAUK-U" },
     { value: "MB", label: "MINBRAR" },
@@ -57,6 +62,7 @@ export default function JobForm({ jobId }) {
     { value: "MBN", label: "MYEBON" },
   ];
 
+  // PRIORITY_CHOICES
   const PRIORITY_CHOICES = [
     { value: "NORMAL", label: "Normal" },
     { value: "FEATURED", label: "Featured" },
@@ -92,7 +98,7 @@ export default function JobForm({ jobId }) {
       };
 
       setFormData(loaded);
-      setInitialData(loaded); // ⭐ Save original
+      setInitialData(loaded);
     });
   }, [jobId]);
 
@@ -111,35 +117,27 @@ export default function JobForm({ jobId }) {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   // Validate form
   const validateForm = () => {
-    if (!formData.title.trim()) {
-      toast.error("Job title is required", { icon: "⚠️" });
-      return false;
-    }
-    if (!formData.job_type) {
-      toast.error("Please select job type", { icon: "⚠️" });
-      return false;
-    }
-    if (!formData.category) {
-      toast.error("Please select a category", { icon: "⚠️" });
-      return false;
-    }
-    if (!formData.location) {
-      toast.error("Please select location", { icon: "⚠️" });
-      return false;
-    }
-    if (!formData.deadline) {
-      toast.error("Please choose a deadline", { icon: "⚠️" });
-      return false;
-    }
-    if (!formData.description.trim()) {
-      toast.error("Please add a job description", { icon: "⚠️" });
-      return false;
-    }
-    return true;
+    const newErrors = {};
+
+    if (!formData.title.trim()) newErrors.title = "Job title is required";
+    if (!formData.priority) newErrors.priority = "Please select priority";
+    if (!formData.job_type) newErrors.job_type = "Please select job type";
+    if (!formData.category) newErrors.category = "Please select a category";
+    if (!formData.location) newErrors.location = "Please select location";
+    if (!formData.deadline) newErrors.deadline = "Please choose a deadline";
+    if (!formData.salary) newErrors.salary = "Salary is required";
+    if (!formData.max_applicants) newErrors.max_applicants = "Max Applicants is required";
+    if (!formData.description.trim())
+      newErrors.description = "Please add a job description";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   // Submit job
@@ -152,7 +150,6 @@ export default function JobForm({ jobId }) {
 
     try {
       if (jobId) {
-        // Check for changes
         if (JSON.stringify(formData) === JSON.stringify(initialData)) {
           toast("No changes to update.", { icon: "⚠️" });
           setLoading(false);
@@ -160,10 +157,10 @@ export default function JobForm({ jobId }) {
         }
 
         await updateJob(jobId, formData);
-        toast.success("Job updated successfully! 🎉");
+        toast.success("Job updated successfully!");
       } else {
         await createJob(formData);
-        toast.success("Job created successfully! 🎉");
+        toast.success("Job created successfully!");
       }
 
       navigate("/employer/dashboard/my-jobs");
@@ -232,18 +229,45 @@ export default function JobForm({ jobId }) {
       </div>
 
       {/* FORM */}
-      <form onSubmit={handleSubmit} className="bg-white shadow-md p-6 rounded-lg space-y-6">
-
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md p-6 rounded-lg space-y-6"
+      >
         {/* Title */}
-        <div>
-          <label className="block font-medium">Job Title</label>
-          <input
-            type="text"
-            name="title"
-            className="w-full border p-3 rounded-md"
-            value={formData.title}
-            onChange={handleChange}
-          />
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium">Job Title</label>
+            <input
+              type="text"
+              name="title"
+              className="w-full border p-3 rounded-md"
+              value={formData.title}
+              onChange={handleChange}
+            />
+            {errors.title && (
+              <p className="text-red-600 text-sm mt-1">{errors.title}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block font-medium">Priority</label>
+            <select
+              name="priority"
+              className="w-full border p-3 rounded-md"
+              value={formData.priority}
+              onChange={handleChange}
+            >
+              <option value="">-- Select Priority --</option>
+              {PRIORITY_CHOICES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            {errors.priority && (
+              <p className="text-red-600 text-sm mt-1">{errors.priority}</p>
+            )}
+          </div>
         </div>
 
         {/* Job Type + Category */}
@@ -263,6 +287,9 @@ export default function JobForm({ jobId }) {
                 </option>
               ))}
             </select>
+            {errors.job_type && (
+              <p className="text-red-600 text-sm mt-1">{errors.job_type}</p>
+            )}
           </div>
 
           <div>
@@ -280,6 +307,9 @@ export default function JobForm({ jobId }) {
                 </option>
               ))}
             </select>
+            {errors.category && (
+              <p className="text-red-600 text-sm mt-1">{errors.category}</p>
+            )}
           </div>
         </div>
 
@@ -300,6 +330,9 @@ export default function JobForm({ jobId }) {
                 </option>
               ))}
             </select>
+            {errors.location && (
+              <p className="text-red-600 text-sm mt-1">{errors.location}</p>
+            )}
           </div>
 
           <div>
@@ -311,6 +344,9 @@ export default function JobForm({ jobId }) {
               value={formData.salary}
               onChange={handleChange}
             />
+            {errors.salary && (
+              <p className="text-red-600 text-sm mt-1">{errors.salary}</p>
+            )}
           </div>
         </div>
 
@@ -325,6 +361,9 @@ export default function JobForm({ jobId }) {
               value={formData.max_applicants}
               onChange={handleChange}
             />
+            {errors.max_applicants && (
+              <p className="text-red-600 text-sm mt-1">{errors.max_applicants}</p>
+            )}
           </div>
 
           <div>
@@ -336,6 +375,9 @@ export default function JobForm({ jobId }) {
               value={formData.deadline}
               onChange={handleChange}
             />
+            {errors.deadline && (
+              <p className="text-red-600 text-sm mt-1">{errors.deadline}</p>
+            )}
           </div>
         </div>
 
@@ -352,6 +394,9 @@ export default function JobForm({ jobId }) {
             formats={quillFormats}
             className="bg-white rounded-md border min-h-[200px]"
           />
+          {errors.description && (
+              <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+            )}
         </div>
 
         {/* Submit */}

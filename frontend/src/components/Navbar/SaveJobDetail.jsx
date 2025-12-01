@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getLocationLabel } from "../../utils/locationHelpers";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function SavedJobDetail() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [jobDetail, setJobDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Page Title
+  usePageTitle(
+    jobDetail?.job?.title ? `${jobDetail.job.title} | Saved` : "Saved Job"
+  );
+
   useEffect(() => {
+    // Saved Job Detail
     async function fetchJobDetail() {
       try {
+        // Send GET request to fetch saved job detail by ID
         const response = await axios.get(
           `${API_URL}/application/saved/job/detail/${id}/`,
           { withCredentials: true }
@@ -24,7 +32,7 @@ export default function SavedJobDetail() {
         setLoading(false);
       }
     }
-
+    // Call the async function
     fetchJobDetail();
   }, [id]);
 
@@ -35,6 +43,7 @@ export default function SavedJobDetail() {
 
   return (
     <div className="container mx-auto px-6 py-10">
+      {/* Back button */}
       <button
         onClick={() => navigate(-1)}
         className="mb-6 text-blue-600 underline text-sm"
@@ -42,8 +51,9 @@ export default function SavedJobDetail() {
         ← Back
       </button>
 
+      {/* title, employer name, location, job type, category, salary, deadline, description */}
       <h1 className="text-2xl font-semibold mb-2">{job.title}</h1>
-      <p className="text-gray-600">{job.employer}</p>
+      <p className="text-gray-600">{job.employer_business_name}</p>
       <p className="text-gray-500 text-sm mb-3">
         {getLocationLabel(job.location)} • {job.job_type}
       </p>
@@ -58,12 +68,17 @@ export default function SavedJobDetail() {
         <p className="text-gray-700 mb-2">
           <strong>Deadline:</strong> {job.deadline}
         </p>
-        <p className="text-gray-700 mt-4">{job.description}</p>
+        <p
+          className="text-gray-700 mt-4"
+          dangerouslySetInnerHTML={{
+            __html: job.description || "No description available",
+          }}
+        ></p>
       </div>
 
-      <button className="mt-6 bg-[#D2691E] hover:bg-[#b45717] text-white py-2 px-6 rounded-md">
+      {/* <button className="mt-6 bg-[#D2691E] hover:bg-[#b45717] text-white py-2 px-6 rounded-md">
         Apply Now
-      </button>
+      </button> */}
     </div>
   );
 }

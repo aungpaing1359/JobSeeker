@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
 import logo from "../../assets/images/logo.png";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const EmployerSignIn = () => {
+  usePageTitle("Employer Sign-In");
   const { signin } = useEmployerAuth();
   const navigate = useNavigate();
 

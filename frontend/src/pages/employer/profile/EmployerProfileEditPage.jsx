@@ -3,14 +3,21 @@ import { useState } from "react";
 import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
-
-const getCSRFToken = () => {
-  const cookieValue = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("csrftoken="))
-    ?.split("=")[1];
+// CSRF token function
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
   return cookieValue;
-};
+}
 
 export default function EmployerProfileEditPage() {
   const location = useLocation();
@@ -40,13 +47,13 @@ export default function EmployerProfileEditPage() {
       setFormData({ ...formData, [name]: value });
     }
   };
-
+  // variables csrfToken
+  const csrfToken = getCookie("csrftoken");
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!profile?.id) return console.error("Profile ID not found!");
 
     const token = localStorage.getItem("access");
-    const csrfToken = getCSRFToken();
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null && value !== undefined) data.append(key, value);
@@ -79,7 +86,7 @@ export default function EmployerProfileEditPage() {
         className="bg-white shadow-md rounded-xl p-8 w-full max-w-5xl border border-gray-100"
       >
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-        Edit Employer Profile
+          Edit Employer Profile
         </h2>
 
         {/* Logo preview */}

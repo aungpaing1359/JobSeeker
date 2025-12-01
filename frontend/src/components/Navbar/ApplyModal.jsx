@@ -5,8 +5,10 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
   const [coverLetter, setCoverLetter] = useState("");
   const { applyJob, loading } = useJobApply();
 
+  // Do not render modal if not open
   if (!isOpen) return null;
 
+  // HandleSubmit
   const handleSubmit = (e) => {
     e.preventDefault();
     applyJob(job, coverLetter, () => {
@@ -26,6 +28,7 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Cover Letter */}
           <div>
             <label className="block font-medium mb-1">Cover Letter</label>
             <textarea
@@ -37,6 +40,7 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
             />
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-4 mt-6">
             <button
               type="submit"
@@ -60,4 +64,3 @@ export default function ApplyModal({ isOpen, onClose, job, onSuccess }) {
     </div>
   );
 }
-

@@ -3,6 +3,7 @@ import { getJobs, deleteJob } from "../../../utils/api/jobAPI";
 import { useNavigate } from "react-router-dom";
 import JobDeleteModal from "../../../components/employer/jobs/JobDeleteModal";
 import Pagination from "../../../components/common/Pagination";
+import usePageTitle from "../../../hooks/usePageTitle";
 
 // Get CSRF Token
 function getCookie(name) {
@@ -22,6 +23,7 @@ function getCookie(name) {
 const csrftoken = getCookie("csrftoken");
 
 export default function MyJobs() {
+  usePageTitle("Jobs List");
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
 
@@ -31,7 +33,7 @@ export default function MyJobs() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
 
-  // ⭐ Pagination state
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -48,11 +50,13 @@ export default function MyJobs() {
     fetchData();
   }, []);
 
+  // Show delete confirmation modal
   const confirmDelete = (id) => {
     setJobToDelete(id);
     setShowConfirm(true);
   };
 
+  // Delete job and update state
   const handleDelete = async (id) => {
     if (!id) return;
 
@@ -67,13 +71,14 @@ export default function MyJobs() {
     }
   };
 
+  // Navigate to job detail page
   const handleDetail = (id) =>
     navigate(`/employer/dashboard/my-jobs/${id}/detail`);
-
+// Navigate to job edit page
   const handleEdit = (job) =>
     navigate(`/employer/dashboard/my-jobs/${job.id}/edit`);
 
-  // ⭐ Compute job status
+  // Compute job status
   function getJobStatus(job) {
     const today = new Date();
 
@@ -91,7 +96,7 @@ export default function MyJobs() {
     return "Active";
   }
 
-  // ⭐ 1 — Filter jobs BEFORE pagination
+  // Filter jobs BEFORE pagination
   const filteredJobs = jobs.filter((job) => {
     const search = searchTerm.toLowerCase();
 
@@ -109,7 +114,7 @@ export default function MyJobs() {
     return matchesSearch && matchesStatus;
   });
 
-  // ⭐ 2 — Pagination logic AFTER filteredJobs exists
+  // Pagination logic AFTER filteredJobs exists
   const indexLast = currentPage * itemsPerPage;
   const indexFirst = indexLast - itemsPerPage;
   const currentJobs = filteredJobs.slice(indexFirst, indexLast);

@@ -4,6 +4,7 @@ import { useNotificationAuth } from "../../../hooks/useNotificationAuth";
 import { toast } from "react-hot-toast";
 
 export default function Notification() {
+  // Get notifications and actions from Notification context
   const { notifications, loading, markRead, markUnread, deleteOne, deleteAll } =
     useNotificationAuth();
   const [open, setOpen] = useState(false);
@@ -26,6 +27,7 @@ export default function Notification() {
 
   if (loading) return null;
 
+  // Toggle read/unread status
   const toggleReadStatus = (id, isRead) => {
     if (isRead) {
       markUnread(id);
@@ -34,6 +36,7 @@ export default function Notification() {
     }
   };
 
+  // Filter notifications based on current filter
   const filteredNotifications = notifications.filter((n) => {
     if (filter === "unread") return !n.is_read;
     if (filter === "read") return n.is_read;
@@ -104,6 +107,7 @@ export default function Notification() {
             </button>
           </div>
 
+{/* Notification list */}
           {filteredNotifications.length === 0 ? (
             <div className="p-4 text-gray-500 text-center">
               No notifications
@@ -116,7 +120,7 @@ export default function Notification() {
                   !n.is_read ? "bg-blue-50" : ""
                 }`}
               >
-                {/* Message + toggle read */}
+                {/* Message + toggle read and unread */}
                 <div
                   onClick={() => toggleReadStatus(n.id, n.is_read)}
                   className="flex-1 cursor-pointer"

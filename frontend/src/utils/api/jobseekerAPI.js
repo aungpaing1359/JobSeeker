@@ -2,7 +2,7 @@
 import axios from "axios";
 import { API_URL } from "../constants/jobseekerConstants";
 
-// ✅ Cookie getter (CSRF token)
+// Cookie getter (CSRF token)
 export function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -18,7 +18,7 @@ export function getCookie(name) {
   return cookieValue;
 }
 
-// ✅ SignIn API
+// SignIn API
 export async function signInAPI(email) {
   const res = await fetch(`${API_URL}/accounts-jobseeker/jobseeker/signin/jobseeker/`, {
     method: "POST",
@@ -35,7 +35,7 @@ export async function signInAPI(email) {
 }
 
 
-// ✅ Verify OTP API
+// Verify OTP API
 export async function verifyOTPAPI(otp) {
   const res = await axios.post(
     `${API_URL}/accounts-jobseeker/jobseeker/send/otp/`,
@@ -48,7 +48,7 @@ export async function verifyOTPAPI(otp) {
   return res.data;
 }
 
-// ✅ Current User
+// Current User
 export async function fetchProfileAPI() {
   const token = localStorage.getItem("token");
   const res = await axios.get(`${API_URL}/accounts-jobseeker/jobseeker/currentuser/`,{
@@ -58,7 +58,7 @@ export async function fetchProfileAPI() {
   return res.data;
 }
 
-// ✅ Logout
+// Logout
 export async function logoutAPI() {
   const csrftoken = getCookie("csrftoken");
   return axios.post(
@@ -71,7 +71,7 @@ export async function logoutAPI() {
   );
 }
 
-// ✅ Resend OTP API
+// Resend OTP API
 export async function resendOTPAPI(email) {
   const res = await axios.post(
     `${API_URL}/accounts-jobseeker/jobseeker/resend/otp/`,

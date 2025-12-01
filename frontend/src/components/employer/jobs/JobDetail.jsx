@@ -3,12 +3,13 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getJobDetail } from "../../../utils/api/jobAPI";
 import { getLocationLabel } from "../../../utils/locationHelpers";
+import usePageTitle from "../../../hooks/usePageTitle";
 
 export default function JobDetail() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
 
-  // Format job type for UI
+  // Format jobtype
   const formatJobType = (type) => {
     const map = {
       FULL: "Full-time",
@@ -19,11 +20,15 @@ export default function JobDetail() {
     return map[type] || type;
   };
 
+  // Fetch job detail when the ID changes
   useEffect(() => {
     getJobDetail(id)
       .then((res) => setJob(res.data))
       .catch((err) => console.error("Error fetching job detail:", err));
   }, [id]);
+
+  // Page Title
+  usePageTitle(job?.title);
 
   if (!job) {
     return (
@@ -46,16 +51,16 @@ export default function JobDetail() {
         {/* Location & Job Type Badges */}
         <div className="flex items-center gap-2 mt-3">
           <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-            📍 {getLocationLabel(job.location)}
+            {getLocationLabel(job.location)}
           </span>
 
           <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
-            💼 {formatJobType(job.job_type)}
+            {formatJobType(job.job_type)}
           </span>
         </div>
       </div>
 
-      {/* Job Info Grid */}
+      {/* Job Info */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div>
           <p className="text-gray-600">
@@ -109,7 +114,7 @@ export default function JobDetail() {
           Job Description
         </h3>
         <div
-          className="text-gray-700 leading-relaxed prose max-w-none"
+          className="text-gray-700 leading-relaxed prose max-w-none break-words whitespace-pre-wrap overflow-hidden"
           dangerouslySetInnerHTML={{
             __html: job.description || "<p>No description provided.</p>",
           }}

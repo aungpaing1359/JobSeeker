@@ -9,18 +9,28 @@ import {
   JOB_CATEGORIES,
 } from "../constants/apiJobendpoints";
 
-export const getCsrfToken = () => {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("csrftoken="))
-    ?.split("=")[1];
-};
+// CSRF token function
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrfToken = () => getCookie("csrftoken");
 
 // Create Job
 export const createJob = (data) =>
   api.post(JOB_CREATE, data, {
     headers: {
-      "X-CSRFTOKEN": getCsrfToken(),
+      "X-CSRFToken": csrfToken(),
     },
     withCredentials: true,
   });
@@ -36,7 +46,7 @@ export const getJobDetail = (id) =>
 export const updateJob = (id, data) =>
   api.put(JOB_UPDATE(id), data, {
     headers: {
-      "X-CSRFToken": getCsrfToken(),
+      "X-CSRFToken": csrfToken(),
     },
     withCredentials: true,
   });
@@ -45,12 +55,11 @@ export const updateJob = (id, data) =>
 export const deleteJob = (id) =>
   api.delete(JOB_DELETE(id), {
     headers: {
-      "X-CSRFToken": getCsrfToken(),
+      "X-CSRFToken": csrfToken(),
     },
     withCredentials: true,
   });
-  
+
 // Get all job categories
 export const getCategories = () =>
   api.get(JOB_CATEGORIES, { withCredentials: true });
-

@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X, User, Bookmark, FileText, LogOut } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import logo from "../../assets/images/logo.png"
+import logo from "../../assets/images/logo.png";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Mobile menu state
+  const [dropdownOpen, setDropdownOpen] = useState(false); // User dropdown state
   const { user, loading, logout } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
-      console.log("Navbar user:", user);
+      // Optional: console.log("Navbar user:", user);
     }
   }, [user, loading]);
 
+  // Nav Links
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Jobs", path: "/job-search" },
@@ -24,6 +25,7 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Navbar header */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-1.5 flex items-center justify-between">
           {/* Logo */}
@@ -56,6 +58,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4 relative">
             {!user && !loading ? (
               <>
+                {/* Sign In & Employer links */}
                 <NavLink
                   to="/sign-in"
                   className={({ isActive }) =>
@@ -95,6 +98,7 @@ export default function Navbar() {
                     ▼
                   </button>
 
+                  {/* Dropdown menu */}
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
                       <NavLink
@@ -133,7 +137,7 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-
+                {/* Employer site link */}
                 <NavLink
                   to="/employer/sign-in"
                   className={({ isActive }) =>

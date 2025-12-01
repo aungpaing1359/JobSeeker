@@ -7,21 +7,21 @@ export default function JobCard({ job }) {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // ------------------ Relative Time ------------------
+  // Relative Time
   function getRelativeTime(dateString) {
     if (!dateString) return "No deadline";
 
     const target = new Date(dateString); // deadline date
     const now = new Date();
 
-    const diffMs = target - now; // ✔ future date တွေအတွက်မှန်တယ်
+    const diffMs = target - now; // difference in milliseconds
     const diffSec = Math.floor(diffMs / 1000);
 
     const minutes = Math.floor(Math.abs(diffSec) / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    // Deadline မကြုံရသေးတဲ့အချိန် (future)
+     // If deadline is in the future
     if (diffMs > 0) {
       if (days > 0) return `${days} days left`;
       if (hours > 0) return `${hours} hours left`;
@@ -29,7 +29,7 @@ export default function JobCard({ job }) {
       return "Ending soon";
     }
 
-    // Deadline ကပြီးသွားပြီ (past)
+    // If deadline is in the past
     if (days > 0) return `${days} days ago`;
     if (hours > 0) return `${hours} hours ago`;
     if (minutes > 0) return `${minutes} minutes ago`;
@@ -37,14 +37,14 @@ export default function JobCard({ job }) {
     return "Just now";
   }
 
-  // ------------------ RENDER ------------------
+  // RENDER 
   return (
     <div
       className="bg-white py-4 px-6 border border-[#F4F5F7] rounded-3xl shadow-md hover:shadow-lg transition cursor-pointer flex flex-col gap-2"
       onClick={() => navigate(`/job-search/${job.id}`)}
     >
       <div className="flex items-start justify-between">
-        {/* LEFT — Text Info */}
+        {/* LEFT — Text Info (title, category name, employer name) */}
         <div className="flex-1 pr-3">
           <h3 className="font-bold text-xl gray-text-custom">
             {job.title?.length > 15
@@ -53,8 +53,8 @@ export default function JobCard({ job }) {
           </h3>
 
           <p className="text-sm gray-text-custom mt-1">
-            {job.category_name?.length > 25
-              ? job.category_name.substring(0, 25) + "..."
+            {job.category_name?.length > 20
+              ? job.category_name.substring(0, 20) + "..."
               : job.category_name || "Not specified"}
           </p>
 

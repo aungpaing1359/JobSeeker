@@ -7,8 +7,10 @@ import { useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/Navbar/ApplyModal";
 import { toast } from "react-hot-toast";
 import { getLocationLabel } from "../../utils/locationHelpers";
+import usePageTitle from "../../hooks/usePageTitle";
 
-export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
+export default function JobDetailView({ job, onToggleMaximize }) {
+  usePageTitle(job?.title || "JobDetail");
   // ==================== STATES ====================
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
@@ -30,7 +32,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
   const { token, user } = useAuth();
   const navigate = useNavigate();
 
-  // ==================== CSRF HELPER ====================
+  // CSRF token function
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -45,9 +47,10 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     }
     return cookieValue;
   }
+  // variables csrfToken
   const csrftoken = getCookie("csrftoken");
 
-  // ==================== CHECK IF APPLIED ====================
+  // CHECK IF APPLIED
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       if (!token || !job?.id) return;
@@ -71,7 +74,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     fetchAppliedJobs();
   }, [job?.id, token]);
 
-  // ==================== CHECK IF SAVED ====================
+  // CHECK IF SAVED
   useEffect(() => {
     const fetchSavedJobs = async () => {
       if (!token || !job?.id) {
@@ -90,13 +93,13 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         const foundItem = savedList.find((item) => item.job?.id === job.id);
         if (foundItem) {
           setIsSaved(true);
-          setSavedJobId(foundItem.id); // ✅ store saved_job.id
+          setSavedJobId(foundItem.id);
         } else {
           setIsSaved(false);
           setSavedJobId(null);
         }
       } catch (err) {
-        console.error("❌ Fetch saved jobs failed:", err);
+        console.error("Fetch saved jobs failed:", err);
         setIsSaved(false);
         setSavedJobId(null);
       }
@@ -104,7 +107,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     fetchSavedJobs();
   }, [job?.id, token]);
 
-  // ==================== FETCH PROFILE DATA ====================
+  // FETCH PROFILE DATA
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!token) {
@@ -132,24 +135,29 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
         if (prof?.id) {
           const [skills, langs, edu, exp, resume] = await Promise.all([
+            // skill api
             axios.get(
               `${API_URL}/accounts-jobseeker/skill/?profile=${prof.id}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
             ),
+            // language api
             axios.get(
               `${API_URL}/accounts-jobseeker/language/?profile=${prof.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             ),
+            // education api
             axios.get(
               `${API_URL}/accounts-jobseeker/education/?profile=${prof.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             ),
+            // experience api
             axios.get(
               `${API_URL}/accounts-jobseeker/experience/?profile=${prof.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             ),
+            // resume api
             axios.get(
               `${API_URL}/accounts-jobseeker/resume/?profile=${prof.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
@@ -163,14 +171,14 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           setResumeList(resume.data);
         }
       } catch (err) {
-        console.error("❌ Error fetching profile data:", err);
+        console.error(" Error fetching profile data:", err);
       }
     };
 
     fetchProfileData();
   }, [token, user]);
 
-  // ==================== APPLY MODAL HANDLER ====================
+  // APPLY MODAL HANDLER
   const handleOpenModal = () => {
     if (!token) {
       toast.error("Please sign in to apply for jobs.");
@@ -199,7 +207,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     setIsModalOpen(true);
   };
 
-  // ==================== SAVE / UNSAVE TOGGLE ====================
+  // SAVE / UNSAVE TOGGLE
   async function handleToggleSave(e) {
     e.stopPropagation();
     if (!token) {
@@ -210,7 +218,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
     try {
       if (!isSaved) {
-        // ✅ SAVE JOB
+        // SAVE JOB
         const res = await axios.post(
           `${API_URL}/application/save/job/${job.id}/`,
           {},
@@ -226,7 +234,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         toast.success("Job saved successfully!");
         setIsSaved(true);
 
-        // ✅ refresh saved list to get savedJobId
+        // refresh saved list to get savedJobId
         const refresh = await axios.get(`${API_URL}/application/saved/jobs/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -236,7 +244,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
 
         console.log("✅ Save Response:", res.data);
       } else {
-        // ✅ UNSAVE JOB (use savedJobId)
+        // UNSAVE JOB (use savedJobId)
         if (!savedJobId) {
           toast.error("Saved job ID not found!");
           return;
@@ -259,7 +267,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
         console.log("🗑️ Unsave Response:", res.data);
       }
     } catch (error) {
-      console.error("❌ Save toggle failed:", error);
+      console.error("Save toggle failed:", error);
       toast.error(
         "Your profile is incomplete. Please finish it to continue saving jobs"
       );
@@ -267,7 +275,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     }
   }
 
-  // ==================== NO JOB SELECTED ====================
+  // NO JOB SELECTED
   if (!job) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -277,7 +285,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
     );
   }
 
-  // ==================== RENDER ====================
+  // RENDER
   return (
     <>
       {/* Header */}
@@ -316,12 +324,12 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
           disabled={!job?.is_active || isApplying || isApplied}
           className={`px-6 py-2 rounded-md text-white font-semibold transition-colors duration-200 cursor-pointer ${
             isApplied
-              ? "bg-green-600 cursor-not-allowed"
+              ? "bg-green-600 cursor-not-allowed opacity-70"
               : isApplying
               ? "bg-blue-400 cursor-wait"
               : job?.is_active
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-400 cursor-not-allowed"
+              ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              : "bg-gray-400 cursor-not-allowed opacity-70"
           }`}
         >
           {isApplied ? "✅ Applied" : isApplying ? "Applying..." : "Apply Now"}
@@ -350,7 +358,7 @@ export default function JobDetailView({ job, isMaximized, onToggleMaximize }) {
       {/* Description */}
       <div className="mt-8">
         <div
-          className="text-gray-600 leading-relaxed"
+          className="text-gray-600 leading-relaxed whitespace-pre-wrap break-words overflow-hidden"
           dangerouslySetInnerHTML={{
             __html: job.description || "No description available",
           }}

@@ -3,8 +3,10 @@ import { FaFacebook } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import logo from "../../assets/images/logo.png"
+import usePageTitle from "../../hooks/usePageTitle";
 
 const SignIn = () => {
+  usePageTitle("Sing-In");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const { loading, message, signIn } = useAuth();

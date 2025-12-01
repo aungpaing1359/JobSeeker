@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 import { useEmployerAuth } from "../../../hooks/useEmployerAuth";
 import Notification from "./Notification";
+import usePageTitle from "../../../hooks/usePageTitle";
 
+// Sidebar menu items for employer dashboard
 export const sidebarItems = [
   { route: "dashboard", label: "Dashboard", icon: Briefcase },
   { route: "job-category", label: "Job Category", icon: LayoutGrid },
@@ -22,12 +24,19 @@ export const sidebarItems = [
 ];
 
 export default function EmployerDashboardLayout() {
+  // Page title
+  usePageTitle("Overview");
+  // Employer authentication and state
   const { employer, authLoading, logout, resendEmail } = useEmployerAuth();
   const navigate = useNavigate();
+   // Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  // Loading state for email verification resend
   const [resendLoading, setResendLoading] = useState(false);
+  // Flag to show verification message
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
+   // Show verification message if employer exists but not verified
   useEffect(() => {
     if (employer) {
       setShowVerificationMessage(!employer.is_verified);
@@ -36,6 +45,7 @@ export default function EmployerDashboardLayout() {
 
   console.log("EMPLOYER FROM CONTEXT:", employer);
 
+   // Loading state while authentication data is being fetched
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -44,6 +54,7 @@ export default function EmployerDashboardLayout() {
     );
   }
 
+  // Function to resend verification email
   const handleResendEmail = async () => {
     setResendLoading(true);
     try {
@@ -56,6 +67,7 @@ export default function EmployerDashboardLayout() {
     }
   };
 
+   // If employer data not yet available, show loading
   if (!employer) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -64,6 +76,7 @@ export default function EmployerDashboardLayout() {
     );
   }
 
+  // Flag to check if email is not verified
   const emailNotVerified = showVerificationMessage;
 
   return (

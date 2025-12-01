@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Pagination from "../../common/Pagination"; // 👉 path ကိုလိုအပ်ရာပြင်ပါ
+import Pagination from "../../common/Pagination";
 
 export default function JobCategoryList({ categories, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // ⭐ Pagination logic
+  // Pagination logic
   const indexLast = currentPage * itemsPerPage;
   const indexFirst = indexLast - itemsPerPage;
   const currentItems = categories.slice(indexFirst, indexLast);
@@ -52,7 +52,7 @@ export default function JobCategoryList({ categories, onDelete }) {
         )}
       </ul>
 
-      {/* ⭐ Pagination Component */}
+      {/* Pagination Component */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

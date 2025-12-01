@@ -1,15 +1,18 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function Profile() {
+  usePageTitle("Profile");
+
   const navigate = useNavigate();
   const { user } = useAuth();
 
   // If the user exists, redirect.
   useEffect(() => {
-    if(user) {
-      navigate("/profile/me"); 
+    if (user) {
+      navigate("/profile/me");
     }
   }, [user, navigate]);
 

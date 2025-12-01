@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // CSRF cookie သုံးမယ်ဆိုရင်
+  withCredentials: true,
 });
 
 // Request interceptor to attach employer token

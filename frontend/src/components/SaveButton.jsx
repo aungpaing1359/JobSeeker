@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
+// CSRF token from cookies
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -27,7 +28,7 @@ export default function SaveButton({ jobId }) {
   const csrftoken = getCookie("csrftoken");
   const token = localStorage.getItem("token");
 
-  // ------------------ Load saved state ------------------
+  // Load saved state
   useEffect(() => {
     if (!token || !jobId) return;
 
@@ -56,7 +57,7 @@ export default function SaveButton({ jobId }) {
     load();
   }, [jobId]);
 
-  // ------------------ Toggle Save / Unsave ------------------
+  // Toggle Save / Unsave 
   async function toggleSave(e) {
     e.stopPropagation();
 
@@ -107,10 +108,13 @@ export default function SaveButton({ jobId }) {
   }
 
   return (
+    // Clickable icon to toggle saved state for a job
     <div onClick={toggleSave} className="cursor-pointer">
       {isSaved ? (
+        // If saved (green)
         <BookmarkCheck className="text-green-600" size={22} />
       ) : (
+        // If not saved (blue)
         <Save className="text-blue-500" size={22} />
       )}
     </div>

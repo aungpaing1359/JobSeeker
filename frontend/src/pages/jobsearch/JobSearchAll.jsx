@@ -5,11 +5,12 @@ import QuickSearchSection from "../homepage/QuickSearchSection";
 import EnterSearch from "../EnterSearch";
 import { getLocationLabel } from "../../utils/locationHelpers";
 import SaveButton from "../../components/SaveButton";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const JobCard = ({ job }) => {
+  // Page Title
+  usePageTitle("Job All");
   const API_URL = import.meta.env.VITE_API_URL;
-
-  console.log("🔍 JobCard Data:", job);
 
   const navigate = useNavigate();
 
@@ -20,6 +21,7 @@ const JobCard = ({ job }) => {
       onClick={() => navigate(`/job-search/${job.id}`)}
       className="border border-gray-300 rounded-lg p-4 relative shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer flex flex-col justify-between h-full"
     >
+      {/* Employer Logo */}
       <div className="absolute top-4 right-4 text-blue-500">
         <img
           src={logoPath ? `${API_URL}${logoPath}` : "/logo.png"}
@@ -27,19 +29,23 @@ const JobCard = ({ job }) => {
           className="w-14 h-14 object-cover"
         />
       </div>
+      {/* Job Title */}
       <h3 className="text-lg font-semibold text-gray-800">
         {job.title?.length > 15
           ? job.title.substring(0, 15) + "..."
           : job.title || "Unknown Title"}
       </h3>
+      {/* Company Name */}
       <p className="text-sm text-gray-600">
         {job.employer_business_name?.length > 20
           ? job.employer_business_name.substring(0, 20) + "..."
           : job.employer_business_name || "Unknown Company"}
       </p>
+      {/* Job Location */}
       <p className="text-sm text-gray-500 mt-1">
         {getLocationLabel(job.location)}
       </p>
+      {/* Job Description (truncated, rendered as HTML) */}
       <div
         className="text-sm text-gray-700 mt-3"
         dangerouslySetInnerHTML={{
@@ -49,6 +55,7 @@ const JobCard = ({ job }) => {
               : job.description || "No description available",
         }}
       ></div>
+      {/* Footer: Deadline & Save Button */}
       <div className="flex items-center justify-between mt-4">
         <p className="text-sm text-gray-400">
           {job.deadline ? `Deadline: ${job.deadline}` : "No deadline"}
@@ -73,10 +80,12 @@ const JobSearchAll = () => {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Scroll to top when location state changes (e.g., navigation)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.state]);
 
+  // Fetch all jobs from API
   useEffect(() => {
     const fetchAllJobs = async () => {
       try {
@@ -88,19 +97,19 @@ const JobSearchAll = () => {
         else if (Array.isArray(data.results)) jobList = data.results;
         else if (Array.isArray(data.jobs)) jobList = data.jobs;
 
-        console.log("✅ Loaded All Jobs:", jobList);
-
+        // Standardize API response format
         setAllJobs(jobList);
         setJobs(jobList);
         setLoading(false);
       } catch (err) {
-        console.error("❌ Error fetching jobs:", err);
+        console.error("Error fetching jobs:", err);
         setLoading(false);
       }
     };
     fetchAllJobs();
   }, []);
 
+  // Update jobs when search results or all jobs change
   useEffect(() => {
     if (location.state?.jobs) {
       setJobs(location.state.jobs);
@@ -112,6 +121,7 @@ const JobSearchAll = () => {
     }
   }, [location.state, allJobs]);
 
+  // Merge search result jobs with full job detail
   useEffect(() => {
     if (location.state?.jobs) {
       const merged = location.state.jobs.map((sJob) => {

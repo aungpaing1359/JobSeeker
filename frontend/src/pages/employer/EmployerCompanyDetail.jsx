@@ -3,8 +3,10 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
 import { toast } from "react-hot-toast";
 import logo from "../../assets/images/logo.png";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function EmployerCompanyDetail() {
+  usePageTitle("Employer Company Register");
   const location = useLocation();
   const navigate = useNavigate();
   const { submitCompanyDetail } = useEmployerAuth();
@@ -55,7 +57,7 @@ export default function EmployerCompanyDetail() {
       toast.success("Account created successfully!");
       navigate("/employer/dashboard");
     } catch (err) {
-      console.error("Error 👉", err.response.data);
+      console.error("Error :", err.response.data);
       console.log("Status:", err.response.status);
       toast.error("Email already exist!");
     } finally {

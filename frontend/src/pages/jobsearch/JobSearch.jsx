@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EnterSearch from "../EnterSearch";
@@ -6,8 +6,10 @@ import JobDetailView from "./JobDetailView";
 import { useAuth } from "../../hooks/useAuth";
 import ApplyModal from "../../components/Navbar/ApplyModal";
 import { getLocationLabel } from "../../utils/locationHelpers";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function JobSearch() {
+  usePageTitle("Jobs");
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -23,8 +25,29 @@ export default function JobSearch() {
   const [selectedJobId, setSelectedJobId] = useState(null);
 
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const jobRefs = useRef({});
 
   const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    if (selectedJobId && jobRefs.current[selectedJobId]) {
+      jobRefs.current[selectedJobId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [selectedJobId]);
+
+  useEffect(() => {
+    if (selectedJobId) {
+      if (window.innerWidth < 768) {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [selectedJobId]);
 
   // Fetch Jobs
   useEffect(() => {
@@ -106,20 +129,29 @@ export default function JobSearch() {
       <div className="container mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job List */}
         {!isMaximized && (
-          <div className="md:col-span-1 space-y-4 h-[700px] max-2xl:h-[550px] max-xl:h-[500px] max-lg:h-[450px] overflow-y-auto pr-3">
+          <div
+            className={`
+    md:col-span-1 space-y-4 h-[700px] max-2xl:h-[550px] max-xl:h-[500px] max-lg:h-[450px] 
+    overflow-y-auto pr-3
+    ${selectedJobId ? "max-md:hidden" : ""}
+  `}
+          >
             {loadingJobs ? (
               <p className="text-gray-500 text-center">Loading jobs...</p>
             ) : jobs.length > 0 ? (
               jobs.map((job) => (
                 <div
                   key={job.id}
+                  ref={(el) => (jobRefs.current[job.id] = el)}
                   onClick={() => {
                     setSelectedJob(job);
                     setSelectedJobId(job.id);
                     navigate(`/job-search/${job.id}`);
                   }}
-                  className={`company-bg-custom rounded-lg p-4 shadow-md cursor-pointer hover:shadow-lg ${
-                    selectedJobId === job.id ? "bg-gray-200" : ""
+                  className={`company-bg-custom rounded-lg p-4 shadow-md cursor-pointer transition-all hover:shadow-lg ${
+                    selectedJobId === job.id
+                      ? "active-job-color shadow-lg"
+                      : "bg-white"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -170,9 +202,12 @@ export default function JobSearch() {
 
         {/* Detail View */}
         <div
-          className={`${
-            isMaximized ? "md:col-span-3" : "md:col-span-2"
-          } p-4 h-[750px] max-2xl:h-[600px] max-xl:h-[500px] max-lg:h-[450px] overflow-auto`}
+          className={`
+    p-4 overflow-auto
+    ${selectedJobId ? "max-md:h-full max-md:w-full" : ""}
+    h-[750px] max-2xl:h-[600px] max-xl:h-[500px] max-lg:h-[450px]
+    ${isMaximized ? "md:col-span-3" : "md:col-span-2"}
+  `}
         >
           <JobDetailView
             job={selectedJob}

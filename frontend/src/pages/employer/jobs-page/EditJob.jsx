@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import usePageTitle from "../../../hooks/usePageTitle";
 
 export default function EditJob() {
   const { id } = useParams();
@@ -71,6 +72,8 @@ export default function EditJob() {
     };
     fetchData();
   }, [id]);
+
+  usePageTitle(`${job?.title} | Edit`);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -140,7 +143,7 @@ export default function EditJob() {
     <div className="bg-white rounded-xl shadow-md p-6 max-w-3xl mx-auto">
       <h2 className="text-xl font-semibold mb-4">Edit Job</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* --- Title --- */}
+        {/* Title */}
         <div>
           <label className="block mb-1 font-medium">Title</label>
           <input
@@ -151,7 +154,7 @@ export default function EditJob() {
           />
         </div>
 
-        {/* --- Job Type (looped) --- */}
+        {/* Job Type (looped) */}
         <div>
           <label className="block mb-1 font-medium">Job Type</label>
           <select
@@ -169,7 +172,7 @@ export default function EditJob() {
           </select>
         </div>
 
-        {/* --- Location (looped) --- */}
+        {/* Location (looped) */}
         <div>
           <label className="block mb-1 font-medium">Location</label>
           <select
@@ -187,7 +190,7 @@ export default function EditJob() {
           </select>
         </div>
 
-        {/* --- Salary --- */}
+        {/* Salary */}
         <div>
           <label className="block mb-1 font-medium">Salary</label>
           <input
@@ -200,7 +203,7 @@ export default function EditJob() {
           />
         </div>
 
-        {/* --- Deadline --- */}
+        {/* Deadline */}
         <div>
           <label className="block mb-1 font-medium">Deadline</label>
           <input
@@ -212,7 +215,7 @@ export default function EditJob() {
           />
         </div>
 
-        {/* --- Category --- */}
+        {/* Category */}
         <div>
           <label className="block mb-1 font-medium">Category</label>
           <select
@@ -230,7 +233,7 @@ export default function EditJob() {
           </select>
         </div>
 
-        {/* --- Max Applicants --- */}
+        {/* Max Applicants */}
         <div>
           <label className="block mb-1 font-medium">Max Applicants</label>
           <input
@@ -242,7 +245,7 @@ export default function EditJob() {
           />
         </div>
 
-        {/* --- Priority (looped) --- */}
+        {/* Priority (looped) */}
         <div>
           <label className="block mb-1 font-medium">Priority</label>
           <select
@@ -259,7 +262,7 @@ export default function EditJob() {
           </select>
         </div>
 
-        {/* --- Active Status --- */}
+        {/* Active Status */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -270,7 +273,7 @@ export default function EditJob() {
           <label className="font-medium">Active</label>
         </div>
 
-        {/* --- Employer (read-only) --- */}
+        {/* Employer (read-only) */}
         <div>
           <label className="block mb-1 font-medium">Employer</label>
           <input
@@ -281,7 +284,7 @@ export default function EditJob() {
           />
         </div>
 
-        {/* --- Description --- */}
+        {/* Description */}
         <div className="mb-4">
           <label className="block mb-1 font-medium">Description</label>
           <ReactQuill
@@ -300,6 +303,7 @@ export default function EditJob() {
           />
         </div>
 
+        {/* save change button */}
         <button
           type="submit"
           className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded"

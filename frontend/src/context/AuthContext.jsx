@@ -16,9 +16,9 @@ export const AuthProvider = ({ children }) => {
   // State to hold user data
   const [user, setUser] = useState(undefined);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-  // State to handle loading status (when API calls are in progress)
+  // loading status
   const [loading, setLoading] = useState(true);
-  // State to display messages (success/error)
+  // success/error
   const [message, setMessage] = useState("");
 
   // ---------------------- Sign In ----------------------

@@ -7,13 +7,13 @@ import {
   CheckCircle,
   Handshake,
   MoreVertical,
-  Trash2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import Pagination from "../../../components/common/Pagination";
+import usePageTitle from "../../../hooks/usePageTitle";
 
-// ✅ Get CSRF Token Helper
+// Get CSRF Token Helper
 export function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
@@ -30,6 +30,7 @@ export function getCookie(name) {
 }
 
 export default function JobApplication() {
+  usePageTitle("Jobs Application");
   const [applications, setApplications] = useState([]);
   const [counts, setCounts] = useState({
     P: 0,
@@ -51,7 +52,7 @@ export default function JobApplication() {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // ✅ Detect click outside dropdown
+  // Detect click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -62,21 +63,19 @@ export default function JobApplication() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Fetch All Applications (for default view)
+  // Fetch All Applications (for default view)
   const fetchApplications = async (endpoint = null) => {
     setLoading(true);
     try {
       const url = endpoint || `${API_URL}/application/employer/applications/`;
       const res = await axios.get(url, { withCredentials: true });
-
-      // API မှာ key မတူနိုင်တာကြောင့် dynamic key handle
       const data = res.data;
       const key = Object.keys(data).find((k) => k.endsWith("_apps"));
       const apps = key ? data[key] : data.applications || [];
 
       setApplications(apps);
 
-      // ✅ Count ကို API response အပေါ်မူတည်မဟုတ်ဘဲ Local မှတင်တွက်မယ်
+      // Calculate the number of applications for each status
       const newCounts = {
         P: apps.filter((a) => a.status === "P").length,
         R: apps.filter((a) => a.status === "R").length,
@@ -93,11 +92,12 @@ export default function JobApplication() {
     }
   };
 
+  // Run fetchApplications once when the component mounts
   useEffect(() => {
     fetchApplications();
   }, []);
 
-  // ✅ Cards config
+  // Cards config
   const cards = [
     {
       title: "Pending",
@@ -136,7 +136,7 @@ export default function JobApplication() {
     },
   ];
 
-  // ✅ Card click handler (list change only)
+  // Card click handler (list change only)
   const handleCardClick = async (card) => {
     setActiveStatus(card.title);
     try {
@@ -151,7 +151,7 @@ export default function JobApplication() {
     }
   };
 
-  // ✅ Update status
+  // Update status
   const handleAction = async (newStatus, appId) => {
     const csrftoken = getCookie("csrftoken");
     setOpenMenuId(null);
@@ -180,12 +180,12 @@ export default function JobApplication() {
 
       toast.success(`Status updated to ${newStatus}!`);
 
-      // 1️⃣ Update applications list (UI table)
+      // Update applications list (UI table)
       setApplications((prev) =>
         prev.map((a) => (a.id === appId ? { ...a, status: code } : a))
       );
 
-      // 2️⃣ Update Card Counts (Live Update)
+      // Update Card Counts (Live Update)
       setCounts((prev) => {
         const oldStatus = applications.find((a) => a.id === appId)?.status;
 
@@ -204,7 +204,7 @@ export default function JobApplication() {
     }
   };
 
-  // ✅ Delete
+  // Delete
   const handleDelete = async (appId) => {
     if (!window.confirm("Are you sure you want to delete this application?"))
       return;
@@ -226,7 +226,7 @@ export default function JobApplication() {
     }
   };
 
-  // ✅ Search + Filter
+  // Search + Filter
   const filteredApplications = applications.filter((app) => {
     const matchesSearch =
       app.job?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -241,7 +241,7 @@ export default function JobApplication() {
     return matchesSearch && matchesStatus;
   });
 
-  // ⭐ Pagination logic
+  // Pagination logic
   const indexLast = currentPage * itemsPerPage;
   const indexFirst = indexLast - itemsPerPage;
   const currentItems = filteredApplications.slice(indexFirst, indexLast);
@@ -250,7 +250,7 @@ export default function JobApplication() {
 
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
-  // ✅ Render UI
+  // Render UI
   return (
     <div className="bg-[#e9f3fb] min-h-screen p-6 relative">
       <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -258,7 +258,7 @@ export default function JobApplication() {
         <span className="text-sm text-gray-500">({activeStatus})</span>
       </h2>
 
-      {/* ===== Summary Cards ===== */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {cards.map((card, i) => (
           <button
@@ -275,7 +275,7 @@ export default function JobApplication() {
         ))}
       </div>
 
-      {/* ===== Search & Filter ===== */}
+      {/* Search & Filter */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-5">
         <input
           type="text"
@@ -298,7 +298,7 @@ export default function JobApplication() {
         </select>
       </div>
 
-      {/* ===== Table ===== */}
+      {/* Table */}
       <div className="bg-white shadow-sm rounded-xl border border-gray-100 relative overflow-visible">
         <div className="p-4 border-b border-gray-100">
           <h3 className="text-gray-700 font-semibold text-base">
@@ -347,15 +347,15 @@ export default function JobApplication() {
                     <div className="flex items-center gap-3">
                       <Link
                         to={`/employer/dashboard/applications/${app.id}`}
-                        className="text-blue-500 hover:text-blue-700 flex items-center gap-1 hover:underline"
+                        className="text-blue-500 hover:text-blue-700 items-center gap-1 hover:underline"
                       >
-                        <Eye size={16} /> View
+                        View
                       </Link>
                       <button
                         onClick={() => handleDelete(app.id)}
-                        className="text-red-500 hover:text-red-700 flex items-center gap-1 hover:underline"
+                        className="text-red-500 hover:text-red-700 items-center gap-1 hover:underline"
                       >
-                        <Trash2 size={16} /> Delete
+                        Delete
                       </button>
                       <button
                         className="text-gray-500 hover:text-gray-700"

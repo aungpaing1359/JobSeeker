@@ -4,46 +4,54 @@
 
 @layer utilities {
   .custom-blue-border {
-    border-color: var(--blue-11, #0d74ce);
+    border-color: var(--blue-11, #0f4c81);
   }
   .custom-blue-background {
-    background-color: var(--blue-11, #0d74ce);
+    background-color: var(--blue-11, #0f4c81);
   }
   .custom-blue-text {
-    color: var(--blue-11, #0d74ce);
+    color: var(--blue-11, #0f4c81);
   }
   .nav-hover-blue:hover {
-    color: var(--blue-11, #0d74ce);
+    color: var(--blue-11, #0f4c81);
   }
   .hover-blue:hover {
-    color: var(--blue-11, #01549c);
+    color: var(--blue-11, #0d4270);
   }
   .index-Dcw0pk-hindex-Dcw0pk-hindex-Dcw0pk-hindex-Dcw0pk-h:hover {
-    background-color: var(--blue-11, #01549c);
+    background-color: var(--blue-11, #0d4270);
   }
   .blue-placeholder::placeholder {
-    color: var(--blue-11, #01549c);
+    color: var(--blue-11, #0d4270);
   }
   .blue-bg-hover:hover {
-    background-color: var(--blue-11, #0d74ce);
+    background-color: var(--blue-11, #0f4c81);
   }
   .blue-border-color {
-    border: var(--blue-11, #0d74ce);
+    border: var(--blue-11, #0f4c81);
   }
 
   .gray-text-custom {
-    color: var(--blue-11, #363636);
-  }
-  .search-text-custom{
-    color: var(--blue-11, #49494A);
+    color: var(--blue-11, #1a1a1a);
   }
 
-  .company-bg-custom{
-    background-color: var(--blue-11, #F4F5F7);
+  .company-border-custom {
+    border-color: var(--blue-11, #e6f4fe);
   }
 
-  .company-border-custom{
-    border-color: var(--blue-11, #E6F4FE);
+  .feacture-company-color {
+    color: var(--blue-11, #1e88e5);
+  }
+
+  .search-button {
+    background-color: var(--blue-11, #ffc947);
+  }
+  .hover-search-button:hover {
+    background-color: var(--blue-11, #f3bc3b);
+  }
+
+  .active-job-color {
+    background-color: var(--blue-11, #eaeaea);
   }
 
   .sky-bg-employer {
@@ -53,7 +61,7 @@
     padding: 1.5rem;
   }
 
-  /* ✅ SlideDown Animation */
+  /* SlideDown Animation */
   @keyframes slideDown {
     0% {
       transform: translateY(-100%);
@@ -66,6 +74,12 @@
   }
   .animate-slideDown {
     animation: slideDown 0.3s ease-out;
+  }
+}
+
+@media (max-width: 483px) {
+  .slick-dots {
+    bottom: -50px !important;
   }
 }
 
@@ -98,5 +112,5 @@
 }
 
 .font-inter {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }

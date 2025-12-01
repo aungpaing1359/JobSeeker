@@ -3,10 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import jobseekerBg from "../../assets/images/jobseekerbg.png";
+import jobseekerBg from "../../assets/images/jobseekerphoto.jpg";
 import QuickSearchSection from "../homepage/QuickSearchSection";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Companies = ({ collapse }) => {
+
+  usePageTitle("Companies");
+
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,6 +19,7 @@ const Companies = ({ collapse }) => {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
+  // company search (API)
   const handleSearch = async () => {
     if (!search.trim()) return;
 
@@ -43,20 +48,17 @@ const Companies = ({ collapse }) => {
   const updateItemsPerPage = () => {
     const width = window.innerWidth;
     if (width >= 1024) {
-      // xl: >=1024px
       setItemsPerPage(12);
     } else if (width >= 768) {
-      // lg: >=768px
       setItemsPerPage(9);
     } else if (width >= 548) {
-      // md: >=548px
       setItemsPerPage(8);
     } else {
-      // sm: <548px
       setItemsPerPage(6);
     }
   };
 
+  // company card (API)
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
@@ -87,10 +89,12 @@ const Companies = ({ collapse }) => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentCompanies = companies.slice(indexOfFirstItem, indexOfLastItem);
 
+  // handle prev
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
+  // handle next
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
@@ -116,7 +120,7 @@ const Companies = ({ collapse }) => {
       >
         <div className="container mx-auto px-4 w-full h-[300px]">
           <div className="h-full w-full flex flex-col justify-center items-start mt-28 max-2xl:mt-0">
-            <div className="search-text-custom">
+            <div className="text-white">
               <h1 className="text-3xl font-bold mb-2">
                 Find jobs from companies near you.
               </h1>
@@ -127,18 +131,19 @@ const Companies = ({ collapse }) => {
 
             <div className="grid grid-cols-6 gap-4 w-full container">
               <div className="max-sm:col-span-4 col-span-3 w-full">
+                {/* Companies Search input  */}
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search company..."
-                  className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
+                  className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 custom-blue-text bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
                 />
               </div>
               <div className="max-sm:col-span-2 col-span-1 w-full">
                 <button
                   onClick={handleSearch}
-                  className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md cursor-pointer"
+                  className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg search-button custom-blue-text hover-search-button hover-blue text-white font-semibold transition shadow-md cursor-pointer"
                 >
                   Search
                 </button>
@@ -218,7 +223,7 @@ const Companies = ({ collapse }) => {
               >
                 <Link
                   to={`/companies/${company.id}`}
-                  className="w-full flex flex-col items-center"
+                  className="w-full flex flex-col items-center h-full"
                 >
                   {/* Logo */}
                   <div className="flex items-center gap-2 mb-2 overflow-hidden">
@@ -233,7 +238,9 @@ const Companies = ({ collapse }) => {
 
                   {/* Business Name */}
                   <h3 className="text-sm gray-text-custom my-2 flex items-center">
-                    {company.business_name || "Not specified"}
+                    {company.business_name.length > 12
+                      ? company.business_name.substring(0, 12) + "..."
+                      : company.business_name || "Not specified"}
                   </h3>
 
                   {/* Description */}
@@ -241,8 +248,13 @@ const Companies = ({ collapse }) => {
                     {" "}
                     {company.description ? (
                       <div
+                        className=" whitespace-pre-wrap break-words overflow-hidden"
                         dangerouslySetInnerHTML={{
-                          __html: company.description,
+                          __html: company.description
+                            ? company.description.length > 25
+                              ? company.description.slice(0, 25) + "..."
+                              : company.description
+                            : "No description available.",
                         }}
                       />
                     ) : (
@@ -254,9 +266,11 @@ const Companies = ({ collapse }) => {
                   </p>
 
                   {/* Job Count Button */}
-                  <button className="px-5 py-2 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB] font-medium cursor-pointer hover:font-bold">
-                    {company.job_count || "0"} jobs
-                  </button>
+                  <div className="mt-auto pt-3">
+                    <button className="px-5 py-2 border rounded-xl bg-white border-[#1A82DE] text-[#1A82DEEB] font-medium cursor-pointer hover:font-bold">
+                      {company.job_count || "0"} jobs
+                    </button>
+                  </div>
                 </Link>
               </div>
             ))}

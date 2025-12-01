@@ -7,6 +7,7 @@ export default function JobDeleteModal({
   title = "Confirm", 
   message = "Are you sure?" 
 }) {
+  // Hide modal if not visible
   if (!show) return null;
 
   return (
@@ -14,6 +15,7 @@ export default function JobDeleteModal({
       <div className="bg-white p-6 rounded-xl shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4 text-red-600">{title}</h2>
         <p className="mb-6 text-gray-700">{message}</p>
+        {/* Action buttons */}
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}

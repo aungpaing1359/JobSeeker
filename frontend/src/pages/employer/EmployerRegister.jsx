@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEmployerAuth } from "../../hooks/useEmployerAuth";
 import logo from "../../assets/images/logo.png";
+import usePageTitle from "../../hooks/usePageTitle";
 
 export default function EmployerRegister() {
+  usePageTitle("Employer Register");
   const navigate = useNavigate();
   const { register } = useEmployerAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ❗ UI Error Messages
+  // UI Error Messages
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [formError, setFormError] = useState(""); // backend error
@@ -24,7 +26,7 @@ export default function EmployerRegister() {
     setPasswordError("");
     setFormError("");
 
-    // 🛑 Frontend Validation
+    // Frontend Validation
     let hasError = false;
 
     if (!email.trim()) {
@@ -52,21 +54,21 @@ export default function EmployerRegister() {
       console.error("Register error:", err);
       const data = err?.response?.data;
 
-      // 1️⃣ Backend Email Exists
+      // Backend Email Exists
       if (data?.code === "EMAIL_EXISTS") {
         setFormError("Email already exists.");
         setLoading(false);
         return;
       }
 
-      // 2️⃣ Backend Profile Exists
+      // Backend Profile Exists
       if (data?.code === "PROFILE_EXISTS") {
         setFormError("An employer profile already exists for this email.");
         setLoading(false);
         return;
       }
 
-      // 3️⃣ Backend Field Validation
+      // Backend Field Validation
       if (data?.email) {
         setEmailError(data.email[0]);
         setLoading(false);
@@ -79,7 +81,7 @@ export default function EmployerRegister() {
         return;
       }
 
-      // 4️⃣ Generic Backend Error
+      // Generic Backend Error
       if (data?.error) {
         setFormError(data.error);
       } else {
@@ -116,7 +118,7 @@ export default function EmployerRegister() {
 
         <h2 className="text-2xl font-bold mb-6">Register as an employer</h2>
 
-        {/* ❗ Backend Error */}
+        {/* Backend Error */}
         {formError && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded-lg text-sm">
             {formError}

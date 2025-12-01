@@ -104,7 +104,7 @@ export default function LanguageModal({
       toast.success(editData ? "Language updated successfully" : "Language saved successfully");
       onClose();
     } catch (error) {
-      console.error("❌ Failed to save language:", error.response?.data || error);
+      console.error("Failed to save language:", error.response?.data || error);
       toast.error(
         `Failed to save language.\n${
           error.response?.data?.detail || "Check your token or form data."

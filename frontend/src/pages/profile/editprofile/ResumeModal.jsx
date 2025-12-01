@@ -131,11 +131,11 @@ export default function ResumeModal({
         toast.success(editData ? "Resume updated successfully" : "Resume saved successfully");
       }
 
-      console.log("✅ Resume saved:", res.data);
+      console.log("Resume saved:", res.data);
       onSuccess?.(res.data);
       onClose();
     } catch (error) {
-      console.error("❌ Failed to save resume:", error.response?.data || error);
+      console.error("Failed to save resume:", error.response?.data || error);
       toast.error(
         "Failed to save resume:\n" +
           JSON.stringify(error.response?.data, null, 2)

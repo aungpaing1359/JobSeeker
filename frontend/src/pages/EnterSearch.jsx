@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import jobseekerBg from "../assets/images/jobseekerbg.png";
+import jobseekerBg from "../assets/images/jobseekerphoto.jpg";
 import { LOCATION_CHOICES } from "../utils/locationHelpers";
 
-// ------------------ Convert Label → Value ------------------
+// Convert Label → Value
 function getLocationValue(userInput) {
   if (!userInput) return "";
 
-  // 1. Exact match ("MRAUK-U" → { value: "MO" })
+  // Exact match ("MRAUK-U" → { value: "MO" })
   const match = LOCATION_CHOICES.find(
     (item) => item.label.toLowerCase() === userInput.toLowerCase()
   );
 
   if (match) return match.value;
 
-  // 2. Partial match ("mrau" → "MRAUK-U" → "MO")
+  // Partial match ("mrau" → "MRAUK-U" → "MO")
   const partial = LOCATION_CHOICES.find((item) =>
     item.label.toLowerCase().includes(userInput.toLowerCase())
   );
@@ -44,7 +44,7 @@ function EnterSearch({ collapse }) {
       toast.error("No jobs found!", { icon: null });
 
       navigate("/job-search/all", { state: { jobs: [] } });
-      return; // ❗ Prevent API call
+      return; // Prevent API call
     }
 
     try {
@@ -58,10 +58,10 @@ function EnterSearch({ collapse }) {
       const jobs = res.data?.results || [];
       toast.success(`Found ${res.data.count || 0} job(s)!`, { icon: null });
 
-      // ✅ navigate and pass results to JobSearchAll.jsx
+      // navigate and pass results to JobSearchAll.jsx
       navigate("/job-search/all", { state: { jobs } });
     } catch (error) {
-      console.error("❌ Search error:", error);
+      console.error("Search error:", error);
       toast.error("Failed to fetch jobs. Please try again.");
     }
   };
@@ -87,7 +87,7 @@ function EnterSearch({ collapse }) {
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 max-md:gap-3 w-full">
             {/* WHAT */}
             <div className="md:col-span-3 relative">
-              <p className="search-text-custom text-lg font-semibold max-md:hidden">
+              <p className="text-white text-lg font-semibold max-md:hidden">
                 What
               </p>
 
@@ -97,13 +97,13 @@ function EnterSearch({ collapse }) {
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
+                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 custom-blue-text bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
             </div>
 
             {/* WHERE */}
             <div className="md:col-span-2 relative">
-              <p className="search-text-custom text-lg font-semibold max-md:hidden">
+              <p className="text-white text-lg font-semibold max-md:hidden">
                 Where
               </p>
 
@@ -113,7 +113,7 @@ function EnterSearch({ collapse }) {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 text-gray-800 bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
+                className="p-4 max-md:h-[40px] max-xl:h-[48px] h-[55px] rounded-xl border border-gray-300 custom-blue-text bg-white max-md:text-base text-lg w-full placeholder-gray-400 focus:outline-none shadow-sm"
               />
             </div>
 
@@ -121,7 +121,7 @@ function EnterSearch({ collapse }) {
             <div className="md:col-span-1 flex items-end">
               <button
                 onClick={handleSearch}
-                className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg bg-[#C46210] text-white font-semibold hover:bg-[#AB4812] transition shadow-md cursor-pointer"
+                className="max-md:h-[40px] max-xl:h-[48px] h-[55px] w-full px-5 rounded-xl max-md:text-base text-lg search-button custom-blue-text font-semibold hover-search-button hover-blue transition shadow-md cursor-pointer"
               >
                 Search
               </button>
