@@ -250,8 +250,9 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-DEFAULT_FROM_EMAIL = 'JobSeeker <no-reply@yourdomain.com>'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_SENDER_NAME = "Arakkha Job Connect"
+DEFAULT_FROM_EMAIL = "no-reply@yourdomain.com"
+
 
 #Meaida files
 MEDIA_URL = '/media/'
